@@ -1,7 +1,7 @@
 /*
  * main.c  -- main part of mouse-processor
  *
- * $Id: main.c,v 1.2 2004/12/27 09:22:13 hos Exp $
+ * $Id: main.c,v 1.3 2004/12/30 14:29:46 hos Exp $
  *
  */
 
@@ -353,7 +353,37 @@ int main(int ac, char **av)
 {
     int ret;
 
-    memset(&ctx, 0, sizeof(ctx));
+    {
+        int i;
+
+        memset(&ctx, 0, sizeof(ctx));
+
+        ctx.conf = &ctx.norm_conf;
+
+        for(i = 0; i < MOUSE_BTN_MAX; i++) {
+            ctx.norm_conf.button[i].act.code = MOUSE_ACT_BUTTON;
+            ctx.norm_conf.button[i].act.data = i;
+        }
+    }
+
+    /* dbg */
+    ctx.norm_conf.comb_time = 300;
+    ctx.norm_conf.button[0].flags = MOUSE_BTN_CONF_ENABLE_COMB;
+    ctx.norm_conf.button[0].comb_act[1].code = MOUSE_ACT_BUTTON;
+    ctx.norm_conf.button[0].comb_act[1].data = 2;
+    ctx.norm_conf.button[0].comb_act[2].code = MOUSE_ACT_BUTTON;
+    ctx.norm_conf.button[0].comb_act[2].data = 3;
+    ctx.norm_conf.button[1].flags = MOUSE_BTN_CONF_ENABLE_COMB;
+    ctx.norm_conf.button[1].comb_act[0].code = MOUSE_ACT_BUTTON;
+    ctx.norm_conf.button[1].comb_act[0].data = 2;
+    ctx.norm_conf.button[2].flags = MOUSE_BTN_CONF_ENABLE_COMB;
+    ctx.norm_conf.button[2].comb_act[0].code = MOUSE_ACT_BUTTON;
+    ctx.norm_conf.button[2].comb_act[0].data = 3;
+    ctx.norm_conf.button[2].comb_act[3].code = MOUSE_ACT_BUTTON;
+    ctx.norm_conf.button[2].comb_act[3].data = 4;
+    ctx.norm_conf.button[3].flags = MOUSE_BTN_CONF_ENABLE_COMB;
+    ctx.norm_conf.button[3].comb_act[2].code = MOUSE_ACT_BUTTON;
+    ctx.norm_conf.button[3].comb_act[2].data = 4;
 
     {
         HMODULE module;
