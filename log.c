@@ -1,7 +1,7 @@
 /*
  * log.c  -- logging procs
  *
- * $Id: log.c,v 1.3 2005/01/14 18:05:48 hos Exp $
+ * $Id: log.c,v 1.4 2005/01/15 14:09:42 hos Exp $
  *
  */
 
@@ -17,6 +17,8 @@
 #include "resource.h"
 
 
+#define EDIT_TEXT_MAX 0x00ffffff
+
 static int log_level = LOG_LEVEL_NOTIFY;
 
 
@@ -117,6 +119,8 @@ INT_PTR log_dlg_init(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
     }
 
     log_dlg_arrannge();
+
+    SendMessageW(log_edit, EM_SETLIMITTEXT, EDIT_TEXT_MAX, 0);
 
     return TRUE;
 }
@@ -265,7 +269,17 @@ void __cdecl log_thread(void *arg)
                 break;
             }
 
-            log_size = GetWindowTextLengthW(log_edit);
+            log_size = SendMessageW(log_edit, WM_GETTEXTLENGTH, 0, 0);
+            while(log_size + wcslen(wbuf) > EDIT_TEXT_MAX) {
+                DWORD idx;
+
+                idx = SendMessageW(log_edit, EM_LINEINDEX, 1, 0);
+                SendMessageW(log_edit, EM_SETSEL, 0, idx);
+                SendMessageW(log_edit, EM_REPLACESEL, FALSE, (LPARAM)L"");
+
+                log_size = SendMessageW(log_edit, WM_GETTEXTLENGTH, 0, 0);
+            }
+
             SendMessageW(log_edit, EM_SETSEL, log_size, log_size);
             SendMessageW(log_edit, EM_REPLACESEL, FALSE, (LPARAM)wbuf);
 
@@ -368,7 +382,7 @@ int log_printf(int level, const wchar_t *fmt, ...)
             int nch;
 
             nch = buf_nch + 256;
-            p = (wchar_t *)realloc(buf, sizeof(wchar_t) * buf_nch);
+            p = (wchar_t *)realloc(buf, sizeof(wchar_t) * nch);
             if(p == NULL) {
                 return -1;
             }
