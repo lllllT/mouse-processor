@@ -1,7 +1,7 @@
 #
 # Makefile
 #
-# $Id: Makefile,v 1.10 2005/01/12 02:25:11 hos Exp $
+# $Id: Makefile,v 1.11 2005/01/12 09:39:44 hos Exp $
 #
 
 DEFINES = 
@@ -12,8 +12,8 @@ LDFLAGS = -Wall -g -mwindows -mno-cygwin
 UTIL_LIBS = util/util.a
 
 EXE_NAME = mp.exe
-EXE_OBJS = main.o hook.o scroll.o ie.o conf.o resource.o
-EXE_HEADERS = main.h resource.h
+EXE_OBJS = main.o hook.o scroll.o scroll_op.o ie.o conf.o resource.o
+EXE_HEADERS = main.h scroll_op.h resource.h
 EXE_LDLIBS = $(UTIL_LIBS) -lpsapi -lole32 -loleaut32 -loleacc -luuid
 EXE_LDFLAGS = $(LDFLAGS)
 

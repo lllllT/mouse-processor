@@ -1,10 +1,14 @@
 /*
  * s_exp.h  -- s-expression
  *
- * $Id: s_exp.h,v 1.3 2005/01/07 04:51:45 hos Exp $
+ * $Id: s_exp.h,v 1.4 2005/01/12 09:39:49 hos Exp $
  *
  */
 
+#ifndef __S_EXP_H__
+#define __S_EXP_H__ 1
+
+
 #include <wchar.h>
 #include <stdarg.h>
 
@@ -120,6 +124,10 @@ s_exp_data_t *s_exp_intern(const wchar_t *str);
 s_exp_data_t *s_exp_assq(const s_exp_data_t *alist, const wchar_t *sym);
 s_exp_data_t *s_exp_massq(const s_exp_data_t *alist, int type, ...);
 s_exp_data_t *s_exp_massq_v(const s_exp_data_t *alist, int type, va_list ap);
+s_exp_data_t *s_exp_nth(const s_exp_data_t *list, int nth);
 int s_exp_length(const s_exp_data_t *list);
 
 void free_s_exp(s_exp_data_t *data);
+
+
+#endif /* __S_EXP_H__ */

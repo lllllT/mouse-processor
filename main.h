@@ -1,7 +1,7 @@
 /*
  * main.h  --
  *
- * $Id: main.h,v 1.20 2005/01/12 02:25:12 hos Exp $
+ * $Id: main.h,v 1.21 2005/01/12 09:39:46 hos Exp $
  *
  */
 
@@ -14,6 +14,7 @@
 #include <tchar.h>
 #include <oleauto.h>
 #include "s_exp.h"
+#include "scroll_op.h"
 
 
 #define MOUSE_BTN_MAX 5
@@ -102,7 +103,57 @@ struct mouse_conf {
     };
 };
 
-/* scroll context */
+/* scroll operator configuration */
+struct scroll_operator_conf {
+    LPWSTR *name;
+
+    struct scroll_operator_procs proc;
+    s_exp_data_t *conf;
+};
+
+/* window configuration */
+struct scroll_window_conf {
+    LPWSTR regexp;
+
+    struct scroll_operator_conf *op;
+    s_exp_data_t *args;
+};
+
+/* application setting */
+struct app_setting {
+    LPWSTR conf_file;
+    s_exp_data_t *conf_data;
+
+    int comb_time;
+
+    struct mouse_conf *cur_conf;
+
+    int normal_conf_num;
+    struct mouse_conf *normal_conf;
+
+    int scroll_conf_num;
+    struct mouse_conf *scroll_conf;
+
+    int scroll_window_num;
+    struct scroll_window_conf *window_conf;
+
+    int scroll_operator_num;
+    struct scroll_operator_conf *operator_conf;
+};
+
+/* hook context */
+struct hook_context {
+    unsigned int ignore_btn_mask;
+
+    int pressed;
+    int pressed_btn;
+    MSLLHOOKSTRUCT pressed_btn_data;
+
+    int combinated;
+    int combination[MOUSE_BTN_MAX * 3];
+};
+
+/* scroll context: todo: discard */
 struct scroll_context {
     int mode;
 
@@ -123,6 +174,10 @@ struct scroll_mode_context {
 
     double x_ratio, y_ratio;
     double dx, dy;
+
+    struct scroll_operator_conf *op;
+    int op_context_size;
+    void *op_context;
 };
 
 /* mode context */
@@ -132,34 +187,6 @@ struct mode_context {
     union {
         struct scroll_mode_context scroll;
     };
-};
-
-/* hook context */
-struct hook_context {
-    unsigned int ignore_btn_mask;
-
-    int pressed;
-    int pressed_btn;
-    MSLLHOOKSTRUCT pressed_btn_data;
-
-    int combinated;
-    int combination[MOUSE_BTN_MAX * 3];
-};
-
-/* application setting */
-struct app_setting {
-    LPWSTR conf_file;
-    s_exp_data_t *conf_data;
-
-    int comb_time;
-
-    struct mouse_conf *cur_conf;
-
-    int normal_conf_num;
-    struct mouse_conf *normal_conf;
-
-    int scroll_conf_num;
-    struct mouse_conf *scroll_conf;
 };
 
 /* application context */

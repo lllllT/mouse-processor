@@ -1,7 +1,7 @@
 /*
  * conf.h  -- configuration
  *
- * $Id: conf.c,v 1.5 2005/01/09 13:56:59 hos Exp $
+ * $Id: conf.c,v 1.6 2005/01/12 09:39:45 hos Exp $
  *
  */
 
@@ -246,31 +246,11 @@ s_exp_data_t *get_conf_list(const s_exp_data_t *def_val, ...)
 
 
 static
-s_exp_data_t *get_nth(const s_exp_data_t *list, int nth)
-{
-    int i;
-
-    for(i = 0; i < nth; i++) {
-        if(list->type != S_EXP_TYPE_CONS) {
-            return NULL;
-        }
-
-        list = S_EXP_CDR(list);
-    }
-
-    if(list->type != S_EXP_TYPE_CONS) {
-        return NULL;
-    }
-
-    return S_EXP_CAR(list);
-}
-
-static
 double get_nth_double(const s_exp_data_t *list, int nth, double def_val)
 {
     const s_exp_data_t *v;
 
-    v = get_nth(list, nth);
+    v = s_exp_nth(list, nth);
     if(v != NULL) {
         if(v->type == S_EXP_TYPE_FLONUM) {
             return v->flonum.val;
