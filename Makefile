@@ -1,7 +1,7 @@
 #
 # Makefile
 #
-# $Id: Makefile,v 1.38 2005/02/10 17:19:23 hos Exp $
+# $Id: Makefile,v 1.39 2005/02/10 17:34:17 hos Exp $
 #
 
 DEFINES = -D_WIN32_WINNT=0x0500 -DUNICODE=1 -D_UNICODE=1
@@ -62,7 +62,7 @@ RC = rc
 WINDRES = windres
 ZIP = zip
 GTAR = tar
-INSTALL = install
+INSTALL = install -p
 
 
 .SUFFIXES: .rc .res
