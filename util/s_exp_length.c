@@ -1,16 +1,16 @@
 /*
  * s_exp_length.c  -- length of list
  *
- * $Id: s_exp_length.c,v 1.1 2005/01/05 07:59:37 hos Exp $
+ * $Id: s_exp_length.c,v 1.2 2005/01/06 08:49:05 hos Exp $
  *
  */
 
 #include "s_exp.h"
 
-int s_exp_length(s_exp_data_t *list)
+int s_exp_length(const s_exp_data_t *list)
 {
     int n;
-    s_exp_data_t *p;
+    const s_exp_data_t *p;
 
     if(list == S_EXP_NIL) {
         return 0;

@@ -1,7 +1,7 @@
 /*
  * write_s_exp.c  -- write s-expression
  *
- * $Id: write_s_exp.c,v 1.1 2005/01/05 07:59:39 hos Exp $
+ * $Id: write_s_exp.c,v 1.2 2005/01/06 08:49:06 hos Exp $
  *
  */
 
@@ -13,7 +13,7 @@
 #include "util.h"
 
 
-static int write_list(FILE *fp, s_exp_data_t *data)
+static int write_list(FILE *fp, const s_exp_data_t *data)
 {
     if(! write_s_exp(fp, S_EXP_CAR(data))) {
         return 0;
@@ -30,7 +30,7 @@ static int write_list(FILE *fp, s_exp_data_t *data)
     }
 }
 
-int write_s_exp(FILE *fp, s_exp_data_t *data)
+int write_s_exp(FILE *fp, const s_exp_data_t *data)
 {
     switch(data->type) {
       case S_EXP_TYPE_TRUE:

@@ -1,7 +1,7 @@
 /*
  * read_s_exp.c  -- read s-expression
  *
- * $Id: read_s_exp.c,v 1.1 2005/01/05 07:59:36 hos Exp $
+ * $Id: read_s_exp.c,v 1.2 2005/01/06 08:49:04 hos Exp $
  *
  */
 
@@ -124,15 +124,15 @@ static s_exp_data_t *read_symbol(s_exp_read_context_t *ctx);
 static s_exp_data_t *read_word(s_exp_read_context_t *ctx);
 
 static s_exp_data_t *s_exp_read_error(s_exp_read_context_t *ctx,
-                                      char *fmt, ...);
-static s_exp_data_t *s_exp_sys_error(char *name, int en);
+                                      const char *fmt, ...);
+static s_exp_data_t *s_exp_sys_error(const char *name, int en);
 
 static s_exp_data_t *s_exp_append(s_exp_data_t *head, s_exp_data_t **tail,
                                   s_exp_data_t *data);
 static s_exp_data_t *s_exp_empty_string(void);
 static s_exp_data_t *s_exp_append_char_to_string(s_exp_data_t *data, int c);
 static s_exp_data_t *s_exp_integer(long val);
-static s_exp_data_t *s_exp_intern_symbol(s_exp_data_t *str);
+static s_exp_data_t *s_exp_intern_symbol(const s_exp_data_t *str);
 
 static s_exp_data_t *s_exp_alloc(int type);
 
@@ -174,7 +174,7 @@ s_exp_read_context_t *open_s_exp_read_context_f(FILE *fp, const char *name)
     return ctx;
 }
 
-int close_s_exp_read_context(struct s_exp_read_context *ctx)
+int close_s_exp_read_context(s_exp_read_context_t *ctx)
 {
     if(ctx != NULL) {
         if(ctx->fp != NULL) fclose(ctx->fp);
@@ -402,9 +402,9 @@ static s_exp_data_t *read_string(s_exp_read_context_t *ctx)
 
 static s_exp_data_t *read_integer_from_word(s_exp_read_context_t *ctx,
                                             int base,
-                                            s_exp_data_t *data)
+                                            const s_exp_data_t *data)
 {
-    wchar_t *s;
+    const wchar_t *s;
     int l, i;
     long long val;
     long v;
@@ -760,7 +760,7 @@ static int char_to_number(int c, int base)
 
 
 static s_exp_data_t *s_exp_read_error(s_exp_read_context_t *ctx,
-                                      char *fmt, ...)
+                                      const char *fmt, ...)
 {
     va_list vlist;
     static s_exp_data_t data;
@@ -783,7 +783,7 @@ static s_exp_data_t *s_exp_read_error(s_exp_read_context_t *ctx,
     return &data;
 }
 
-static s_exp_data_t *s_exp_sys_error(char *name, int en)
+static s_exp_data_t *s_exp_sys_error(const char *name, int en)
 {
     static s_exp_data_t data;
     static char buf[1024];
@@ -885,7 +885,7 @@ static s_exp_data_t *s_exp_integer(long val)
 }
 
 
-static s_exp_data_t *s_exp_intern_symbol(s_exp_data_t *str)
+static s_exp_data_t *s_exp_intern_symbol(const s_exp_data_t *str)
 {
     static int sym_alloc_cnt = 0;
     static int sym_cnt = 0;
@@ -943,13 +943,13 @@ static s_exp_data_t *s_exp_intern_symbol(s_exp_data_t *str)
     return data;
 }
 
-s_exp_data_t *s_exp_intern(wchar_t *str)
+s_exp_data_t *s_exp_intern(const wchar_t *str)
 {
     s_exp_data_t s;
 
     memset(&s, 0, sizeof(s));
     s.type = S_EXP_TYPE_STRING;
-    s.string.str = str;
+    s.string.str = (wchar_t *)str;
     s.string.len = wcslen(str);
     s.string.alloc_len = s.string.len + 1;
 

@@ -1,7 +1,7 @@
 /*
  * main.c  -- main part of mouse-processor
  *
- * $Id: main.c,v 1.8 2005/01/05 06:55:26 hos Exp $
+ * $Id: main.c,v 1.9 2005/01/06 08:49:03 hos Exp $
  *
  */
 
@@ -72,20 +72,26 @@ int set_pause_menu_item(int state)
 
 
 static
-void error_message(const char *msg)
+void error_message(LPWSTR msg)
 {
-    LPTSTR buf1 = NULL, buf2 = NULL;
+    MessageBoxW(NULL, msg, window_title_name, MB_OK | MB_ICONERROR);
+}
 
-    FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-                  NULL, GetLastError(), 0, (LPTSTR)&buf1, 0, NULL);
+static
+void error_message_le(const char *msg)
+{
+    LPWSTR buf1 = NULL, buf2 = NULL;
 
-    buf2 = (TCHAR *)malloc(sizeof(TCHAR) * (_tcslen(buf1) + strlen(msg)));
+    FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+                   NULL, GetLastError(), 0, (LPWSTR)&buf1, 0, NULL);
+
+    buf2 = (WCHAR *)malloc(sizeof(WCHAR) * (wcslen(buf1) + strlen(msg)));
     if(buf2 == NULL) {
         goto end;
     }
 
-    wsprintf(buf2, _T("%hs: %s"), msg, buf1);
-    MessageBox(NULL, buf2, window_title_name, MB_OK | MB_ICONERROR);
+    wsprintfW(buf2, L"%hs: %ls", msg, buf1);
+    error_message(buf2);
 
   end:
     LocalFree(buf1);
@@ -114,12 +120,12 @@ LRESULT menu_pause(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
     if(pause) {
         ret = clear_hook();
         if(ret == 0) {
-            error_message("clear_hook() failed");
+            error_message_le("clear_hook() failed");
         }
     } else {
         ret = set_hook();
         if(ret == 0) {
-            error_message("set_hook() failed");
+            error_message_le("set_hook() failed");
         }
     }
 
@@ -150,7 +156,7 @@ LRESULT tray_rbutton_up(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
     ret = TrackPopupMenu(popup_menu, TPM_LEFTALIGN | TPM_BOTTOMALIGN,
                          pos.x, pos.y, 0, hwnd, NULL);
     if(ret == 0) {
-        error_message("TrackPopupMenu() failed");
+        error_message_le("TrackPopupMenu() failed");
     }
 
     return 0;
@@ -167,26 +173,26 @@ LRESULT main_create(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
         menu = LoadMenu(ctx.instance, MAKEINTRESOURCE(ID_MENU_TRAY));
         if(menu == NULL) {
-            error_message("LoadMenu() failed");
+            error_message_le("LoadMenu() failed");
             return -1;
         }
 
         popup_menu = GetSubMenu(menu, 0);
         if(popup_menu == 0) {
-            error_message("GetSubMenu() failed");
+            error_message_le("GetSubMenu() failed");
             return -1;
         }
     }
 
     ret = set_tasktray_icon(hwnd, NIM_ADD);
     if(ret == 0) {
-        error_message("set_tasktray_icon() failed");
+        error_message_le("set_tasktray_icon() failed");
         return -1;
     }
 
     ret = set_hook();
     if(ret == 0) {
-        error_message("set_hook() failed");
+        error_message_le("set_hook() failed");
         return -1;
     }
 
@@ -213,7 +219,7 @@ LRESULT main_taskbar_created(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
     ret = set_tasktray_icon(hwnd, NIM_ADD);
     if(ret == 0) {
-        error_message("set_tasktray_icon() failed");
+        error_message_le("set_tasktray_icon() failed");
     }
 
     return 0;
@@ -332,7 +338,7 @@ int message_loop(void)
     while(1) {
         ret = GetMessage(&msg, NULL, 0, 0);
         if(ret < 0) {
-            error_message("GetMessage() failed");
+            error_message_le("GetMessage() failed");
             return 1;
         }
 
@@ -352,12 +358,28 @@ int main(int ac, char **av)
 {
     int ret;
 
+    memset(&ctx, 0, sizeof(ctx));
+
+    ctx.conf_data = load_conf(ctx.conf_file);
+    if(ctx.conf_data == NULL) {
+        ctx.conf_data = S_EXP_NIL;
+    }
+
+    if(S_EXP_ERROR(ctx.conf_data)) {
+        LPWSTR msg;
+
+        msg = wcs_dup_from_u8s(ctx.conf_data->error.descript, NULL);
+        error_message(msg);
+        free(msg);
+
+        return 1;
+    }
+
     {
         int i;
 
-        memset(&ctx, 0, sizeof(ctx));
-
-        ctx.norm_conf.comb_time = 250;
+        ctx.norm_conf.comb_time =
+            get_conf_int(300, L"global", L"combination-time", NULL);
 
         ctx.scroll_wheel.x_ratio = 0;
         ctx.scroll_wheel.y_ratio = -5;
@@ -427,7 +449,7 @@ int main(int ac, char **av)
 
         module = GetModuleHandle(NULL);
         if(module == NULL) {
-            error_message("GetModuleHandle() failed");
+            error_message_le("GetModuleHandle() failed");
             return 1;
         }
 
@@ -436,13 +458,13 @@ int main(int ac, char **av)
 
     taskbar_created_message = RegisterWindowMessage(_T("TaskbarCreated"));
     if(taskbar_created_message == 0) {
-        error_message("RegisterWindowMessage() failed");
+        error_message_le("RegisterWindowMessage() failed");
         return 1;
     }
 
     ctx.main_window = create_main_window();
     if(ctx.main_window == NULL) {
-        error_message("create_main_window() failed");
+        error_message_le("create_main_window() failed");
         return 1;
     }
 
@@ -451,7 +473,7 @@ int main(int ac, char **av)
 
         hres = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
         if(FAILED(hres)) {
-            error_message("CoInitializeEx() failed");
+            error_message_le("CoInitializeEx() failed");
             return 1;
         }
     }

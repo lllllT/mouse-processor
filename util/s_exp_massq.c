@@ -1,43 +1,46 @@
 /*
  * s_exp_massq.c  -- s-expression multi-assq
  *
- * $Id: s_exp_massq.c,v 1.1 2005/01/05 07:59:38 hos Exp $
+ * $Id: s_exp_massq.c,v 1.2 2005/01/06 08:49:06 hos Exp $
  *
  */
 
 #include "s_exp.h"
 #include <stdarg.h>
 
-s_exp_data_t *s_exp_massq(s_exp_data_t *alist, int type, ...)
+s_exp_data_t *s_exp_massq_v(const s_exp_data_t *alist, int type, va_list ap)
 {
-    va_list ap;
-    wchar_t *sn;
-    s_exp_data_t *ret = NULL, *d;
+    const wchar_t *sn;
+    const s_exp_data_t *d;
 
-    va_start(ap, type);
-
+    d = alist;
     while(1) {
-        sn = va_arg(ap, wchar_t *);
+        sn = va_arg(ap, const wchar_t *);
         if(sn == NULL) {
-            if(alist->type != type) {
-                goto func_end;
+            if(d->type != type) {
+                return NULL;
             }
 
             break;
         }
 
-        d = s_exp_assq(alist, sn);
+        d = s_exp_assq(d, sn);
         if(d == NULL) {
-            goto func_end;
+            return NULL;
         }
-
-        alist = d;
     }
 
-    ret = alist;
+    return (s_exp_data_t *)d;
+}
 
-  func_end:
+s_exp_data_t *s_exp_massq(const s_exp_data_t *alist, int type, ...)
+{
+    va_list ap;
+    const s_exp_data_t *ret;
+
+    va_start(ap, type);
+    ret = s_exp_massq_v(alist, type, ap);
     va_end(ap);
 
-    return ret;
+    return (s_exp_data_t *)ret;
 }

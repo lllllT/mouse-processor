@@ -1,13 +1,14 @@
 /*
  * main.h  --
  *
- * $Id: main.h,v 1.9 2005/01/05 06:55:27 hos Exp $
+ * $Id: main.h,v 1.10 2005/01/06 08:49:03 hos Exp $
  *
  */
 
 #include <windows.h>
 #include <tchar.h>
 #include <oleauto.h>
+#include "s_exp.h"
 
 
 #define MOUSE_BTN_MAX 5
@@ -108,6 +109,9 @@ struct app_context {
     HINSTANCE instance;
     HWND main_window;
 
+    LPWSTR conf_file;
+    s_exp_data_t *conf_data;
+
     struct mouse_conf *conf;
     struct mouse_conf norm_conf;
     struct mouse_conf scroll_conf;
@@ -160,3 +164,9 @@ HRESULT init_ie_dpids(IDispatch *elem);
 
 int scroll_ie_h(IDispatch *elem, int delta, int length);
 int scroll_ie_v(IDispatch *elem, int delta, int length);
+
+s_exp_data_t *load_conf(LPCWSTR conf_file);
+
+s_exp_data_t *get_conf(int type, ...);
+int get_conf_int(int def_val, ...);
+wchar_t *get_conf_string(const wchar_t *def_val, ...);

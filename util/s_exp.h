@@ -1,11 +1,12 @@
 /*
  * s_exp.h  -- s-expression
  *
- * $Id: s_exp.h,v 1.1 2005/01/05 07:59:36 hos Exp $
+ * $Id: s_exp.h,v 1.2 2005/01/06 08:49:04 hos Exp $
  *
  */
 
 #include <wchar.h>
+#include <stdarg.h>
 
 
 typedef enum {
@@ -100,19 +101,19 @@ extern s_exp_data_t s_exp_true, s_exp_false, s_exp_nil;
   for((p) = (list); (p)->type == S_EXP_TYPE_CONS; (p) = S_EXP_CDR(p))
 
 
-struct s_exp_read_context *open_s_exp_read_context(const char *file);
-struct s_exp_read_context *open_s_exp_read_context_f(FILE *fp,
-                                                     const char *name);
-int close_s_exp_read_context(struct s_exp_read_context *ctx);
+s_exp_read_context_t *open_s_exp_read_context(const char *file);
+s_exp_read_context_t *open_s_exp_read_context_f(FILE *fp, const char *name);
+int close_s_exp_read_context(s_exp_read_context_t *ctx);
 
-s_exp_data_t *read_s_exp(struct s_exp_read_context *ctx);
+s_exp_data_t *read_s_exp(s_exp_read_context_t *ctx);
 s_exp_data_t *read_all_s_exp(s_exp_read_context_t *ctx);
-int write_s_exp(FILE *fp, s_exp_data_t *data);
+int write_s_exp(FILE *fp, const s_exp_data_t *data);
 
-s_exp_data_t *s_exp_intern(wchar_t *str);
+s_exp_data_t *s_exp_intern(const wchar_t *str);
 
-s_exp_data_t *s_exp_assq(s_exp_data_t *alist, wchar_t *sym);
-s_exp_data_t *s_exp_massq(s_exp_data_t *alist, int type, ...);
-int s_exp_length(s_exp_data_t *list);
+s_exp_data_t *s_exp_assq(const s_exp_data_t *alist, const wchar_t *sym);
+s_exp_data_t *s_exp_massq(const s_exp_data_t *alist, int type, ...);
+s_exp_data_t *s_exp_massq_v(const s_exp_data_t *alist, int type, va_list ap);
+int s_exp_length(const s_exp_data_t *list);
 
 void free_s_exp(s_exp_data_t *data);
