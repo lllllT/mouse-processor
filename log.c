@@ -1,7 +1,7 @@
 /*
  * log.c  -- logging procs
  *
- * $Id: log.c,v 1.8 2005/01/18 04:29:49 hos Exp $
+ * $Id: log.c,v 1.9 2005/01/18 09:36:40 hos Exp $
  *
  */
 
@@ -362,10 +362,79 @@ int start_logger(void)
 }
 
 
-int create_logger(void)
+struct log_dlg_data {
+    int ret;
+    DWORD last_error;
+    HANDLE start_evt;
+};
+
+static
+void __cdecl log_dlg_thread(void *arg)
 {
+    struct log_dlg_data *data = (struct log_dlg_data *)arg;
+    MSG msg;
+    int ret;
+
     if(CreateDialog(ctx.instance, MAKEINTRESOURCE(ID_DLG_LOG),
                     NULL, log_dlg_proc) == NULL) {
+        data->ret = 0;
+    } else {
+        data->ret = 1;
+    }
+    data->last_error = GetLastError();
+    SetEvent(data->start_evt);
+
+    while(ctx.log_window != NULL) {
+        ret = GetMessage(&msg, NULL, 0, 0);
+        if(ret <= 0) {
+            break;
+        }
+
+        ret = IsDialogMessage(ctx.log_window, &msg);
+        if(ret != 0) {
+            continue;
+        }
+
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+
+    _endthread();
+}
+
+static
+int start_log_dlg(void)
+{
+    struct log_dlg_data data;
+    int ret;
+
+    memset(&data, 0, sizeof(data));
+
+    data.start_evt = CreateEvent(NULL, TRUE, FALSE, NULL);
+    if(data.start_evt == NULL) {
+        return 0;
+    }
+
+    ret = (long)_beginthread(log_dlg_thread, 0, &data);
+    if(ret == -1) {
+        CloseHandle(data.start_evt);
+        return 0;
+    }
+
+    ret = WaitForSingleObject(data.start_evt, INFINITE);
+    CloseHandle(data.start_evt);
+    if(ret != WAIT_OBJECT_0) {
+        return 0;
+    }
+
+    SetLastError(data.last_error);
+    return data.ret;
+}
+
+
+int create_logger(void)
+{
+    if(start_log_dlg() == 0) {
         return 0;
     }
 
@@ -379,6 +448,8 @@ int create_logger(void)
 int destroy_logger(void)
 {
     DestroyWindow(ctx.log_window);
+    ctx.log_window = NULL;
+
     CloseHandle(log_wpipe_hdl);
 
     return 1;

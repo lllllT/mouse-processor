@@ -1,7 +1,7 @@
 /*
  * scroll.c  -- scroll window
  *
- * $Id: scroll.c,v 1.19 2005/01/17 14:18:11 hos Exp $
+ * $Id: scroll.c,v 1.20 2005/01/18 09:36:41 hos Exp $
  *
  */
 
@@ -124,6 +124,112 @@ void get_hierarchial_window_class_title(HWND hwnd,
     *title = tp;
 }
 
+
+struct enum_notr_data {
+    POINT spt;
+    HWND target;
+};
+
+static
+BOOL CALLBACK enum_nontr_window(HWND hwnd, LPARAM lparam)
+{
+    struct enum_notr_data *data;
+    LONG_PTR style;
+    POINT pt;
+    LRESULT ht;
+
+    data = (struct enum_notr_data *)lparam;
+
+    style = GetWindowLongPtr(hwnd, GWL_STYLE);
+    if((style & WS_VISIBLE) != WS_VISIBLE) {
+        return TRUE;
+    }
+
+    pt = data->spt;
+    ScreenToClient(hwnd, &pt);
+
+    if(RealChildWindowFromPoint(hwnd, pt) == NULL) {
+        return TRUE;
+    }
+
+    if(SendMessageTimeout(hwnd, WM_NCHITTEST,
+                          0, MAKELPARAM(data->spt.x, data->spt.y),
+                          SMTO_ABORTIFHUNG, 500, &ht) == 0) {
+        return TRUE;
+    }
+
+    if(ht == HTTRANSPARENT) {
+        return TRUE;
+    }
+
+    data->target = hwnd;
+    return FALSE;
+}
+
+static
+HWND get_window_for_mouse_input(POINT spt)
+{
+    HWND w;
+    LRESULT ht;
+
+    w = WindowFromPoint(spt);
+    while(1) {
+        LONG_PTR style;
+        HWND p;
+
+        style = GetWindowLongPtr(w, GWL_STYLE);
+        if((style & WS_CHILD) != WS_CHILD) {
+            break;
+        }
+
+        p = GetParent(w);
+        if(p == NULL) {
+            break;
+        }
+
+        w = p;
+    }
+
+    if(SendMessageTimeout(w, WM_NCHITTEST, 0, MAKELPARAM(spt.x, spt.y),
+                          SMTO_ABORTIFHUNG, 500, &ht) != 0 &&
+       ht == HTTRANSPARENT) {
+        DWORD tid;
+        struct enum_notr_data data;
+
+        tid = GetWindowThreadProcessId(w, NULL);
+
+        memset(&data, 0, sizeof(data));
+        data.spt = spt;
+        EnumWindows(enum_nontr_window, (LPARAM)&data);
+        if(data.target != NULL) {
+            w = data.target;
+        }
+    }
+
+    while(1) {
+        POINT pt;
+        HWND c;
+
+        pt = spt;
+        ScreenToClient(w, &pt);
+
+        c = RealChildWindowFromPoint(w, pt);
+        if(c == w) {
+            break;
+        }
+
+        if(c == NULL) {
+            w = c;
+            break;
+        }
+
+        w = c;
+    }
+
+    return w;
+}
+
+
 static
 LRESULT start_scroll_mode(struct mode_conf *data)
 {
@@ -136,7 +242,7 @@ LRESULT start_scroll_mode(struct mode_conf *data)
 
     /* target window */
     ctx.mode_data.scroll.target =
-        WindowFromPoint(ctx.mode_data.scroll.start_pt);
+        get_window_for_mouse_input(ctx.mode_data.scroll.start_pt);
 
     /* hierarchical window class/title */
     ctx.mode_data.scroll.class = NULL;

@@ -1,7 +1,7 @@
 /*
  * main.c  -- main part of mouse-processor
  *
- * $Id: main.c,v 1.19 2005/01/17 06:14:29 hos Exp $
+ * $Id: main.c,v 1.20 2005/01/18 09:36:41 hos Exp $
  *
  */
 
@@ -448,7 +448,7 @@ int main(int ac, char **av)
     /* logger */
     ret = create_logger();
     if(ret == 0) {
-        error_message(L"create_logger() failed");
+        error_message_le("create_logger() failed");
         return 1;
     }
 
