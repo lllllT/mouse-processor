@@ -1,7 +1,7 @@
 #
 # Makefile
 #
-# $Id: Makefile,v 1.22 2005/01/21 16:24:45 hos Exp $
+# $Id: Makefile,v 1.23 2005/01/29 20:53:02 hos Exp $
 #
 
 DEFINES = 
@@ -30,7 +30,7 @@ PACK_BIN_FILES = $(EXE_NAME)
 PACK_BIN_ADD_FILES = README.txt VERSION default.mprc
 PACK_SRC_FILES = $(EXE_SRCS) $(EXE_RSRC) $(EXE_HEADERS) icon.ico Makefile
 
-SUBDIRS = util
+SUBDIRS = util doc
 TARGET = $(EXE_NAME)
 VERSION = `cat VERSION`
 
@@ -74,7 +74,7 @@ pack-bin: all
 	VERSION=$(VERSION) ; \
 	TARGET_DIR=`pwd`/$(TARGET_NAME)-$$VERSION ; \
 	for d in $(SUBDIRS); do \
-	  $(MAKE) -C $$d pack-bin TARGET_DIR="$$TARGET_DIR" ; \
+	  $(MAKE) -C $$d pack-bin TARGET_DIR="$$TARGET_DIR/$$d" ; \
 	done
 	$(INSTALL) -m 755 -s $(PACK_BIN_FILES) $(TARGET_NAME)-$(VERSION)
 	$(INSTALL) -m 644 $(PACK_BIN_ADD_FILES) $(TARGET_NAME)-$(VERSION)
