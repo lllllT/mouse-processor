@@ -1,7 +1,7 @@
 /*
  * scroll.c  -- scroll window
  *
- * $Id: scroll.c,v 1.18 2005/01/17 06:14:31 hos Exp $
+ * $Id: scroll.c,v 1.19 2005/01/17 14:18:11 hos Exp $
  *
  */
 
@@ -268,7 +268,6 @@ LRESULT shift_scroll_mode(struct mode_conf *data)
     ctx.mode_data.scroll.y_ratio = ctx.mode_data.cur_conf->scroll_mode.y_ratio;
 
     log_printf(LOG_LEVEL_DEBUG,
-               L"\n"
                L"shift scroll mode: %ls\n"
                L"scroll ratio: %8.3lf, %8.3lf\n",
                ctx.mode_data.cur_conf->mode_name,
@@ -296,7 +295,7 @@ LRESULT end_scroll_mode(struct mode_conf *data)
     ctx.mode_data.scroll.class = NULL;
     ctx.mode_data.scroll.title = NULL;
 
-    log_printf(LOG_LEVEL_DEBUG, L"\n" L"end scroll mode\n");
+    log_printf(LOG_LEVEL_DEBUG, L"end scroll mode\n");
 
     return 0;
 }
@@ -359,7 +358,6 @@ LRESULT scroll_modemsg_mulratio(struct mode_conf *data)
     ctx.mode_data.scroll.y_ratio *= data->ratio.y;
 
     log_printf(LOG_LEVEL_DEBUG,
-               L"\n"
                L"mul scroll ratio: %8.3lf, %8.3lf\n",
                ctx.mode_data.scroll.x_ratio, ctx.mode_data.scroll.y_ratio);
 
@@ -374,7 +372,6 @@ LRESULT scroll_modemsg_setratio(struct mode_conf *data)
     ctx.mode_data.scroll.y_ratio = data->ratio.y;
 
     log_printf(LOG_LEVEL_DEBUG,
-               L"\n"
                L"set scroll ratio: %8.3lf, %8.3lf\n",
                ctx.mode_data.scroll.x_ratio, ctx.mode_data.scroll.y_ratio);
 
