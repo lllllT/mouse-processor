@@ -1,7 +1,7 @@
 /*
  * hook.c  -- hook funcs
  *
- * $Id: hook.c,v 1.2 2004/12/27 09:22:13 hos Exp $
+ * $Id: hook.c,v 1.3 2004/12/28 01:48:43 hos Exp $
  *
  */
 
@@ -10,6 +10,10 @@
 #include "main.h"
 
 #define LLMHF_INJECTED 0x00000001
+#define XBUTTON1 0x0001
+#define XBUTTON2 0x0002
+#define MOUSEEVENTF_XDOWN 0x0080
+#define MOUSEEVENTF_XUP 0x0100
 
 
 static HHOOK mouse_ll_hook = NULL;
@@ -140,7 +144,7 @@ void fill_input(INPUT *in, int motion, int data)
 
 
 static inline
-int post_main(int motion, int data)
+void post_to_main(int motion, int data)
 {
     PostMessage(ctx.main_window, WM_MOUSEHOOK_MOTION, motion, data);
 }
@@ -199,7 +203,7 @@ LRESULT CALLBACK mouse_ll_proc(int code, WPARAM wparam, LPARAM lparam)
                         in[1].mi.dwExtraInfo = msll->dwExtraInfo;
                         fill_input(&in[1], MOTION_UP, send_btn);
 
-                        SendInput(2, &in, sizeof(INPUT));
+                        SendInput(2, in, sizeof(INPUT));
                         ctx.pressed = 0;
                         return 1;
                     }
