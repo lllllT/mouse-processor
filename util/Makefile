@@ -1,12 +1,13 @@
 #
 # util/Makefile
 #
-# $Id: Makefile,v 1.8 2005/01/19 08:36:49 hos Exp $
+# $Id: Makefile,v 1.9 2005/01/19 09:16:06 hos Exp $
 #
 
 DEFINES = 
-INCLUDES = 
-CFLAGS = -Wall -g -mwindows -mno-cygwin $(DEFINES) $(INCLUDES)
+INCLUDES =
+OPT_CFLAGS = 
+CFLAGS = -Wall -g -mwindows -mno-cygwin $(DEFINES) $(INCLUDES) $(OPT_CFLAGS)
 LDFLAGS = -Wall -g -mwindows -mno-cygwin
 
 OBJS = assq_pair.o rassq_pair.o \

@@ -1,12 +1,12 @@
 #
 # Makefile
 #
-# $Id: Makefile,v 1.18 2005/01/18 10:28:24 hos Exp $
+# $Id: Makefile,v 1.19 2005/01/19 09:16:04 hos Exp $
 #
 
 DEFINES = 
 INCLUDES = -I./util
-OPT_CFLAGS = 
+OPT_CFLAGS = -O3 -fomit-frame-pointer
 CFLAGS = -Wall -g -mwindows -mno-cygwin $(DEFINES) $(INCLUDES) $(OPT_CFLAGS)
 LDFLAGS = -Wall -g -mwindows -mno-cygwin
 
@@ -35,7 +35,7 @@ all: all-rec $(TARGET)
 
 %-rec:
 	for d in $(SUBDIRS); do \
-	  $(MAKE) -C $$d $*; \
+	  $(MAKE) -C $$d $* OPT_CFLAGS="$(OPT_CFLAGS)"; \
 	done
 
 .SUFFIXES: .rc

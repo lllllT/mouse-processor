@@ -1,7 +1,7 @@
 /*
  * main.c  -- main part of mouse-processor
  *
- * $Id: main.c,v 1.22 2005/01/19 07:05:56 hos Exp $
+ * $Id: main.c,v 1.23 2005/01/19 09:16:05 hos Exp $
  *
  */
 
@@ -88,7 +88,7 @@ void error_message_le(const char *msg)
     LPWSTR buf1 = NULL, buf2 = NULL;
 
     FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-                   NULL, GetLastError(), 0, (LPWSTR)&buf1, 0, NULL);
+                   NULL, GetLastError(), 0, (LPWSTR)(void *)&buf1, 0, NULL);
 
     buf2 = (WCHAR *)malloc(sizeof(WCHAR) * (wcslen(buf1) + strlen(msg)));
     if(buf2 == NULL) {
