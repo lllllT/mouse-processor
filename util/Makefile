@@ -1,10 +1,10 @@
 #
 # util/Makefile
 #
-# $Id: Makefile,v 1.4 2005/01/11 09:37:10 hos Exp $
+# $Id: Makefile,v 1.5 2005/01/12 02:25:13 hos Exp $
 #
 
-DEFINES = -D_WIN32_WINNT=0x0500 -DUNICODE -D_UNICODE
+DEFINES = 
 INCLUDES = 
 CFLAGS = -Wall -g -mwindows -mno-cygwin $(DEFINES) $(INCLUDES)
 LDFLAGS = -Wall -g -mwindows -mno-cygwin

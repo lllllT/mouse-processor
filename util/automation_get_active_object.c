@@ -1,14 +1,13 @@
 /*
  * automation_get_active_object.c  -- get_active_object
  *
- * $Id: automation_get_active_object.c,v 1.1 2005/01/11 09:37:12 hos Exp $
+ * $Id: automation_get_active_object.c,v 1.2 2005/01/12 02:25:13 hos Exp $
  *
  */
 
 
 #define COBJMACROS 1
 
-#include <objbase.h>
 #include "automation.h"
 
 
