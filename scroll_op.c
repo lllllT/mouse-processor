@@ -1,7 +1,7 @@
 /*
  * scroll_op.c  -- scroll operators
  *
- * $Id: scroll_op.c,v 1.9 2005/01/17 06:14:32 hos Exp $
+ * $Id: scroll_op.c,v 1.10 2005/01/21 04:38:15 hos Exp $
  *
  */
 
@@ -227,7 +227,7 @@ int SCROLL_OP_API or_end_scroll(void *ctxp)
 
     op_ctx->op_context = NULL;
 
-    return 1;
+    return ret;
 }
 
 static

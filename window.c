@@ -1,7 +1,7 @@
 /*
  * window.c  -- window utils
  *
- * $Id: window.c,v 1.2 2005/01/18 12:47:16 hos Exp $
+ * $Id: window.c,v 1.3 2005/01/21 04:38:16 hos Exp $
  *
  */
 
@@ -54,7 +54,7 @@ BOOL CALLBACK enum_nontr_window(HWND hwnd, LPARAM lparam)
     /* hittest is not transparent? */
     if(SendMessageTimeout(hwnd, WM_NCHITTEST,
                           0, MAKELPARAM(data->spt.x, data->spt.y),
-                          SMTO_ABORTIFHUNG, 500, &ht) == 0 ||
+                          SMTO_ABORTIFHUNG, 1000, &ht) == 0 ||
        ht == HTTRANSPARENT) {
         return TRUE;
     }

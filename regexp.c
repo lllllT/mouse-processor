@@ -1,7 +1,7 @@
 /*
  * regexp.c  -- regular expression
  *
- * $Id: regexp.c,v 1.1 2005/01/13 09:39:55 hos Exp $
+ * $Id: regexp.c,v 1.2 2005/01/21 04:38:15 hos Exp $
  *
  */
 
@@ -12,21 +12,20 @@
 static IDispatch *regexp = NULL;
 
 
+HRESULT init_regexp(void)
+{
+    return create_instance_from_progid(L"VBScript.RegExp", &regexp);
+}
+
 int is_regexp_match(BSTR re_str, BSTR test_str)
 {
     HRESULT hres;
     VARIANTARG arg;
     VARIANT var;
 
-    if(regexp == NULL) {
-        hres = create_instance_from_progid(L"VBScript.RegExp", &regexp);
-        if(FAILED(hres)) {
-            return 0;
-        }
-    }
-
     hres = put_property_str(regexp, L"Pattern", re_str);
     if(FAILED(hres)) {
+        error_message_hr("Failed to set RegExp.Pattern", hres);
         return 0;
     }
 
@@ -34,6 +33,7 @@ int is_regexp_match(BSTR re_str, BSTR test_str)
     arg.bstrVal = test_str;
     hres = call_method_s(regexp, L"Test", &arg, 1, &var);
     if(FAILED(hres)) {
+        error_message_hr("Failed to call RegExp.Test", hres);
         return 0;
     }
 

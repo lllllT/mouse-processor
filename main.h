@@ -1,7 +1,7 @@
 /*
  * main.h  --
  *
- * $Id: main.h,v 1.30 2005/01/19 05:51:14 hos Exp $
+ * $Id: main.h,v 1.31 2005/01/21 04:38:14 hos Exp $
  *
  */
 
@@ -254,9 +254,14 @@ int log_printf(int level, const wchar_t *fmt, ...);
 int log_print_s_exp(int level, const s_exp_data_t *data);
 
 
+void error_message_le(const char *msg);
+void error_message_hr(const char *msg, HRESULT hr);
+
+
 HWND get_window_for_mouse_input(POINT spt);
 void get_hierarchial_window_class_title(HWND hwnd,
                                         LPWSTR *class, LPWSTR *title);
 
 
+HRESULT init_regexp(void);
 int is_regexp_match(BSTR re_str, BSTR test_str);

@@ -1,7 +1,7 @@
 /*
  * main.c  -- main part of mouse-processor
  *
- * $Id: main.c,v 1.26 2005/01/20 09:39:42 hos Exp $
+ * $Id: main.c,v 1.27 2005/01/21 04:38:13 hos Exp $
  *
  */
 
@@ -104,24 +104,48 @@ void error_message(LPWSTR msg)
 }
 
 static
-void error_message_le(const char *msg)
+void error_message_id(const char *msg, DWORD id, BOOL is_hex)
 {
     LPWSTR buf1 = NULL, buf2 = NULL;
 
-    FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-                   NULL, GetLastError(), 0, (LPWSTR)(void *)&buf1, 0, NULL);
+    if(FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER |
+                      FORMAT_MESSAGE_FROM_SYSTEM,
+                      NULL, id, 0, (LPWSTR)(void *)&buf1, 0, NULL) != 0) {
+        buf2 = (WCHAR *)
+               malloc(sizeof(WCHAR) * (strlen(msg) + 2 + wcslen(buf1) + 1));
+        if(buf2 == NULL) {
+            goto end;
+        }
 
-    buf2 = (WCHAR *)malloc(sizeof(WCHAR) * (wcslen(buf1) + strlen(msg)));
-    if(buf2 == NULL) {
-        goto end;
+        wsprintfW(buf2, L"%hs: %ls", msg, buf1);
+    } else {
+        buf2 = (WCHAR *)malloc(sizeof(WCHAR) * (strlen(msg) + 32));
+        if(buf2 == NULL) {
+            goto end;
+        }
+
+        wsprintfW(buf2, (is_hex ? L"%hs: 0x%08X" : L"%hs: %d"), msg, id);
     }
 
-    wsprintfW(buf2, L"%hs: %ls", msg, buf1);
     error_message(buf2);
 
   end:
     LocalFree(buf1);
     free(buf2);
+}
+
+void error_message_le(const char *msg)
+{
+    error_message_id(msg, GetLastError(), FALSE);
+}
+
+void error_message_hr(const char *msg, HRESULT hr)
+{
+    if(HRESULT_FACILITY(hr) == FACILITY_WINDOWS) {
+        error_message_id(msg, HRESULT_CODE(hr), FALSE);
+    } else {
+        error_message_id(msg, hr, TRUE);
+    }
 }
 
 
@@ -453,7 +477,13 @@ int main(int ac, char **av)
 
         hres = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
         if(FAILED(hres)) {
-            error_message_le("CoInitializeEx() failed");
+            error_message_hr("CoInitializeEx() failed", hres);
+            return 1;
+        }
+
+        hres = init_regexp();
+        if(FAILED(hres)) {
+            error_message_hr("init_regexp() failed", hres);
             return 1;
         }
     }
