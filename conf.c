@@ -1,7 +1,7 @@
 /*
  * conf.h  -- configuration
  *
- * $Id: conf.c,v 1.17 2005/01/26 04:42:36 hos Exp $
+ * $Id: conf.c,v 1.18 2005/01/26 08:34:48 hos Exp $
  *
  */
 
@@ -588,7 +588,7 @@ int apply_comm_mode_conf(struct mouse_conf *conf,
                         }
                     }
 
-                    if(n != m) {
+                    if(n != m && act[0]->code != MOUSE_ACT_NOTHING) {
                         conf->button[n].flags |= MOUSE_BTN_CONF_ENABLE_COMB;
                         conf->button[m].flags |= MOUSE_BTN_CONF_ENABLE_COMB;
 

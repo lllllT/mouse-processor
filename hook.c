@@ -1,7 +1,7 @@
 /*
  * hook.c  -- hook funcs
  *
- * $Id: hook.c,v 1.24 2005/01/24 05:39:51 hos Exp $
+ * $Id: hook.c,v 1.25 2005/01/26 08:34:48 hos Exp $
  *
  */
 
@@ -277,15 +277,21 @@ LRESULT CALLBACK mouse_ll_proc(int code, WPARAM wparam, LPARAM lparam)
         btn = msg_to_button(wparam, msll->mouseData);
 
         if(ctx.hook_data.pressed) {
+            struct mouse_action *cmb_d_act, *cmb_u_act;
+
             ctx.hook_data.pressed = 0;
             KillTimer(NULL, comb_timer_id);
 
-            if(motion == MOTION_DOWN) {
+            cmb_d_act = &ctx.mode_data.cur_conf->
+                        button[ctx.hook_data.pressed_btn].comb_d_act[btn];
+            cmb_u_act = &ctx.mode_data.cur_conf->
+                        button[ctx.hook_data.pressed_btn].comb_u_act[btn];
+
+            if(motion == MOTION_DOWN &&
+               (cmb_d_act->code != MOUSE_ACT_NOTHING ||
+                cmb_u_act->code != MOUSE_ACT_NOTHING)) {
                 /* combination press */
-                do_action(
-                    &ctx.mode_data.cur_conf->
-                    button[ctx.hook_data.pressed_btn].comb_d_act[btn],
-                    msll);
+                do_action(cmb_d_act, msll);
 
                 ctx.hook_data.
                     combination[ctx.hook_data.combinated * 2] =
