@@ -1,7 +1,7 @@
 /*
  * main.h  --
  *
- * $Id: main.h,v 1.38 2005/02/03 09:51:12 hos Exp $
+ * $Id: main.h,v 1.39 2005/02/04 17:08:38 hos Exp $
  *
  */
 
@@ -238,6 +238,11 @@ int MP_OP_API ie_scroll_get_operator(scroll_op_procs_t *op, int size,
                                      const support_procs_t *sprocs);
 int MP_OP_API wheel_message_get_operator(scroll_op_procs_t *op, int size,
                                          const support_procs_t *sprocs);
+
+int MP_OP_API or_get_operator(scroll_op_procs_t *op, int size,
+                              const support_procs_t *sprocs);
+int MP_OP_API apply_parent_get_operator(scroll_op_procs_t *op, int size,
+                                        const support_procs_t *sprocs);
 
 struct scroll_operator_def {
     wchar_t *name;

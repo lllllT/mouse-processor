@@ -73,6 +73,8 @@
 
 (scroll-window
  (":OperaWindowClass$" (window-scrollbar line-scroll))
+ ((title ":AVTreeViewClass:AVTreeNodeSimpleView$")
+  (apply-parent (neighborhood-scrollbar)))
 
  (":Internet Explorer_Server$" (or (ie-scroll)
 				   (window-scrollbar line-scroll)))

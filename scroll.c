@@ -1,7 +1,7 @@
 /*
  * scroll.c  -- scroll window
  *
- * $Id: scroll.c,v 1.24 2005/01/21 08:54:52 hos Exp $
+ * $Id: scroll.c,v 1.25 2005/02/04 17:08:39 hos Exp $
  *
  */
 
@@ -146,10 +146,8 @@ LRESULT start_scroll_mode(struct mode_conf *data)
         ctx.mode_data.scroll.op = target_win_conf->op;
     }
 
-    if(wcscmp(ctx.mode_data.scroll.op->name, L"or") != 0) {
-        log_printf(LOG_LEVEL_DEBUG, L"scroll operator: started: ");
-        log_print_s_exp(LOG_LEVEL_DEBUG, target_win_conf->args, 1);
-    }
+    log_printf(LOG_LEVEL_DEBUG, L"scroll operator: started: ");
+    log_print_s_exp(LOG_LEVEL_DEBUG, target_win_conf->args, 1);
 
     return 0;
 }
