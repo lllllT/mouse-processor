@@ -129,6 +129,18 @@ Known Problem
     line-scroll、page-scroll は WM_HSCROLL または WM_VSCROLL メッセー
     ジを SB_LINELEFT/RIHT、SB_PAGELEFT/RIGHT で発行している。
     うまく動作しない原因を知っている方がいたら教えて下さい。)
+    -> 0.1.3 で動作するよう対応。
+       まず、スクロールバーのドラッグ中に SCROLLINFO.nPos はスクロール
+       バー側からは設定せず、SCROLLINFO.nTrackPos のみ変化するので、こ
+       れと同等の動作をさせる必要がある。しかし、SCROLLINFO.nTrackPos
+       は外部からは設定できない。
+       そこで、DLL injection で GetScrollInfo() を差し替えて無理矢理書
+       き換えることで対応した (スクロールバーコントロールの場合はサブ
+       クラス化して SBM_GETSCROLLINFO メッセージも補足する)。
+       ただ、これでも MS Word は動作しない。原因よく分からず。また、
+       GetProcAddress() で実行時に関数ポインタを得た場合にも対応できな
+       い (Delphi などの起動時に import しない言語系で書かれていて自前
+       でスクロールさせているウィンドウも同様)。
 
 
 TODO
@@ -146,4 +158,4 @@ Link
  - mouse-processor <http://www.tamanegi.org/prog/mouse-processor/>
 
 
-$Id: README.txt,v 1.7 2005/01/29 22:05:19 hos Exp $
+$Id: README.txt,v 1.8 2005/02/04 18:20:19 hos Exp $
