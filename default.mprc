@@ -67,10 +67,11 @@
 (scroll-window
  (":Internet Explorer_Server$" (or (ie-scroll)
 				   (window-scrollbar line-scroll)))
- (":SysListView32$" (window-scrollbar line-scroll))
- (":OperaWindowClass$" (window-scrollbar line-scroll))
  (":ScrollBar$" (scrollbar-control))
  (":msctls_trackbar32$" (trackbar-control))
+ (":SysListView32$" (window-scrollbar line-scroll))
+ (":OperaWindowClass$" (window-scrollbar line-scroll))
+ (":_WwG$" (wheel-message))
 
  (".*" (or (window-scrollbar)
 	   (neighborhood-scrollbar)
