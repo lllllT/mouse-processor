@@ -52,7 +52,7 @@ Setting
    コマンドライン引数を指定しなかった場合は以下の場所を順に検索し、最
    初に見付かったファイルを使用します。
 
-   - 環境変数 HOME が設定してある場合、そのディレクトリのにある
+   - 環境変数 HOME が設定してある場合、そのディレクトリにある
      ".mprc" ファイル。
    - mp.exe と同じディレクトリにある "default.mprc" ファイル。
 
@@ -143,4 +143,4 @@ Link
  - mouse-processor <http://www.tamanegi.org/prog/mouse-processor/>
 
 
-$Id: README.txt,v 1.4 2005/01/22 02:40:37 hos Exp $
+$Id: README.txt,v 1.5 2005/01/25 06:38:59 hos Exp $
