@@ -1,7 +1,7 @@
 /*
  * scroll_op_wheel.c  -- scroll operator for wheel message
  *
- * $Id: scroll_op_wheel.c,v 1.5 2005/02/09 09:22:21 hos Exp $
+ * $Id: scroll_op_wheel.c,v 1.6 2005/02/09 11:05:36 hos Exp $
  *
  */
 
@@ -108,7 +108,8 @@ int MP_OP_API wheel_message_scroll(void *ctxp, double dx, double dy)
                     data);
     lp = MAKELPARAM(ctx->pt.x, ctx->pt.y);
 
-    PostMessage(ctx->target, WM_MOUSEWHEEL, wp, lp);
+    SendMessageTimeout(ctx->target, WM_MOUSEWHEEL, wp, lp,
+                       SMTO_ABORTIFHUNG, 1000, NULL);
 
     ctx->ds -= data;
 

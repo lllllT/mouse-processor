@@ -139,8 +139,7 @@ Known Problem
        クラス化して SBM_GETSCROLLINFO メッセージも補足する)。
        ただ、これでも MS Word は動作しない。原因よく分からず。また、
        GetProcAddress() で実行時に関数ポインタを得た場合にも対応できな
-       い (Delphi などの起動時に import しない言語系で書かれていて自前
-       でスクロールさせているウィンドウも同様)。
+       い。
 
 
 TODO
@@ -158,4 +157,4 @@ Link
  - mouse-processor <http://www.tamanegi.org/prog/mouse-processor/>
 
 
-$Id: README.txt,v 1.8 2005/02/04 18:20:19 hos Exp $
+$Id: README.txt,v 1.9 2005/02/09 11:05:35 hos Exp $

@@ -1,7 +1,7 @@
 /*
  * main.c  -- main part of mouse-processor
  *
- * $Id: main.c,v 1.32 2005/02/09 09:22:19 hos Exp $
+ * $Id: main.c,v 1.33 2005/02/09 11:05:35 hos Exp $
  *
  */
 
@@ -414,7 +414,8 @@ LRESULT wheel_post(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
                     (GetKeyState(VK_XBUTTON2) & 0x8000 ? MK_XBUTTON2 : 0),
                     delta);
 
-    PostMessage(target, WM_MOUSEWHEEL, wp, lp);
+    SendMessageTimeout(target, WM_MOUSEWHEEL, wp, lp,
+                       SMTO_ABORTIFHUNG, 1000, NULL);
 
     return 0;
 }
