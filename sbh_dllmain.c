@@ -1,7 +1,7 @@
 /*
  * sbh_dllmain.c  -- entry point of DLL for scrollbar hook
  *
- * $Id: sbh_dllmain.c,v 1.1 2005/02/02 10:03:52 hos Exp $
+ * $Id: sbh_dllmain.c,v 1.2 2005/02/02 12:04:33 hos Exp $
  *
  */
 
@@ -9,21 +9,48 @@
 #include "shmem.h"
 #include "scroll_op_scrollbar.h"
 
-#include <stdio.h>
-#define DBG(a1,a2,a3) {FILE *fp = fopen("d:\\dbg.log", "a"); fprintf(fp,a1,a2,a3); fclose(fp);}
 
 static fake_gsinfo_data_t *gsinfo_data = NULL;
 static HANDLE fmap = NULL;
 static HHOOK *hook = NULL;
 
+static WNDPROC org_wnd_proc = NULL;
+
 
+static
+LRESULT fake_gsi_wnd_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+{
+    LRESULT ret;
+
+    ret = CallWindowProc(org_wnd_proc, hwnd, msg, wparam, lparam);
+    if(msg == SBM_GETSCROLLINFO &&
+       ret != FALSE && lparam != (LPARAM)NULL && gsinfo_data != NULL &&
+       hwnd == gsinfo_data->hwnd &&
+       (((LPSCROLLINFO)lparam)->fMask & SIF_TRACKPOS)) {
+        ((LPSCROLLINFO)lparam)->nTrackPos = gsinfo_data->track_pos;
+    }
+
+    return ret;
+}
+
 __declspec(dllexport)
 LRESULT CALLBACK gsi_call_proc(int code, WPARAM wparam, LPARAM lparam)
 {
     CWPSTRUCT *cw = (CWPSTRUCT *)lparam;
 
-    if(cw->message == gsinfo_data->hook_subclass_msg) {
-        /* todo: subclass target window */
+    if(gsinfo_data != NULL &&
+       cw->message == gsinfo_data->hook_subclass_msg &&
+       gsinfo_data->valid &&
+       gsinfo_data->bar == SB_CTL) {
+        if(org_wnd_proc == NULL) {
+            org_wnd_proc =
+                (WNDPROC)SetWindowLongPtr(gsinfo_data->hwnd, GWLP_WNDPROC,
+                                          (LONG_PTR)fake_gsi_wnd_proc);
+        } else {
+            SetWindowLongPtr(gsinfo_data->hwnd, GWLP_WNDPROC,
+                             (LONG_PTR)org_wnd_proc);
+            org_wnd_proc = NULL;
+        }
     }
 
     return CallNextHookEx(*hook, code, wparam, lparam);
@@ -40,10 +67,8 @@ BOOL init(void)
 
     if(gsinfo_data != NULL) {
         hook = &gsinfo_data->hook[gsinfo_data->hook_idx];
-        DBG("hook: %p\n", hook, 0);
     }
 
-    DBG("cw: init success: %p, %p\n", gsinfo_data, fmap);
     return TRUE;
 }
 
@@ -55,7 +80,6 @@ BOOL finit(void)
     gsinfo_data = NULL;
     fmap = NULL;
 
-    DBG("cw: finit\n", 0, 0);
     return TRUE;
 }
 

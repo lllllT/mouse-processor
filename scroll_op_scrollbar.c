@@ -1,7 +1,7 @@
 /*
  * scroll_op_scrollbar.c  -- scroll operators for scrollbar
  *
- * $Id: scroll_op_scrollbar.c,v 1.14 2005/02/02 10:03:53 hos Exp $
+ * $Id: scroll_op_scrollbar.c,v 1.15 2005/02/02 12:04:34 hos Exp $
  *
  */
 
@@ -14,8 +14,6 @@
 #include <commctrl.h>
 #include <math.h>
 
-#include <stdio.h>
-#define DBG(a1,a2,a3) {FILE *fp = fopen("d:\\dbg.log", "a"); fprintf(fp,a1,a2,a3); fclose(fp);}
 
 static const support_procs_t *spr = NULL;
 
@@ -37,6 +35,8 @@ static struct {
 
 #define INJECT_SB_MODULE_BASE L"mpsbi.dll"
 #define HOOK_SB_MODULE_BASE _T("mpsbh.dll")
+#define HOOK_SB_SUBCLASS_MSG \
+_T("mouse-processsor-{63F91666-6E29-4f58-A2DF-A89E6B3FD1CF}")
 
 __declspec(dllimport)
 LRESULT CALLBACK gsi_call_proc(int code, WPARAM wparam, LPARAM lparam);
@@ -180,22 +180,24 @@ void uninject_scrollbar_support_proc_from(int n)
 static
 void uninject_scrollbar_support_proc(void)
 {
-    /* un-inject */
-    if(inject_sb_data.process[0] != NULL)
-        uninject_scrollbar_support_proc_from(0);
-    if(inject_sb_data.process[1] != NULL)
-        uninject_scrollbar_support_proc_from(1);
+    if(inject_sb_data.gsinfo_data != NULL) {
+        /* un-inject */
+        if(inject_sb_data.process[0] != NULL)
+            uninject_scrollbar_support_proc_from(0);
+        if(inject_sb_data.process[1] != NULL)
+            uninject_scrollbar_support_proc_from(1);
 
-    /* uninstall hook */
-    if(inject_sb_data.gsinfo_data->hook[0] != NULL)
-        uninstall_scrollbar_support_hook_from(0);
-    if(inject_sb_data.gsinfo_data->hook[1] != NULL)
-        uninstall_scrollbar_support_hook_from(1);
+        /* uninstall hook */
+        if(inject_sb_data.gsinfo_data->hook[0] != NULL)
+            uninstall_scrollbar_support_hook_from(0);
+        if(inject_sb_data.gsinfo_data->hook[1] != NULL)
+            uninstall_scrollbar_support_hook_from(1);
 
-    /* release shared memory */
-    close_shared_mem(inject_sb_data.gsinfo_data, inject_sb_data.fmap);
-    inject_sb_data.gsinfo_data = NULL;
-    inject_sb_data.fmap = NULL;
+        /* release shared memory */
+        close_shared_mem(inject_sb_data.gsinfo_data, inject_sb_data.fmap);
+    }
+
+    memset(&inject_sb_data, 0, sizeof(inject_sb_data));
 }
 
 static
@@ -213,9 +215,15 @@ void inject_scrollbar_support_proc(HWND hwnd1, HWND hwnd2, int is_control)
     }
     memset(inject_sb_data.gsinfo_data, 0, sizeof(fake_gsinfo_data_t));
 
+    /* regist message id */
+    inject_sb_data.gsinfo_data->hook_subclass_msg =
+        RegisterWindowMessage(HOOK_SB_SUBCLASS_MSG);
+
     /* install hook */
-    if(hwnd1 != NULL) install_scrollbar_support_hook_to(hwnd1);
-    if(hwnd2 != NULL) install_scrollbar_support_hook_to(hwnd2);
+    if(is_control) {
+        if(hwnd1 != NULL) install_scrollbar_support_hook_to(hwnd1);
+        if(hwnd2 != NULL) install_scrollbar_support_hook_to(hwnd2);
+    }
 
     /* DLL injection */
     {
@@ -354,7 +362,10 @@ int scrollbar_r_scroll(HWND hwnd, int bar,
         inject_sb_data.gsinfo_data->bar = bar;
         inject_sb_data.gsinfo_data->track_pos = pos;
         inject_sb_data.gsinfo_data->valid = 1;
-        DBG("sbs: enable: %p, %d\n", hwnd, pos);
+
+        SendMessageTimeout(hwnd, inject_sb_data.gsinfo_data->hook_subclass_msg,
+                           0, 0,
+                           SMTO_ABORTIFHUNG, 1000, NULL);
     }
 
     SendMessageTimeout(msg_hwnd, msg,
@@ -367,8 +378,11 @@ int scrollbar_r_scroll(HWND hwnd, int bar,
                        SMTO_ABORTIFHUNG, 1000, NULL);
 
     if(inject_sb_data.gsinfo_data != NULL) {
+        SendMessageTimeout(hwnd, inject_sb_data.gsinfo_data->hook_subclass_msg,
+                           0, 0,
+                           SMTO_ABORTIFHUNG, 1000, NULL);
+
         inject_sb_data.gsinfo_data->valid = 0;
-        DBG("sbs: disable: %p, %d\n", hwnd, pos);
     }
 
     memset(&si, 0, sizeof(si));
@@ -533,6 +547,9 @@ int MP_OP_API window_scrollbar_init_ctx(void *ctxp, int size,
 
           break;
       }
+
+      default:
+          ctx->style = WS_HSCROLL | WS_VSCROLL;
     }
 
     /* initial delta */

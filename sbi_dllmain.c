@@ -1,7 +1,7 @@
 /*
  * sbi_dllmain.c  -- entry point of DLL for scrollbar injection
  *
- * $Id: sbi_dllmain.c,v 1.4 2005/02/02 10:03:52 hos Exp $
+ * $Id: sbi_dllmain.c,v 1.5 2005/02/02 12:04:33 hos Exp $
  *
  */
 
@@ -10,8 +10,6 @@
 #include "shmem.h"
 #include "scroll_op_scrollbar.h"
 
-#include <stdio.h>
-#define DBG(a1,a2,a3) {FILE *fp = fopen("d:\\dbg.log", "a"); fprintf(fp,a1,a2,a3); fclose(fp);}
 
 typedef BOOL (* WINAPI get_scroll_info_proc_t)(HWND, int, LPSCROLLINFO);
 static get_scroll_info_proc_t org_get_scroll_info = NULL;
@@ -26,15 +24,10 @@ BOOL WINAPI fake_get_scroll_info(HWND hwnd, int bar, LPSCROLLINFO si)
     BOOL ret;
 
     ret = org_get_scroll_info(hwnd, bar, si);
-    DBG("fke: %d, %p, ", GetCurrentThreadId(), hwnd);
-    DBG("%p, %d, ", gsinfo_data->hwnd, ret);
-    DBG("%d, 0x%X\n", gsinfo_data->valid, si->fMask);
     if(ret != FALSE && si != NULL && gsinfo_data != NULL &&
        hwnd == gsinfo_data->hwnd &&
        bar == gsinfo_data->bar &&
        (si->fMask & SIF_TRACKPOS) && gsinfo_data->valid) {
-        DBG("fke: track replace: %d -> %d\n",
-            si->nTrackPos, gsinfo_data->track_pos);
         si->nTrackPos = gsinfo_data->track_pos;
     }
 
@@ -61,7 +54,6 @@ BOOL init(void)
         return FALSE;
     }
 
-    DBG("fke: init success: %p, %p\n", gsinfo_data, fmap);
     return TRUE;
 }
 
@@ -78,7 +70,6 @@ BOOL finit(void)
     gsinfo_data = NULL;
     fmap = NULL;
 
-    DBG("fke: finit\n", 0, 0);
     return TRUE;
 }
 
