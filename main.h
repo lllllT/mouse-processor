@@ -1,7 +1,7 @@
 /*
  * main.h  --
  *
- * $Id: main.h,v 1.33 2005/01/21 08:54:51 hos Exp $
+ * $Id: main.h,v 1.34 2005/01/24 05:39:52 hos Exp $
  *
  */
 
@@ -23,7 +23,7 @@
 #define MOUSE_BTN_CONF_ENABLE_COMB 0x0001
 
 /* mouse_action.code */
-#define MOUSE_ACT_NONE        0x00 /* for all */
+#define MOUSE_ACT_NOTHING     0x00 /* for all */
 #define MOUSE_ACT_BUTTON_D    0x01 /* for button */
 #define MOUSE_ACT_BUTTON_U    0x02 /* for button */
 #define MOUSE_ACT_WHEEL       0x03 /* for wheel */

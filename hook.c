@@ -1,7 +1,7 @@
 /*
  * hook.c  -- hook funcs
  *
- * $Id: hook.c,v 1.23 2005/01/21 08:54:48 hos Exp $
+ * $Id: hook.c,v 1.24 2005/01/24 05:39:51 hos Exp $
  *
  */
 
@@ -229,7 +229,7 @@ void do_action(struct mouse_action *act, MSLLHOOKSTRUCT *msll)
                       (LPARAM)&act->conf.mode_msg.data);
           break;
 
-      case MOUSE_ACT_NONE:
+      case MOUSE_ACT_NOTHING:
           /* do nothing */
           break;
     }
@@ -282,26 +282,19 @@ LRESULT CALLBACK mouse_ll_proc(int code, WPARAM wparam, LPARAM lparam)
 
             if(motion == MOTION_DOWN) {
                 /* combination press */
-                if(ctx.mode_data.cur_conf->
-                   button[ctx.hook_data.pressed_btn].comb_d_act[btn].code !=
-                   MOUSE_ACT_NONE ||
-                   ctx.mode_data.cur_conf->
-                   button[ctx.hook_data.pressed_btn].comb_u_act[btn].code !=
-                   MOUSE_ACT_NONE) {
-                    do_action(
-                        &ctx.mode_data.cur_conf->
-                        button[ctx.hook_data.pressed_btn].comb_d_act[btn],
-                        msll);
+                do_action(
+                    &ctx.mode_data.cur_conf->
+                    button[ctx.hook_data.pressed_btn].comb_d_act[btn],
+                    msll);
 
-                    ctx.hook_data.
-                        combination[ctx.hook_data.combinated * 2] =
-                        ctx.hook_data.pressed_btn;
-                    ctx.hook_data.
-                        combination[ctx.hook_data.combinated * 2 + 1] = btn;
-                    ctx.hook_data.combinated += 1;
+                ctx.hook_data.
+                    combination[ctx.hook_data.combinated * 2] =
+                    ctx.hook_data.pressed_btn;
+                ctx.hook_data.
+                    combination[ctx.hook_data.combinated * 2 + 1] = btn;
+                ctx.hook_data.combinated += 1;
 
-                    return 1;
-                }
+                return 1;
             }
 
             do_action(&ctx.mode_data.cur_conf->

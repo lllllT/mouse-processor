@@ -1,7 +1,7 @@
 /*
  * conf.h  -- configuration
  *
- * $Id: conf.c,v 1.14 2005/01/21 09:19:29 hos Exp $
+ * $Id: conf.c,v 1.15 2005/01/24 05:39:51 hos Exp $
  *
  */
 
@@ -290,11 +290,11 @@ int apply_act(struct mouse_action *act,
 }
 
 static
-int apply_action_none(struct mouse_action *act,
-                      const struct app_setting *app_conf,
-                      const s_exp_data_t *conf)
+int apply_action_nothing(struct mouse_action *act,
+                         const struct app_setting *app_conf,
+                         const s_exp_data_t *conf)
 {
-    act->code = MOUSE_ACT_NONE;
+    act->code = MOUSE_ACT_NOTHING;
 
     return 1;
 }
@@ -469,7 +469,7 @@ int apply_button_act(struct mouse_action *act,
                      const s_exp_data_t *conf)
 {
     static struct action_conf_map map[] = {
-        {L"none", apply_action_none},
+        {L"nothing", apply_action_nothing},
         {L"button-d", apply_action_button_d},
         {L"button-u", apply_action_button_u},
         {L"normal-mode", apply_action_change_normal},
@@ -489,7 +489,7 @@ int apply_wheel_act(struct mouse_action *act,
                     const s_exp_data_t *conf)
 {
     static struct action_conf_map map[] = {
-        {L"none", apply_action_none},
+        {L"nothing", apply_action_nothing},
         {L"wheel-input", apply_action_wheel_input},
         {L"post-wheel-message", apply_action_wheel_message},
 
