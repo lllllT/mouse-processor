@@ -1,7 +1,7 @@
 /*
  * scroll.c  -- scroll window
  *
- * $Id: scroll.c,v 1.4 2005/01/05 06:55:27 hos Exp $
+ * $Id: scroll.c,v 1.5 2005/01/05 09:30:33 hos Exp $
  *
  */
 
@@ -198,6 +198,7 @@ void scrolling_wheel(int x, int y)
 }
 
 
+/* WM_MOUSEHOOK_SCROLL_MODE */
 LRESULT scroll_mode(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
     struct mode_conf *data;
@@ -273,9 +274,11 @@ LRESULT scroll_mode(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
     return 0;
 }
 
-LRESULT scrolling(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+/* WM_MOUSEHOOK_SCROLLING */
+LRESULT scrolling(HWND hwnd, UINT msgid, WPARAM wparam, LPARAM lparam)
 {
     int x, y;
+    MSG msg;
 
     typedef void (*mode_proc_t)(int, int);
     mode_proc_t proc;
@@ -298,6 +301,27 @@ LRESULT scrolling(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
                           ctx.scroll_data.x_ratio;
     ctx.scroll_data.dy += (y - ctx.scroll_data.start_pt.y) *
                           ctx.scroll_data.y_ratio;
+
+    while(PeekMessage(&msg, hwnd,
+                      WM_MOUSEHOOK_SCROLL_MODE, WM_MOUSEHOOK_SCROLLING,
+                      PM_NOREMOVE)) {
+        if(msg.message != WM_MOUSEHOOK_SCROLLING) {
+            break;
+        }
+
+        x = LOWORD(msg.wParam);
+        y = HIWORD(msg.wParam);
+
+        ctx.scroll_data.dx += (x - ctx.scroll_data.start_pt.x) *
+                              ctx.scroll_data.x_ratio;
+        ctx.scroll_data.dy += (y - ctx.scroll_data.start_pt.y) *
+                              ctx.scroll_data.y_ratio;
+
+        /* discard */
+        PeekMessage(&msg, hwnd,
+                    WM_MOUSEHOOK_SCROLL_MODE, WM_MOUSEHOOK_SCROLLING,
+                    PM_REMOVE);
+    }
 
     proc = assq_pair(mode_map, ctx.scroll_data.mode, NULL);
     if(proc) {

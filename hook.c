@@ -1,11 +1,12 @@
 /*
  * hook.c  -- hook funcs
  *
- * $Id: hook.c,v 1.11 2005/01/04 15:33:27 hos Exp $
+ * $Id: hook.c,v 1.12 2005/01/05 09:30:31 hos Exp $
  *
  */
 
 #include "main.h"
+#include <process.h>
 
 #define LLMHF_INJECTED 0x00000001
 #define XBUTTON1 0x0001
@@ -17,8 +18,12 @@
 
 #define COMB_TIMER_ID 1
 
+#define HOOK_THREAD_END (WM_APP + 100)
+
 
 static HHOOK mouse_ll_hook = NULL;
+static DWORD hook_thread_id = 0;
+static HANDLE hook_thread_end_evt = NULL;
 
 
 static
@@ -410,19 +415,82 @@ LRESULT CALLBACK mouse_ll_proc(int code, WPARAM wparam, LPARAM lparam)
 }
 
 
+struct hook_data {
+    int ret;
+    HANDLE start_evt;
+};
+
+static
+void __cdecl hook_thread(void *arg)
+{
+    struct hook_data *data = (struct hook_data *)arg;
+    MSG msg;
+
+    /* create thread message queue */
+    PeekMessage(&msg, NULL, WM_USER, WM_USER, PM_NOREMOVE);
+
+    hook_thread_id = GetCurrentThreadId();
+
+    mouse_ll_hook = SetWindowsHookEx(WH_MOUSE_LL, mouse_ll_proc,
+                                     ctx.instance, 0);
+    if(mouse_ll_hook == NULL) {
+        hook_thread_id = 0;
+        data->ret = 0;
+    } else {
+        data->ret = 1;
+    }
+    SetEvent(data->start_evt);
+
+    while(hook_thread_id > 0) {
+        if(GetMessage(&msg, NULL, 0, 0) < 0) {
+            break;
+        }
+
+        if(msg.message == HOOK_THREAD_END) {
+            UnhookWindowsHookEx(mouse_ll_hook);
+            mouse_ll_hook = NULL;
+
+            SetEvent(hook_thread_end_evt);
+            break;
+        }
+    }
+
+    hook_thread_id = 0;
+    _endthread();
+}
+
 int set_hook(void)
 {
     if(mouse_ll_hook != NULL) {
         return 1;
     }
 
-    mouse_ll_hook = SetWindowsHookEx(WH_MOUSE_LL, mouse_ll_proc,
-                                     ctx.instance, 0);
-    if(mouse_ll_hook == NULL) {
-        return 0;
-    }
+    {
+        struct hook_data data;
+        long ret;
 
-    return 1;
+        memset(&data, 0, sizeof(data));
+
+        data.start_evt = CreateEvent(NULL, TRUE, FALSE, NULL);
+        hook_thread_end_evt = CreateEvent(NULL, TRUE, FALSE, NULL);
+        if(data.start_evt == NULL || hook_thread_end_evt == NULL) {
+            return 0;
+        }
+
+        ret = (long)_beginthread(hook_thread, 0, &data);
+        if(ret == -1) {
+            CloseHandle(data.start_evt);
+            return 0;
+        }
+
+        ret = WaitForSingleObject(data.start_evt, INFINITE);
+        CloseHandle(data.start_evt);
+        if(ret != WAIT_OBJECT_0) {
+            return 0;
+        }
+
+        return data.ret;
+    }
 }
 
 int clear_hook(void)
@@ -431,16 +499,9 @@ int clear_hook(void)
         return 1;
     }
 
-    {
-        int ret;
-
-        ret = UnhookWindowsHookEx(mouse_ll_hook);
-        mouse_ll_hook = NULL;
-
-        if(ret == 0) {
-            return 0;
-        }
-    }
+    PostThreadMessage(hook_thread_id, HOOK_THREAD_END, 0, 0);
+    WaitForSingleObject(hook_thread_end_evt, INFINITE);
+    CloseHandle(hook_thread_end_evt);
 
     return 1;
 }

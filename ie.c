@@ -1,7 +1,7 @@
 /*
  * ie.c  -- ie compornent operation
  *
- * $Id: ie.c,v 1.3 2005/01/05 06:55:25 hos Exp $
+ * $Id: ie.c,v 1.4 2005/01/05 09:30:32 hos Exp $
  *
  */
 
@@ -148,7 +148,7 @@ HRESULT get_ie_target(HWND hwnd, int x, int y, IDispatch **ret_elem)
                    SUCCEEDED(get_property_long(elem, L"clientHeight", &ch)) &&
                    SUCCEEDED(get_property_long(elem, L"scrollWidth", &sw)) &&
                    SUCCEEDED(get_property_long(elem, L"scrollHeight", &sh))) {
-                    if(cw != 0 && ch != 0 && (cw != sw || ch != sh)) {
+                    if(cw != 0 && ch != 0 && (cw < sw || ch < sh)) {
                         break;
                     }
                 }
