@@ -1,7 +1,7 @@
 /*
  * log.c  -- logging procs
  *
- * $Id: log.c,v 1.7 2005/01/17 09:05:53 hos Exp $
+ * $Id: log.c,v 1.8 2005/01/18 04:29:49 hos Exp $
  *
  */
 
@@ -386,7 +386,12 @@ int destroy_logger(void)
 
 int show_logger(BOOL show)
 {
-    return ShowWindow(ctx.log_window, (show ? SW_SHOW : SW_HIDE));
+    ShowWindow(ctx.log_window, (show ? SW_SHOW : SW_HIDE));
+    if(show) {
+        SetForegroundWindow(ctx.log_window);
+    }
+
+    return 1;
 }
 
 int log_printf(int level, const wchar_t *fmt, ...)
