@@ -1,7 +1,7 @@
 /*
  * scroll.c  -- scroll window
  *
- * $Id: scroll.c,v 1.22 2005/01/19 05:51:14 hos Exp $
+ * $Id: scroll.c,v 1.23 2005/01/21 05:26:10 hos Exp $
  *
  */
 
@@ -102,7 +102,7 @@ LRESULT start_scroll_mode(struct mode_conf *data)
 
     /* start operator */
     {
-        scroll_op_arg_t arg;
+        op_arg_t arg;
 
         memset(&arg, 0, sizeof(arg));
         arg.conf = target_win_conf->op->conf;

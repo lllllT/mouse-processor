@@ -1,11 +1,11 @@
 /*
  * scroll_op_wheel.c  -- scroll operator for wheel message
  *
- * $Id: scroll_op_wheel.c,v 1.2 2005/01/13 17:13:21 hos Exp $
+ * $Id: scroll_op_wheel.c,v 1.3 2005/01/21 05:26:13 hos Exp $
  *
  */
 
-#include "scroll_op.h"
+#include "operator.h"
 #include "scroll_op_utils.h"
 #include <math.h>
 
@@ -20,14 +20,13 @@ struct wheel_message_context {
 };
 
 static
-int SCROLL_OP_API wheel_message_get_ctx_size(const scroll_op_arg_t *arg)
+int MP_OP_API wheel_message_get_ctx_size(const op_arg_t *arg)
 {
     return sizeof(struct wheel_message_context);
 }
 
 static
-int SCROLL_OP_API wheel_message_init_ctx(void *ctxp, int size,
-                                         const scroll_op_arg_t *arg)
+int MP_OP_API wheel_message_init_ctx(void *ctxp, int size, const op_arg_t *arg)
 {
     struct wheel_message_context *ctx;
     s_exp_data_t *ratio_conf, *data;
@@ -77,7 +76,7 @@ int SCROLL_OP_API wheel_message_init_ctx(void *ctxp, int size,
 }
 
 static
-int SCROLL_OP_API wheel_message_scroll(void *ctxp, double dx, double dy)
+int MP_OP_API wheel_message_scroll(void *ctxp, double dx, double dy)
 {
     struct wheel_message_context *ctx;
     int i, n, data;
@@ -121,17 +120,19 @@ int SCROLL_OP_API wheel_message_scroll(void *ctxp, double dx, double dy)
 }
 
 static
-int SCROLL_OP_API wheel_message_end_scroll(void *ctxp)
+int MP_OP_API wheel_message_end_scroll(void *ctxp)
 {
     return 1;
 }
 
-int SCROLL_OP_API wheel_message_get_operator(scroll_op_procs_t *op,
-                                             int api_ver)
+int MP_OP_API wheel_message_get_operator(scroll_op_procs_t *op, int size)
 {
-    if(api_ver < SCROLL_OP_API_VERSION) {
+    if(size < sizeof(scroll_op_procs_t)) {
         return 0;
     }
+
+    op->hdr.api_ver = MP_OP_API_VERSION;
+    op->hdr.type = MP_OP_TYPE_SCROLL;
 
     op->get_context_size = wheel_message_get_ctx_size;
     op->init_context = wheel_message_init_ctx;

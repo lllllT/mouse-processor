@@ -1,7 +1,7 @@
 /*
  * conf.h  -- configuration
  *
- * $Id: conf.c,v 1.11 2005/01/18 05:40:12 hos Exp $
+ * $Id: conf.c,v 1.12 2005/01/21 05:26:08 hos Exp $
  *
  */
 
@@ -674,22 +674,38 @@ int apply_scroll_operator(struct app_setting *app_conf)
 
     /* setup builtin scroll operators */
     for(i = 0; i < n_builtin_sop; i++) {
-        app_conf->scroll_operator_conf[i].name = builtin_scroll_op[i].name;
+        struct scroll_operator_conf *op_conf;
 
-        if(builtin_scroll_op[i].get_op_proc(
-               &app_conf->scroll_operator_conf[i].proc,
-               SCROLL_OP_API_VERSION) == 0) {
-            return 0;
+        op_conf = &app_conf->scroll_operator_conf[i];
+
+        /* name of operator */
+        op_conf->name = builtin_scroll_op[i].name;
+
+        /* load operator */
+        if(builtin_scroll_op[i].get_op_proc(&op_conf->proc,
+                                            sizeof(scroll_op_procs_t)) == 0) {
+            memset(&op_conf->proc, 0, sizeof(scroll_op_procs_t));
+            continue;
         }
     }
 
-    /* fill configuration for each operators */
+    /* for each operators */
     for(i = 0; i < app_conf->scroll_operator_num; i++) {
-        app_conf->scroll_operator_conf[i].conf =
-            get_conf_list(app_conf, S_EXP_NIL,
-                          L"scroll-operator",
-                          app_conf->scroll_operator_conf[i].name,
-                          NULL);
+        struct scroll_operator_conf *op_conf;
+
+        op_conf = &app_conf->scroll_operator_conf[i];
+
+        /* check data */
+        if(op_conf->proc.hdr.api_ver != MP_OP_API_VERSION ||
+           op_conf->proc.hdr.type != MP_OP_TYPE_SCROLL) {
+            memset(&op_conf->proc, 0, sizeof(scroll_op_procs_t));
+        }
+
+        /* fill configuration */
+        op_conf->conf = get_conf_list(app_conf, S_EXP_NIL,
+                                      L"scroll-operator",
+                                      app_conf->scroll_operator_conf[i].name,
+                                      NULL);
     }
 
     return 1;

@@ -1,7 +1,7 @@
 /*
  * operator.h  -- operator definition
  *
- * $Id: operator.h,v 1.3 2005/01/21 05:00:58 hos Exp $
+ * $Id: operator.h,v 1.4 2005/01/21 05:26:09 hos Exp $
  *
  */
 
@@ -62,7 +62,7 @@ struct scroll_operator_procs {
 };
 typedef struct scroll_operator_procs scroll_op_procs_t;
 
-typedef int (SCROLL_OP_API * get_operator_proc_t)(scroll_op_procs_t *, int);
+typedef int (MP_OP_API * get_operator_proc_t)(scroll_op_procs_t *, int);
 
 
 #endif /* __OPERATOR_H__ */

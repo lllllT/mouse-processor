@@ -1,12 +1,11 @@
 /*
  * scroll_op_trackbar.c  -- scroll operator for trackbar control
  *
- * $Id: scroll_op_trackbar.c,v 1.2 2005/01/14 19:13:59 hos Exp $
+ * $Id: scroll_op_trackbar.c,v 1.3 2005/01/21 05:26:12 hos Exp $
  *
  */
 
-#include "main.h"
-#include "scroll_op.h"
+#include "operator.h"
 #include "scroll_op_utils.h"
 #include "util.h"
 #include <commctrl.h>
@@ -225,14 +224,14 @@ struct trackbar_control_context {
 };
 
 static
-int SCROLL_OP_API trackbar_control_get_ctx_size(const scroll_op_arg_t *arg)
+int MP_OP_API trackbar_control_get_ctx_size(const op_arg_t *arg)
 {
     return sizeof(struct trackbar_control_context);
 }
 
 static
-int SCROLL_OP_API trackbar_control_init_ctx(void *ctxp, int size,
-                                             const scroll_op_arg_t *arg)
+int MP_OP_API trackbar_control_init_ctx(void *ctxp, int size,
+                                        const op_arg_t *arg)
 {
     struct trackbar_control_context *ctx;
     s_exp_data_t *mode_conf;
@@ -309,7 +308,7 @@ int SCROLL_OP_API trackbar_control_init_ctx(void *ctxp, int size,
 }
 
 static
-int SCROLL_OP_API trackbar_control_scroll(void *ctxp, double dx, double dy)
+int MP_OP_API trackbar_control_scroll(void *ctxp, double dx, double dy)
 {
     struct trackbar_control_context *ctx;
 
@@ -326,17 +325,19 @@ int SCROLL_OP_API trackbar_control_scroll(void *ctxp, double dx, double dy)
 }
 
 static
-int SCROLL_OP_API trackbar_control_end_scroll(void *ctxp)
+int MP_OP_API trackbar_control_end_scroll(void *ctxp)
 {
     return 1;
 }
 
-int SCROLL_OP_API trackbar_control_get_operator(scroll_op_procs_t *op,
-                                                int api_ver)
+int MP_OP_API trackbar_control_get_operator(scroll_op_procs_t *op, int size)
 {
-    if(api_ver < SCROLL_OP_API_VERSION) {
+    if(size < sizeof(scroll_op_procs_t)) {
         return 0;
     }
+
+    op->hdr.api_ver = MP_OP_API_VERSION;
+    op->hdr.type = MP_OP_TYPE_SCROLL;
 
     op->get_context_size = trackbar_control_get_ctx_size;
     op->init_context = trackbar_control_init_ctx;

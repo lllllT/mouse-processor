@@ -1,7 +1,7 @@
 /*
  * main.h  --
  *
- * $Id: main.h,v 1.31 2005/01/21 04:38:14 hos Exp $
+ * $Id: main.h,v 1.32 2005/01/21 05:26:09 hos Exp $
  *
  */
 
@@ -14,7 +14,7 @@
 #include <tchar.h>
 #include <oleauto.h>
 #include "s_exp.h"
-#include "scroll_op.h"
+#include "operator.h"
 
 
 #define MOUSE_BTN_MAX 5
@@ -219,18 +219,13 @@ LRESULT scroll_modemsg(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 int load_setting(LPWSTR conf_file, int force_apply);
 
 
-int SCROLL_OP_API window_scrollbar_get_operator(scroll_op_procs_t *op,
-                                                int api_ver);
-int SCROLL_OP_API neighborhood_scrollbar_get_operator(scroll_op_procs_t *op,
-                                                      int api_ver);
-int SCROLL_OP_API scrollbar_control_get_operator(scroll_op_procs_t *op,
-                                                 int api_ver);
-int SCROLL_OP_API trackbar_control_get_operator(scroll_op_procs_t *op,
-                                                int api_ver);
-int SCROLL_OP_API ie_scroll_get_operator(scroll_op_procs_t *op,
-                                         int api_ver);
-int SCROLL_OP_API wheel_message_get_operator(scroll_op_procs_t *op,
-                                             int api_ver);
+int MP_OP_API window_scrollbar_get_operator(scroll_op_procs_t *op, int size);
+int MP_OP_API neighborhood_scrollbar_get_operator(scroll_op_procs_t *op,
+                                                  int size);
+int MP_OP_API scrollbar_control_get_operator(scroll_op_procs_t *op, int size);
+int MP_OP_API trackbar_control_get_operator(scroll_op_procs_t *op, int size);
+int MP_OP_API ie_scroll_get_operator(scroll_op_procs_t *op, int size);
+int MP_OP_API wheel_message_get_operator(scroll_op_procs_t *op, int size);
 
 struct scroll_operator_def {
     wchar_t *name;

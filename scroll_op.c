@@ -1,12 +1,12 @@
 /*
  * scroll_op.c  -- scroll operators
  *
- * $Id: scroll_op.c,v 1.10 2005/01/21 04:38:15 hos Exp $
+ * $Id: scroll_op.c,v 1.11 2005/01/21 05:26:10 hos Exp $
  *
  */
 
 #include "main.h"
-#include "scroll_op.h"
+#include "operator.h"
 #include "scroll_op_utils.h"
 #include <math.h>
 
@@ -99,17 +99,16 @@ struct or_context {
 };
 
 static
-int SCROLL_OP_API or_get_ctx_size(const scroll_op_arg_t *arg)
+int MP_OP_API or_get_ctx_size(const op_arg_t *arg)
 {
     return sizeof(struct or_context);
 }
 
 static
-int SCROLL_OP_API or_init_ctx(void *ctxp, int size,
-                              const scroll_op_arg_t *arg)
+int MP_OP_API or_init_ctx(void *ctxp, int size, const op_arg_t *arg)
 {
     struct or_context *op_ctx;
-    s_exp_data_t *p;
+    const s_exp_data_t *p;
     wchar_t *name;
     int i;
 
@@ -121,7 +120,7 @@ int SCROLL_OP_API or_init_ctx(void *ctxp, int size,
 
     /* search and apply operator initializer */
     S_EXP_FOR_EACH(arg->arg, p) {
-        scroll_op_arg_t op_arg;
+        op_arg_t op_arg;
         struct scroll_operator_conf *op;
 
         if(S_EXP_CAR(p)->type != S_EXP_TYPE_CONS ||
@@ -195,7 +194,7 @@ int SCROLL_OP_API or_init_ctx(void *ctxp, int size,
 }
 
 static
-int SCROLL_OP_API or_scroll(void *ctxp, double dx, double dy)
+int MP_OP_API or_scroll(void *ctxp, double dx, double dy)
 {
     struct or_context *op_ctx;
 
@@ -210,7 +209,7 @@ int SCROLL_OP_API or_scroll(void *ctxp, double dx, double dy)
 }
 
 static
-int SCROLL_OP_API or_end_scroll(void *ctxp)
+int MP_OP_API or_end_scroll(void *ctxp)
 {
     struct or_context *op_ctx;
     int ret;
@@ -220,6 +219,8 @@ int SCROLL_OP_API or_end_scroll(void *ctxp)
     if(op_ctx->op != NULL &&
        op_ctx->op->proc.end_scroll != NULL) {
         ret = op_ctx->op->proc.end_scroll(op_ctx->op_context);
+    } else {
+        ret = 1;
     }
 
     if(op_ctx->op_context != NULL)
@@ -231,12 +232,14 @@ int SCROLL_OP_API or_end_scroll(void *ctxp)
 }
 
 static
-int SCROLL_OP_API or_get_operator(scroll_op_procs_t *op,
-                                  int api_ver)
+int MP_OP_API or_get_operator(scroll_op_procs_t *op, int size)
 {
-    if(api_ver < SCROLL_OP_API_VERSION) {
+    if(size < sizeof(scroll_op_procs_t)) {
         return 0;
     }
+
+    op->hdr.api_ver = MP_OP_API_VERSION;
+    op->hdr.type = MP_OP_TYPE_SCROLL;
 
     op->get_context_size = or_get_ctx_size;
     op->init_context = or_init_ctx;

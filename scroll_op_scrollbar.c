@@ -1,11 +1,11 @@
 /*
  * scroll_op_scrollbar.c  -- scroll operators for scrollbar
  *
- * $Id: scroll_op_scrollbar.c,v 1.5 2005/01/18 06:30:52 hos Exp $
+ * $Id: scroll_op_scrollbar.c,v 1.6 2005/01/21 05:26:12 hos Exp $
  *
  */
 
-#include "scroll_op.h"
+#include "operator.h"
 #include "scroll_op_utils.h"
 #include "util.h"
 #include <tchar.h>
@@ -190,14 +190,14 @@ struct window_scrollbar_context {
 };
 
 static
-int SCROLL_OP_API window_scrollbar_get_ctx_size(const scroll_op_arg_t *arg)
+int MP_OP_API window_scrollbar_get_ctx_size(const op_arg_t *arg)
 {
     return sizeof(struct window_scrollbar_context);
 }
 
 static
-int SCROLL_OP_API window_scrollbar_init_ctx(void *ctxp, int size,
-                                            const scroll_op_arg_t *arg)
+int MP_OP_API window_scrollbar_init_ctx(void *ctxp, int size,
+                                        const op_arg_t *arg)
 {
     struct window_scrollbar_context *ctx;
     s_exp_data_t *mode_conf;
@@ -271,7 +271,7 @@ int SCROLL_OP_API window_scrollbar_init_ctx(void *ctxp, int size,
 }
 
 static
-int SCROLL_OP_API window_scrollbar_scroll(void *ctxp, double dx, double dy)
+int MP_OP_API window_scrollbar_scroll(void *ctxp, double dx, double dy)
 {
     struct window_scrollbar_context *ctx;
 
@@ -289,17 +289,19 @@ int SCROLL_OP_API window_scrollbar_scroll(void *ctxp, double dx, double dy)
 }
 
 static
-int SCROLL_OP_API window_scrollbar_end_scroll(void *ctxp)
+int MP_OP_API window_scrollbar_end_scroll(void *ctxp)
 {
     return 1;
 }
 
-int SCROLL_OP_API window_scrollbar_get_operator(scroll_op_procs_t *op,
-                                                int api_ver)
+int MP_OP_API window_scrollbar_get_operator(scroll_op_procs_t *op, int size)
 {
-    if(api_ver < SCROLL_OP_API_VERSION) {
+    if(size < sizeof(scroll_op_procs_t)) {
         return 0;
     }
+
+    op->hdr.api_ver = MP_OP_API_VERSION;
+    op->hdr.type = MP_OP_TYPE_SCROLL;
 
     op->get_context_size = window_scrollbar_get_ctx_size;
     op->init_context = window_scrollbar_init_ctx;
@@ -332,8 +334,7 @@ struct neighborhood_scrollbar_context {
 };
 
 static
-int SCROLL_OP_API neighborhood_scrollbar_get_ctx_size(
-    const scroll_op_arg_t *arg)
+int MP_OP_API neighborhood_scrollbar_get_ctx_size(const op_arg_t *arg)
 {
     return sizeof(struct neighborhood_scrollbar_context);
 }
@@ -433,8 +434,8 @@ BOOL CALLBACK enum_neighborhood_scrollbar(HWND hwnd, LPARAM lparam)
 }
 
 static
-int SCROLL_OP_API neighborhood_scrollbar_init_ctx(void *ctxp, int size,
-                                                  const scroll_op_arg_t *arg)
+int MP_OP_API neighborhood_scrollbar_init_ctx(void *ctxp, int size,
+                                              const op_arg_t *arg)
 {
     struct neighborhood_scrollbar_context *ctx;
     s_exp_data_t *mode_conf;
@@ -508,8 +509,8 @@ int SCROLL_OP_API neighborhood_scrollbar_init_ctx(void *ctxp, int size,
 }
 
 static
-int SCROLL_OP_API neighborhood_scrollbar_scroll(void *ctxp,
-                                                double dx, double dy)
+int MP_OP_API neighborhood_scrollbar_scroll(void *ctxp,
+                                            double dx, double dy)
 {
     struct neighborhood_scrollbar_context *ctx;
 
@@ -531,17 +532,20 @@ int SCROLL_OP_API neighborhood_scrollbar_scroll(void *ctxp,
 }
 
 static
-int SCROLL_OP_API neighborhood_scrollbar_end_scroll(void *ctxp)
+int MP_OP_API neighborhood_scrollbar_end_scroll(void *ctxp)
 {
     return 1;
 }
 
-int SCROLL_OP_API neighborhood_scrollbar_get_operator(scroll_op_procs_t *op,
-                                                      int api_ver)
+int MP_OP_API neighborhood_scrollbar_get_operator(scroll_op_procs_t *op,
+                                                  int size)
 {
-    if(api_ver < SCROLL_OP_API_VERSION) {
+    if(size < sizeof(scroll_op_procs_t)) {
         return 0;
     }
+
+    op->hdr.api_ver = MP_OP_API_VERSION;
+    op->hdr.type = MP_OP_TYPE_SCROLL;
 
     op->get_context_size = neighborhood_scrollbar_get_ctx_size;
     op->init_context = neighborhood_scrollbar_init_ctx;
@@ -567,14 +571,14 @@ struct scrollbar_control_context {
 };
 
 static
-int SCROLL_OP_API scrollbar_control_get_ctx_size(const scroll_op_arg_t *arg)
+int MP_OP_API scrollbar_control_get_ctx_size(const op_arg_t *arg)
 {
     return sizeof(struct scrollbar_control_context);
 }
 
 static
-int SCROLL_OP_API scrollbar_control_init_ctx(void *ctxp, int size,
-                                             const scroll_op_arg_t *arg)
+int MP_OP_API scrollbar_control_init_ctx(void *ctxp, int size,
+                                         const op_arg_t *arg)
 {
     struct scrollbar_control_context *ctx;
     s_exp_data_t *mode_conf;
@@ -661,7 +665,7 @@ int SCROLL_OP_API scrollbar_control_init_ctx(void *ctxp, int size,
 }
 
 static
-int SCROLL_OP_API scrollbar_control_scroll(void *ctxp, double dx, double dy)
+int MP_OP_API scrollbar_control_scroll(void *ctxp, double dx, double dy)
 {
     struct scrollbar_control_context *ctx;
 
@@ -679,17 +683,20 @@ int SCROLL_OP_API scrollbar_control_scroll(void *ctxp, double dx, double dy)
 }
 
 static
-int SCROLL_OP_API scrollbar_control_end_scroll(void *ctxp)
+int MP_OP_API scrollbar_control_end_scroll(void *ctxp)
 {
     return 1;
 }
 
-int SCROLL_OP_API scrollbar_control_get_operator(scroll_op_procs_t *op,
-                                                int api_ver)
+int MP_OP_API scrollbar_control_get_operator(scroll_op_procs_t *op,
+                                             int size)
 {
-    if(api_ver < SCROLL_OP_API_VERSION) {
+    if(size < sizeof(scroll_op_procs_t)) {
         return 0;
     }
+
+    op->hdr.api_ver = MP_OP_API_VERSION;
+    op->hdr.type = MP_OP_TYPE_SCROLL;
 
     op->get_context_size = scrollbar_control_get_ctx_size;
     op->init_context = scrollbar_control_init_ctx;
