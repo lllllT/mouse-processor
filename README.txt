@@ -140,8 +140,7 @@ Link
  - Wheel Ball <http://homepage1.nifty.com/jesus/>
  - X Wheel <http://www5b.biglobe.ne.jp/~hokko2nd/Windows/#XWheel>
    X Wheel NT <http://www5b.biglobe.ne.jp/~hokko2nd/Windows/#XWheelNT>
- - mouse-processor <http://www.tamanegi.org/prog/mouse-processor>
- - wheel fix <http://www.tamanegi.org/prog/wheelfix>
+ - mouse-processor <http://www.tamanegi.org/prog/mouse-processor/>
 
 
-$Id: README.txt,v 1.3 2005/01/21 04:38:13 hos Exp $
+$Id: README.txt,v 1.4 2005/01/22 02:40:37 hos Exp $
