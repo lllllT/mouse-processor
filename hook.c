@@ -1,7 +1,7 @@
 /*
  * hook.c  -- hook funcs
  *
- * $Id: hook.c,v 1.21 2005/01/18 05:40:13 hos Exp $
+ * $Id: hook.c,v 1.22 2005/01/18 10:28:25 hos Exp $
  *
  */
 
@@ -189,7 +189,7 @@ void do_action(struct mouse_action *act, MSLLHOOKSTRUCT *msll)
       {
           HWND target;
 
-          target = WindowFromPoint(msll->pt);
+          target = get_window_for_mouse_input(msll->pt);
           if(target == NULL) {
               break;
           }

@@ -1,7 +1,7 @@
 /*
  * main.h  --
  *
- * $Id: main.h,v 1.28 2005/01/18 05:40:13 hos Exp $
+ * $Id: main.h,v 1.29 2005/01/18 10:28:25 hos Exp $
  *
  */
 
@@ -253,6 +253,11 @@ int show_logger(BOOL show);
 
 int log_printf(int level, const wchar_t *fmt, ...);
 int log_print_s_exp(int level, const s_exp_data_t *data);
+
+
+HWND get_window_for_mouse_input(POINT spt);
+void get_hierarchial_window_class_title(HWND hwnd,
+                                        LPWSTR *class, LPWSTR *title);
 
 
 int is_regexp_match(BSTR re_str, BSTR test_str);
