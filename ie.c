@@ -1,7 +1,7 @@
 /*
  * ie.c  -- ie compornent operation
  *
- * $Id: ie.c,v 1.1 2005/01/04 09:36:13 hos Exp $
+ * $Id: ie.c,v 1.2 2005/01/04 15:33:27 hos Exp $
  *
  */
 
@@ -23,28 +23,29 @@ HRESULT get_ie_elem_at(IDispatch *doc, int x, int y, IDispatch **ret_doc)
     IDispatch_AddRef(inner_doc);
 
     while(1) {
-        IDispatch *win, *elem;
-        BSTR str;
-
-        hres = get_property_dp(inner_doc, L"parentWindow", &win);
-        if(FAILED(hres)) {
-            printf("parent fail: %x\n", hres); fflush(stdout);
-            IDispatch_Release(inner_doc);
-            return hres;
-        }
-
         {
-            long sx = 0, sy = 0;
+            IDispatch *win;
 
-            get_property_long(win, L"screenLeft", &sx);
-            get_property_long(win, L"screenTop", &sy);
-            IDispatch_Release(win);
-            printf("sx, sy: %d, %d\n", sx, sy); fflush(stdout);
+            hres = get_property_dp(inner_doc, L"parentWindow", &win);
+            if(FAILED(hres)) {
+                printf("parent fail: %x\n", hres); fflush(stdout);
+                IDispatch_Release(inner_doc);
+                return hres;
+            }
 
-            args[0].vt = VT_I4;
-            args[0].lVal = y - sy;
-            args[1].vt = VT_I4;
-            args[1].lVal = x - sx;
+            {
+                long sx = 0, sy = 0;
+
+                get_property_long(win, L"screenLeft", &sx);
+                get_property_long(win, L"screenTop", &sy);
+                IDispatch_Release(win);
+                printf("sx, sy: %d, %d\n", sx, sy); fflush(stdout);
+
+                args[0].vt = VT_I4;
+                args[0].lVal = y - sy;
+                args[1].vt = VT_I4;
+                args[1].lVal = x - sx;
+            }
         }
 
         hres = call_method_s(inner_doc, L"elementFromPoint", args, 2, &var);
@@ -58,29 +59,36 @@ HRESULT get_ie_elem_at(IDispatch *doc, int x, int y, IDispatch **ret_doc)
             return E_FAIL;
         }
 
-        elem = var.pdispVal;
-
-        hres = get_property_str(elem, L"tagName", &str);
-        if(FAILED(hres)) {
-            IDispatch_Release(inner_doc);
-            IDispatch_Release(elem);
-            return hres;
-        }
-
-        if(str == NULL || wcsstr(str, L"FRAME") == NULL) {
-            SysFreeString(str);
-            IDispatch_Release(elem);
-            break;
-        }
-
-        SysFreeString(str);
-        IDispatch_Release(inner_doc);
-
         {
-            LPOLESTR props[] = {L"contentWindow", L"document", NULL};
-            hres = get_property_dpv(elem, props, &inner_doc);
+            IDispatch *elem = var.pdispVal;
+
+            {
+                BSTR str;
+
+                hres = get_property_str(elem, L"tagName", &str);
+                if(FAILED(hres)) {
+                    IDispatch_Release(inner_doc);
+                    IDispatch_Release(elem);
+                    return hres;
+                }
+                if(str != NULL) { printf("tag: %S\n", str); fflush(stdout); }
+
+                if(str == NULL || wcsstr(str, L"FRAME") == NULL) {
+                    SysFreeString(str);
+                    IDispatch_Release(elem);
+                    break;
+                }
+
+                SysFreeString(str);
+            }
+            IDispatch_Release(inner_doc);
+
+            {
+                LPOLESTR props[] = {L"contentWindow", L"document", NULL};
+                hres = get_property_dpv(elem, props, &inner_doc);
+            }
+            IDispatch_Release(elem);
         }
-        IDispatch_Release(elem);
         if(FAILED(hres)) {
             return hres;
         }

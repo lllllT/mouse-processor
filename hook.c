@@ -1,7 +1,7 @@
 /*
  * hook.c  -- hook funcs
  *
- * $Id: hook.c,v 1.10 2005/01/04 09:36:12 hos Exp $
+ * $Id: hook.c,v 1.11 2005/01/04 15:33:27 hos Exp $
  *
  */
 
@@ -166,16 +166,20 @@ void do_action(struct mouse_action *act, MSLLHOOKSTRUCT *msll, int motion)
       case MOUSE_ACT_WHEEL:
       {
           INPUT in;
-          int data;
+          int data, wn, i;
 
           act->data.wheel +=
               (short)HIWORD(msll->mouseData) * act->conf.wheel.ratio;
-          if((int)act->data.wheel / act->conf.wheel.tick == 0) {
+          wn = act->data.wheel / act->conf.wheel.tick;
+          if(wn == 0) {
               break;
           }
 
-          data = (int)act->data.wheel;
-          act->data.wheel -= data;
+          data = act->conf.wheel.tick;
+          if(wn < 0) {
+              wn = -wn;
+              data = -data;
+          }
 
           memset(&in, 0, sizeof(in));
 
@@ -184,7 +188,11 @@ void do_action(struct mouse_action *act, MSLLHOOKSTRUCT *msll, int motion)
           in.mi.dwExtraInfo = msll->dwExtraInfo;
           fill_input(&in, MOTION_WHEEL, data);
 
-          SendInput(1, &in, sizeof(INPUT));
+          for(i = 0; i < wn; i++) {
+              SendInput(1, &in, sizeof(INPUT));
+          }
+
+          act->data.wheel -= data * wn;
 
           break;
       }
@@ -230,6 +238,8 @@ void do_action(struct mouse_action *act, MSLLHOOKSTRUCT *msll, int motion)
                   MAKELPARAM(msll->pt.x, msll->pt.y));
 
 #undef KEY_STATE
+
+          act->data.wheel -= data * wn;
 
           }
 

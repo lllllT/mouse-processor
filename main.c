@@ -1,7 +1,7 @@
 /*
  * main.c  -- main part of mouse-processor
  *
- * $Id: main.c,v 1.6 2005/01/04 09:36:14 hos Exp $
+ * $Id: main.c,v 1.7 2005/01/04 15:33:28 hos Exp $
  *
  */
 
@@ -400,6 +400,19 @@ int main(int ac, char **av)
         ctx.norm_conf.button[1].comb_act[0].conf.mode.data.mode = 1;
         ctx.norm_conf.button[1].comb_act[0].conf.mode.data.scroll.x_ratio = 1;
         ctx.norm_conf.button[1].comb_act[0].conf.mode.data.scroll.y_ratio = 1;
+
+        ctx.norm_conf.button[0].flags |= MOUSE_BTN_CONF_ENABLE_COMB;
+        ctx.norm_conf.button[0].comb_act[3].code = MOUSE_ACT_MODECH;
+        ctx.norm_conf.button[0].comb_act[3].conf.mode.mode = &ctx.scroll_conf;
+        ctx.norm_conf.button[0].comb_act[3].conf.mode.data.mode = 1;
+        ctx.norm_conf.button[0].comb_act[3].conf.mode.data.scroll.x_ratio = 0;
+        ctx.norm_conf.button[0].comb_act[3].conf.mode.data.scroll.y_ratio = 1;
+        ctx.norm_conf.button[3].flags |= MOUSE_BTN_CONF_ENABLE_COMB;
+        ctx.norm_conf.button[3].comb_act[0].code = MOUSE_ACT_MODECH;
+        ctx.norm_conf.button[3].comb_act[0].conf.mode.mode = &ctx.scroll_conf;
+        ctx.norm_conf.button[3].comb_act[0].conf.mode.data.mode = 1;
+        ctx.norm_conf.button[3].comb_act[0].conf.mode.data.scroll.x_ratio = 0;
+        ctx.norm_conf.button[3].comb_act[0].conf.mode.data.scroll.y_ratio = 1;
 
         ctx.norm_conf.button[2].flags |= MOUSE_BTN_CONF_ENABLE_COMB;
         ctx.norm_conf.button[2].comb_act[3].code = MOUSE_ACT_BUTTON;
