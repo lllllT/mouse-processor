@@ -1,7 +1,7 @@
 /*
  * scroll.c  -- scroll window
  *
- * $Id: scroll.c,v 1.6 2005/01/07 09:21:25 hos Exp $
+ * $Id: scroll.c,v 1.7 2005/01/09 13:56:59 hos Exp $
  *
  */
 
@@ -212,8 +212,8 @@ LRESULT scroll_modech(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
         return 0;
     }
 
-    ctx.scroll_data.x_ratio = data->ratio.x_ratio;
-    ctx.scroll_data.y_ratio = data->ratio.y_ratio;
+    ctx.scroll_data.x_ratio = ctx.app_conf.cur_conf->scroll_mode.x_ratio;
+    ctx.scroll_data.y_ratio = ctx.app_conf.cur_conf->scroll_mode.y_ratio;
 
     /* target window */
     ctx.scroll_data.target = WindowFromPoint(ctx.scroll_data.start_pt);
@@ -308,8 +308,8 @@ LRESULT scroll_modemsg_scroll(int x, int y, struct mode_conf *data)
 static
 LRESULT scroll_modemsg_mulratio(int x, int y, struct mode_conf *data)
 {
-    ctx.scroll_data.x_ratio *= data->ratio.x_ratio;
-    ctx.scroll_data.y_ratio *= data->ratio.y_ratio;
+    ctx.scroll_data.x_ratio *= data->ratio.x;
+    ctx.scroll_data.y_ratio *= data->ratio.y;
 
     return 0;
 }
@@ -318,8 +318,8 @@ LRESULT scroll_modemsg_mulratio(int x, int y, struct mode_conf *data)
 static
 LRESULT scroll_modemsg_setratio(int x, int y, struct mode_conf *data)
 {
-    ctx.scroll_data.x_ratio = data->ratio.x_ratio;
-    ctx.scroll_data.y_ratio = data->ratio.y_ratio;
+    ctx.scroll_data.x_ratio = data->ratio.x;
+    ctx.scroll_data.y_ratio = data->ratio.y;
 
     return 0;
 }

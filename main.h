@@ -1,7 +1,7 @@
 /*
  * main.h  --
  *
- * $Id: main.h,v 1.14 2005/01/08 21:47:52 hos Exp $
+ * $Id: main.h,v 1.15 2005/01/09 13:56:59 hos Exp $
  *
  */
 
@@ -51,8 +51,8 @@ struct mode_conf {
 
     union {
         struct {
-            double x_ratio;
-            double y_ratio;
+            double x;
+            double y;
         } ratio;
     };
 };
@@ -86,6 +86,15 @@ struct mouse_conf {
 
     struct mouse_action move_act;
     struct mouse_action wheel_act;
+
+    wchar_t *mode_name;
+
+    union {
+        struct {
+            double x_ratio;
+            double y_ratio;
+        } scroll_mode;
+    };
 };
 
 /* scroll context */
@@ -113,8 +122,8 @@ struct app_setting {
 
     struct mouse_conf *cur_conf;
 
-    int norm_conf_num;
-    struct mouse_conf *norm_conf;
+    int normal_conf_num;
+    struct mouse_conf *normal_conf;
 
     int scroll_conf_num;
     struct mouse_conf *scroll_conf;
@@ -125,13 +134,7 @@ struct app_context {
     HINSTANCE instance;
     HWND main_window;
 
-    LPWSTR conf_file;
-    s_exp_data_t *conf_data;
-
-    int comb_time;
-    struct mouse_conf *conf;
-    struct mouse_conf norm_conf;
-    struct mouse_conf scroll_conf;
+    struct app_setting app_conf;
 
     struct {
         double x_ratio;
@@ -183,10 +186,4 @@ int scroll_ie_h(IDispatch *elem, int delta, int length);
 int scroll_ie_v(IDispatch *elem, int delta, int length);
 
 s_exp_data_t *load_conf(LPCWSTR conf_file);
-int apply_default_setting(void);
-int apply_setting(s_exp_data_t *conf);
-
-s_exp_data_t *get_conf(int type, ...);
-int get_conf_int(int def_val, ...);
-double get_conf_double(int def_val, ...);
-wchar_t *get_conf_string(const wchar_t *def_val, ...);
+int apply_setting(void);
