@@ -1,7 +1,7 @@
 /*
  * util.h  -- definition of utility
  *
- * $Id: util.h,v 1.1 2004/12/27 05:40:17 hos Exp $
+ * $Id: util.h,v 1.1 2005/01/05 07:46:32 hos Exp $
  *
  */
 

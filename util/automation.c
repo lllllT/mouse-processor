@@ -1,7 +1,7 @@
 /*
  * automation.c  -- COM automation helper
  *
- * $Id: automation.c,v 1.2 2005/01/05 06:55:24 hos Exp $
+ * $Id: automation.c,v 1.1 2005/01/05 07:46:31 hos Exp $
  *
  */
 
