@@ -1,7 +1,7 @@
 /*
  * scroll_op_scrollbar.c  -- scroll operators for scrollbar
  *
- * $Id: scroll_op_scrollbar.c,v 1.21 2005/02/10 09:24:42 hos Exp $
+ * $Id: scroll_op_scrollbar.c,v 1.22 2005/02/23 02:14:46 hos Exp $
  *
  */
 
@@ -29,7 +29,7 @@ static struct {
     /* for DLL injection */
     DWORD pid[2];
     HANDLE process[2];
-    HMODULE module[2];
+    HANDLE thread[2];
     WCHAR module_name[512];
 } inject_sb_data;
 
@@ -90,7 +90,6 @@ void inject_scrollbar_support_proc_to(HWND hwnd)
     HANDLE ph = NULL;
     LPVOID name = NULL;
     HANDLE thread = NULL;
-    HMODULE mod = NULL;
     SIZE_T size;
     int n;
 
@@ -136,18 +135,10 @@ void inject_scrollbar_support_proc_to(HWND hwnd)
         goto end;
     }
 
-    WaitForSingleObject(thread, INFINITE);
-    GetExitCodeThread(thread, (LPDWORD)(void *)&mod);
-    CloseHandle(thread);
-
-    if(mod == NULL) {
-        goto end;
-    }
-
     DuplicateHandle(GetCurrentProcess(), ph,
                     GetCurrentProcess(), &inject_sb_data.process[n],
                     0, FALSE, DUPLICATE_SAME_ACCESS);
-    inject_sb_data.module[n] = mod;
+    inject_sb_data.thread[n] = thread;
     inject_sb_data.pid[n] = pid;
 
   end:
@@ -158,14 +149,24 @@ void inject_scrollbar_support_proc_to(HWND hwnd)
 static
 void uninject_scrollbar_support_proc_from(int n)
 {
+    HMODULE mod;
     HANDLE thread;
+
+    thread = inject_sb_data.thread[n];
+    WaitForSingleObject(thread, INFINITE);
+    GetExitCodeThread(thread, (LPDWORD)(void *)&mod);
+    CloseHandle(thread);
+
+    if(mod == NULL) {
+        goto end;
+    }
 
     thread =
         CreateRemoteThread(inject_sb_data.process[n], NULL, 0,
                            (LPTHREAD_START_ROUTINE)
                            GetProcAddress(GetModuleHandleA("KERNEL32.DLL"),
                                           "FreeLibrary"),
-                           inject_sb_data.module[n], 0, NULL);
+                           mod, 0, NULL);
     if(thread == NULL) {
         goto end;
     }
@@ -175,7 +176,7 @@ void uninject_scrollbar_support_proc_from(int n)
 
   end:
     inject_sb_data.process[n] = NULL;
-    inject_sb_data.module[n] = NULL;
+    inject_sb_data.thread[n] = NULL;
 }
 
 static
