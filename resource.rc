@@ -1,12 +1,12 @@
 /*                                                -*- coding: sjis -*-
  * resource.rc  -- resource
  *
- * $Id: resource.rc,v 1.7 2005/01/20 08:15:14 hos Exp $
+ * $Id: resource.rc,v 1.8 2005/01/21 16:17:00 hos Exp $
  *
  */
 
-#include "resource.h"
 #include <windows.h>
+#include "resource.h"
 
 
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US

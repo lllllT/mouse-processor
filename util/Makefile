@@ -1,7 +1,7 @@
 #
 # util/Makefile
 #
-# $Id: Makefile,v 1.9 2005/01/19 09:16:06 hos Exp $
+# $Id: Makefile,v 1.10 2005/01/21 16:17:00 hos Exp $
 #
 
 DEFINES = 
@@ -10,17 +10,20 @@ OPT_CFLAGS =
 CFLAGS = -Wall -g -mwindows -mno-cygwin $(DEFINES) $(INCLUDES) $(OPT_CFLAGS)
 LDFLAGS = -Wall -g -mwindows -mno-cygwin
 
-OBJS = assq_pair.o rassq_pair.o \
-       automation_idispatch.o \
-       automation_create_instance_from_progid.o \
-       automation_get_active_object.o \
-       read_s_exp.o write_s_exp.o write_s_exp_u8s.o \
-       s_exp_assq.o s_exp_massq.o s_exp_nth.o s_exp_nth_cdr.o s_exp_length.o \
-       ucs.o
+SRCS = assq_pair.c rassq_pair.c \
+       automation_idispatch.c \
+       automation_create_instance_from_progid.c \
+       automation_get_active_object.c \
+       read_s_exp.c write_s_exp.c write_s_exp_u8s.c \
+       s_exp_assq.c s_exp_massq.c s_exp_nth.c s_exp_nth_cdr.c s_exp_length.c \
+       ucs.c
+OBJS = $(SRCS:%.c=%.o)
 HEADERS = util.h automation.h s_exp.h
 LIB_NAME = util.a
 
 TARGET = $(LIB_NAME)
+
+INSTALL = install
 
 all: $(TARGET)
 
@@ -30,6 +33,12 @@ $(OBJS): $(HEADERS)
 
 %.a:
 	$(AR) crs $@ $^
+
+pack-bin:
+
+pack-src:
+	$(INSTALL) -m 755 -d $(TARGET_DIR)
+	$(INSTALL) -m 644 $(SRCS) $(HEADERS) $(RSRC) $(TARGET_DIR)
 
 clean:
 	-$(RM) $(TARGET) $(OBJS) *.o
