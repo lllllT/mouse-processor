@@ -1,7 +1,7 @@
 /*
  * scroll.c  -- scroll window
  *
- * $Id: scroll.c,v 1.14 2005/01/13 17:13:20 hos Exp $
+ * $Id: scroll.c,v 1.15 2005/01/13 18:05:21 hos Exp $
  *
  */
 
@@ -128,8 +128,6 @@ LRESULT start_scroll_mode(struct mode_conf *data)
     int i;
     struct scroll_window_conf *target_win_conf;
 
-    memset(&ctx.mode_data.scroll, 0, sizeof(ctx.mode_data.scroll));
-
     /* x and y ratio */
     ctx.mode_data.scroll.x_ratio = ctx.app_conf.cur_conf->scroll_mode.x_ratio;
     ctx.mode_data.scroll.y_ratio = ctx.app_conf.cur_conf->scroll_mode.y_ratio;
@@ -154,7 +152,7 @@ LRESULT start_scroll_mode(struct mode_conf *data)
         title = SysAllocString(ctx.mode_data.scroll.title);
 
         target_win_conf = NULL;
-        for(i = 0; ctx.app_conf.window_conf_num; i++) {
+        for(i = 0; i < ctx.app_conf.window_conf_num; i++) {
             class_re =
                 SysAllocString(ctx.app_conf.window_conf[i].class_regexp);
             title_re =
@@ -360,10 +358,10 @@ LRESULT scroll_modemsg(HWND hwnd, UINT msgid, WPARAM wparam, LPARAM lparam)
     data = (struct mode_conf *)lparam;
 
     if(data->mode == MODE_MSG_SCROLL) {
-        ctx.mode_data.scroll.dx += (x - ctx.mode_data.scroll.start_pt.x) *
-                                   ctx.mode_data.scroll.x_ratio;
-        ctx.mode_data.scroll.dy += (y - ctx.mode_data.scroll.start_pt.y) *
-                                   ctx.mode_data.scroll.y_ratio;
+        ctx.mode_data.scroll.dx = (x - ctx.mode_data.scroll.start_pt.x) *
+                                  ctx.mode_data.scroll.x_ratio;
+        ctx.mode_data.scroll.dy = (y - ctx.mode_data.scroll.start_pt.y) *
+                                  ctx.mode_data.scroll.y_ratio;
 
         while(PeekMessage(&msg, hwnd,
                           WM_MOUSEHOOK_MODECH, WM_MOUSEHOOK_MODEMSG,

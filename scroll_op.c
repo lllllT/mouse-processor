@@ -1,7 +1,7 @@
 /*
  * scroll_op.c  -- scroll operators
  *
- * $Id: scroll_op.c,v 1.5 2005/01/13 17:13:20 hos Exp $
+ * $Id: scroll_op.c,v 1.6 2005/01/13 18:05:21 hos Exp $
  *
  */
 
@@ -181,9 +181,10 @@ int SCROLL_OP_API or_init_ctx(void *ctxp, int size,
         }
 
         op_ctx->op = op;
+        return 1;
     }
 
-    return 1;
+    return 0;
 }
 
 static

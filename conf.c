@@ -1,7 +1,7 @@
 /*
  * conf.h  -- configuration
  *
- * $Id: conf.c,v 1.7 2005/01/13 17:13:20 hos Exp $
+ * $Id: conf.c,v 1.8 2005/01/13 18:05:21 hos Exp $
  *
  */
 
@@ -634,7 +634,7 @@ int get_class_title_regexp(const s_exp_data_t *e,
     if(e->type == S_EXP_TYPE_STRING) {
         *class_re = e->string.str;
         *title_re = NULL;
-        *class_or_title = 0;
+        *class_or_title = 1;
         return 1;
     } else if(e->type == S_EXP_TYPE_CONS) {
         if(S_EXP_CAR(e)->type != S_EXP_TYPE_SYMBOL) {
@@ -650,7 +650,7 @@ int get_class_title_regexp(const s_exp_data_t *e,
 
             *class_re = S_EXP_CADR(e)->string.str;
             *title_re = NULL;
-            *class_or_title = 0;
+            *class_or_title = 1;
             return 1;
         }
 
@@ -663,7 +663,7 @@ int get_class_title_regexp(const s_exp_data_t *e,
 
             *class_re = NULL;
             *title_re = S_EXP_CADR(e)->string.str;
-            *class_or_title = 0;
+            *class_or_title = 1;
             return 1;
         }
 
@@ -746,8 +746,8 @@ int apply_scroll_window(void)
             continue;
         }
 
-        op_name = S_EXP_CAADR(p)->symbol.name;
-        op_arg = S_EXP_CDADR(p);
+        op_name = S_EXP_CAADR(e)->symbol.name;
+        op_arg = S_EXP_CDADR(e);
 
         /* operator */
         op = NULL;

@@ -1,7 +1,7 @@
 /*
  * scroll_op_scrollbar.c  -- scroll operators for scrollbar
  *
- * $Id: scroll_op_scrollbar.c,v 1.1 2005/01/13 09:39:59 hos Exp $
+ * $Id: scroll_op_scrollbar.c,v 1.2 2005/01/13 18:05:21 hos Exp $
  *
  */
 
@@ -457,10 +457,7 @@ int SCROLL_OP_API neighborhood_scrollbar_init_ctx(void *ctxp, int size,
 
     /* search neighborhood scrollbars */
     ctx->h_bar = ctx->v_bar = NULL;
-    if(EnumChildWindows(ctx->target, enum_neighborhood_scrollbar,
-                        (LPARAM)ctx) == 0) {
-        return 0;
-    }
+    EnumChildWindows(ctx->target, enum_neighborhood_scrollbar, (LPARAM)ctx);
 
     if(ctx->h_bar == NULL && ctx->v_bar == NULL) {
         HWND parent = GetParent(ctx->target);
@@ -470,10 +467,7 @@ int SCROLL_OP_API neighborhood_scrollbar_init_ctx(void *ctxp, int size,
         }
 
         ctx->h_bar = ctx->v_bar = NULL;
-        if(EnumChildWindows(parent, enum_neighborhood_scrollbar,
-                            (LPARAM)ctx) == 0) {
-            return 0;
-        }
+        EnumChildWindows(parent, enum_neighborhood_scrollbar, (LPARAM)ctx);
 
         if(ctx->h_bar == NULL && ctx->v_bar == NULL) {
             return 0;
