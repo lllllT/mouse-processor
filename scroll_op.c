@@ -1,11 +1,12 @@
 /*
  * scroll_op.c  -- scroll operators
  *
- * $Id: scroll_op.c,v 1.1 2005/01/12 09:39:47 hos Exp $
+ * $Id: scroll_op.c,v 1.2 2005/01/12 11:12:57 hos Exp $
  *
  */
 
 #include "scroll_op.h"
+#include "util.h"
 
 
 static
@@ -26,6 +27,8 @@ int get_drag_scroll_delta(int length,
 }
 
 
+typedef int (* scrollbar_scroll_proc_t)(HWND, int, HWND, UINT, double *, int);
+
 static
 int scrollbar_line_scroll(HWND hwnd, int bar,
                           HWND msg_hwnd, UINT msg,
@@ -118,10 +121,48 @@ int scrollbar_drag_scroll(HWND hwnd, int bar,
 }
 
 static
-int scrollbar_parcentage_scroll(HWND hwnd, int bar,
+int scrollbar_percentage_scroll(HWND hwnd, int bar,
                                 HWND msg_hwnd, UINT msg,
                                 double *delta, int length)
 {
+    SCROLLINFO si;
+    int dd, pos, min, max;
+
+    memset(&si, 0, sizeof(si));
+    si.cbSize = sizeof(si);
+    si.fMask = SIF_POS | SIF_RANGE | SIF_PAGE;
+    if(GetScrollInfo(hwnd, bar, &si) == 0) {
+        return 0;
+    }
+
+    min = si.nMin;
+    max = si.nMax - (si.nPage ? si.nPage - 1 : 0);
+    dd = (*delta) / 100.0 * (max - min);
+
+    if(dd == 0) {
+        return 1;
+    }
+
+    pos = si.nPos + dd;
+    if(pos < min) {
+        pos = min;
+    } else if(pos > max) {
+        pos = max;
+    }
+
+    memset(&si, 0, sizeof(si));
+    si.cbSize = sizeof(si);
+    si.fMask = SIF_POS;
+    si.nPos = pos;
+    SetScrollInfo(hwnd, bar, &si, FALSE);
+    SendMessageTimeout(msg_hwnd, msg,
+                       MAKEWPARAM(SB_THUMBPOSITION, pos),
+                       (bar == SB_CTL ? (LPARAM)hwnd : 0),
+                       SMTO_ABORTIFHUNG, 500, NULL);
+
+    *delta -= dd * 100.0 / (max - min);
+
+    return 1;
 }
 
 static
@@ -129,6 +170,40 @@ int scrollbar_unit_scroll(HWND hwnd, int bar,
                           HWND msg_hwnd, UINT msg,
                           double *delta, int length)
 {
+    SCROLLINFO si;
+    int dd, pos, min, max;
+
+    memset(&si, 0, sizeof(si));
+    si.cbSize = sizeof(si);
+    si.fMask = SIF_POS | SIF_RANGE | SIF_PAGE;
+    if(GetScrollInfo(hwnd, bar, &si) == 0) {
+        return 0;
+    }
+
+    min = si.nMin;
+    max = si.nMax - (si.nPage ? si.nPage - 1 : 0);
+    dd = (int)*delta;
+
+    pos = si.nPos + dd;
+    if(pos < min) {
+        pos = min;
+    } else if(pos > max) {
+        pos = max;
+    }
+
+    memset(&si, 0, sizeof(si));
+    si.cbSize = sizeof(si);
+    si.fMask = SIF_POS;
+    si.nPos = pos;
+    SetScrollInfo(hwnd, bar, &si, FALSE);
+    SendMessageTimeout(msg_hwnd, msg,
+                       MAKEWPARAM(SB_THUMBPOSITION, pos),
+                       (bar == SB_CTL ? (LPARAM)hwnd : 0),
+                       SMTO_ABORTIFHUNG, 500, NULL);
+
+    *delta -= dd;
+
+    return 1;
 }
 
 
@@ -138,6 +213,16 @@ enum {
     SCROLLBAR_MODE_DRAG,
     SCROLLBAR_MODE_PERCENTAGE,
     SCROLLBAR_MODE_BARUNIT
+};
+
+static struct uint_ptr_pair scrollbar_scroll_proc_map[] = {
+    {SCROLLBAR_MODE_LINE, scrollbar_line_scroll},
+    {SCROLLBAR_MODE_PAGE, scrollbar_page_scroll},
+    {SCROLLBAR_MODE_DRAG, scrollbar_drag_scroll},
+    {SCROLLBAR_MODE_PERCENTAGE, scrollbar_percentage_scroll},
+    {SCROLLBAR_MODE_BARUNIT, scrollbar_unit_scroll},
+
+    {0, NULL}
 };
 
 static
@@ -220,6 +305,7 @@ void get_scrollbar_ratio(const s_exp_data_t *arg,
 
 struct window_scrollbar_context {
     int mode;
+    scrollbar_scroll_proc_t scroll_proc;
 
     HWND target;
     SIZE target_size;
@@ -228,7 +314,6 @@ struct window_scrollbar_context {
     double dx, dy;
 };
 
-
 static
 int SCROLL_OP_API window_scrollbar_get_ctx_size(const scroll_op_arg_t *arg)
 {
@@ -256,6 +341,9 @@ int SCROLL_OP_API window_scrollbar_init_ctx(void *ctxp, int size,
     if(ctx->mode < 0) {
         return 0;
     }
+
+    ctx->scroll_proc = (scrollbar_scroll_proc_t)
+                       assq_pair(scrollbar_scroll_proc_map, ctx->mode, NULL);
 
     /* check window style */
     switch(ctx->mode) {
@@ -311,10 +399,10 @@ int SCROLL_OP_API window_scrollbar_scroll(void *ctxp, double dx, double dy)
     ctx->dx += dx * ctx->x_ratio;
     ctx->dy += dy * ctx->y_ratio;
 
-    scrollbar_drag_scroll(ctx->target, SB_HORZ, ctx->target, WM_HSCROLL,
-                          &ctx->dx, ctx->target_size.cx);
-    scrollbar_drag_scroll(ctx->target, SB_VERT, ctx->target, WM_VSCROLL,
-                          &ctx->dy, ctx->target_size.cx);
+    ctx->scroll_proc(ctx->target, SB_HORZ, ctx->target, WM_HSCROLL,
+                     &ctx->dx, ctx->target_size.cx);
+    ctx->scroll_proc(ctx->target, SB_VERT, ctx->target, WM_VSCROLL,
+                     &ctx->dy, ctx->target_size.cx);
 
     return 1;
 }
