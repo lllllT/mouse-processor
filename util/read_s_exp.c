@@ -1,7 +1,7 @@
 /*
  * read_s_exp.c  -- read s-expression
  *
- * $Id: read_s_exp.c,v 1.6 2005/01/25 09:02:48 hos Exp $
+ * $Id: read_s_exp.c,v 1.7 2005/01/29 21:16:56 hos Exp $
  *
  */
 
@@ -610,7 +610,7 @@ static s_exp_data_t *read_symbol_or_number(s_exp_read_context_t *ctx)
     if(get_char_type(s[0]) != CHAR_TYPE_LETTER &&
        get_char_type(s[0]) != CHAR_TYPE_SPECIAL_INITIAL) {
         s_exp_data_t *err;
-        err = s_exp_read_error(ctx, "bad symbol: \"%S\"", s);
+        err = s_exp_read_error(ctx, "bad symbol: \"%S\".", s);
         free_s_exp(data);
         return err;
     }
