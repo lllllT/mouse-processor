@@ -1,7 +1,7 @@
 #
 # Makefile
 #
-# $Id: Makefile,v 1.29 2005/02/01 17:12:56 hos Exp $
+# $Id: Makefile,v 1.30 2005/02/02 10:03:50 hos Exp $
 #
 
 DEFINES = 
@@ -24,25 +24,38 @@ EXE_RSRC = resource.rc
 EXE_OBJS = $(EXE_SRCS:%.c=%.o) $(EXE_RSRC:%.rc=%.o)
 EXE_HEADERS = main.h operator.h resource.h \
               scroll_op_utils.h scroll_op_scrollbar.h shmem.h
-EXE_LDLIBS = $(UTIL_LIBS) -lpsapi -lole32 -loleaut32 -loleacc -luuid
+EXE_LDLIBS = $(UTIL_LIBS) -L. -l$(SBH_DLL_NAME) \
+             -lpsapi -lole32 -loleaut32 -loleacc -luuid
 EXE_LDFLAGS = $(LDFLAGS)
 
-SB_DLL_NAME = $(TARGET_NAME)sb.dll
-SB_DLL_SRCS = sb_dllmain.c dllinj.c shmem.c
-SB_DLL_RSRC = 
-SB_DLL_OBJS = $(SB_DLL_SRCS:%.c=%.o) $(SB_DLL_RSRC:%.rc=%.o)
-SB_DLL_HEADERS = dllinj.h scroll_op_scrollbar.h shmem.h
-SB_DLL_LDLIBS = -lpsapi -lkernel32
-SB_DLL_LDFLAGS = $(LDFLAGS) -shared -nostartfiles -nostdlib
+SBI_DLL_NAME = $(TARGET_NAME)sbi.dll
+SBI_DLL_SRCS = sbi_dllmain.c dllinj.c shmem.c
+SBI_DLL_RSRC = 
+SBI_DLL_OBJS = $(SBI_DLL_SRCS:%.c=%.o) $(SBI_DLL_RSRC:%.rc=%.o)
+SBI_DLL_HEADERS = dllinj.h scroll_op_scrollbar.h shmem.h
+SBI_DLL_LDLIBS = -lpsapi -lkernel32
+#SBI_DLL_LDFLAGS = $(LDFLAGS) -shared -nostartfiles -nostdlib -e _DllMain@12
+SBI_DLL_LDFLAGS = $(LDFLAGS) -shared
 
-PACK_BIN_FILES = $(EXE_NAME) $(SB_DLL_NAME)
+SBH_DLL_NAME = $(TARGET_NAME)sbh.dll
+SBH_DLL_SRCS = sbh_dllmain.c shmem.c
+SBH_DLL_RSRC = 
+SBH_DLL_OBJS = $(SBH_DLL_SRCS:%.c=%.o) $(SBH_DLL_RSRC:%.rc=%.o)
+SBH_DLL_HEADERS = scroll_op_scrollbar.h shmem.h
+SBH_DLL_LDLIBS = -lkernel32 -luser32
+#SBH_DLL_LDFLAGS = $(LDFLAGS) -shared -nostartfiles -nostdlib -e _DllMain@12 \
+#                  -Wl,--out-implib,lib$(SBH_DLL_NAME).a
+SBH_DLL_LDFLAGS = $(LDFLAGS) -shared \
+                  -Wl,--out-implib,lib$(SBH_DLL_NAME).a
+
+PACK_BIN_FILES = $(EXE_NAME) $(SBI_DLL_NAME)
 PACK_BIN_ADD_FILES = README.txt VERSION default.mprc
 PACK_SRC_FILES = $(EXE_SRCS) $(EXE_RSRC) $(EXE_HEADERS) icon.ico \
-                 $(SB_DLL_SRCS) $(SB_DLL_RSRC) $(SB_DLL_HEADERS) \
+                 $(SBI_DLL_SRCS) $(SBI_DLL_RSRC) $(SBI_DLL_HEADERS) \
                  Makefile
 
 SUBDIRS = util doc
-TARGET = $(SB_DLL_NAME) $(EXE_NAME)
+TARGET = $(SBI_DLL_NAME) $(SBH_DLL_NAME) $(EXE_NAME)
 VERSION = `cat VERSION`
 
 RC = rc
@@ -64,15 +77,22 @@ all: all-rec $(TARGET)
 
 .SUFFIXES: .rc
 
-$(EXE_NAME): $(EXE_OBJS) $(UTIL_LIBS)
+$(EXE_NAME): $(EXE_OBJS) $(UTIL_LIBS) lib$(SBH_DLL_NAME).a
 	$(CC) $(EXE_LDFLAGS) $(EXE_OBJS) $(EXE_LDLIBS) -o $@
 
-$(SB_DLL_NAME): $(SB_DLL_OBJS)
-	$(CC) $(SB_DLL_LDFLAGS) $(SB_DLL_OBJS) $(SB_DLL_LDLIBS) -o $@
+$(SBI_DLL_NAME): $(SBI_DLL_OBJS)
+	$(CC) $(SBI_DLL_LDFLAGS) $(SBI_DLL_OBJS) $(SBI_DLL_LDLIBS) -o $@
+
+$(SBH_DLL_NAME): $(SBH_DLL_OBJS)
+	$(CC) $(SBH_DLL_LDFLAGS) $(SBH_DLL_OBJS) $(SBH_DLL_LDLIBS) -o $@
+
+lib$(SBH_DLL_NAME).a: $(SBH_DLL_NAME)
 
 $(EXE_OBJS) : $(EXE_HEADERS)
 
-$(SB_DLL_OBJS) : $(SB_DLL_HEADERS)
+$(SBI_DLL_OBJS) : $(SBI_DLL_HEADERS)
+
+$(SBH_DLL_OBJS) : $(SBH_DLL_HEADERS)
 
 .rc.res:
 	$(RC) /fo$@ $<
@@ -116,4 +136,4 @@ pack-clean:
 	-$(RM) -r $(TARGET_NAME)-$(VERSION) $(TARGET_NAME)_src-$(VERSION)
 
 clean: clean-rec pack-clean
-	-$(RM) $(TARGET) *.o *.res *.tmp *~
+	-$(RM) $(TARGET) *.a *.o *.res *.tmp *~

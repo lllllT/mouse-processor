@@ -1,7 +1,7 @@
 /*
  * scroll_op_scrollbar.c  -- scroll operators for scrollbar
  *
- * $Id: scroll_op_scrollbar.c,v 1.13 2005/02/01 17:03:49 hos Exp $
+ * $Id: scroll_op_scrollbar.c,v 1.14 2005/02/02 10:03:53 hos Exp $
  *
  */
 
@@ -14,21 +14,74 @@
 #include <commctrl.h>
 #include <math.h>
 
+#include <stdio.h>
+#define DBG(a1,a2,a3) {FILE *fp = fopen("d:\\dbg.log", "a"); fprintf(fp,a1,a2,a3); fclose(fp);}
 
 static const support_procs_t *spr = NULL;
 
 
 static struct {
+    /* for shared memory */
     fake_gsinfo_data_t *gsinfo_data;
     HANDLE fmap;
 
+    /* for hook */
+    DWORD tid[2];
+
+    /* for DLL injection */
     DWORD pid[2];
     HANDLE process[2];
     HMODULE module[2];
     WCHAR module_name[512];
 } inject_sb_data;
 
-#define INJECT_SB_MODULE_BASE L"mpsb.dll"
+#define INJECT_SB_MODULE_BASE L"mpsbi.dll"
+#define HOOK_SB_MODULE_BASE _T("mpsbh.dll")
+
+__declspec(dllimport)
+LRESULT CALLBACK gsi_call_proc(int code, WPARAM wparam, LPARAM lparam);
+
+static
+void install_scrollbar_support_hook_to(HWND hwnd)
+{
+    HINSTANCE mod;
+    DWORD tid;
+    HHOOK hook;
+    int n;
+
+    if(inject_sb_data.gsinfo_data->hook[0] == NULL) {
+        n = 0;
+    } else {
+        n = 1;
+    }
+
+    tid = GetWindowThreadProcessId(hwnd, NULL);
+    if(n == 1 && inject_sb_data.tid[0] == tid) {
+        return;
+    }
+
+    mod = GetModuleHandle(HOOK_SB_MODULE_BASE);
+    if(mod == NULL) {
+        return;
+    }
+
+    inject_sb_data.gsinfo_data->hook_idx = n;
+    hook = SetWindowsHookEx(WH_CALLWNDPROC, gsi_call_proc, mod, tid);
+    if(hook == NULL) {
+        return;
+    }
+
+    inject_sb_data.gsinfo_data->hook[n] = hook;
+    inject_sb_data.tid[n] = tid;
+    spr->log_printf(LOG_LEVEL_DEBUG, L"install hook success\n");
+}
+
+static
+void uninstall_scrollbar_support_hook_from(int n)
+{
+    UnhookWindowsHookEx(inject_sb_data.gsinfo_data->hook[n]);
+    inject_sb_data.gsinfo_data->hook[n] = NULL;
+}
 
 static
 void inject_scrollbar_support_proc_to(HWND hwnd)
@@ -127,14 +180,22 @@ void uninject_scrollbar_support_proc_from(int n)
 static
 void uninject_scrollbar_support_proc(void)
 {
-    close_shared_mem(inject_sb_data.gsinfo_data, inject_sb_data.fmap);
-    inject_sb_data.gsinfo_data = NULL;
-    inject_sb_data.fmap = NULL;
-
+    /* un-inject */
     if(inject_sb_data.process[0] != NULL)
         uninject_scrollbar_support_proc_from(0);
     if(inject_sb_data.process[1] != NULL)
         uninject_scrollbar_support_proc_from(1);
+
+    /* uninstall hook */
+    if(inject_sb_data.gsinfo_data->hook[0] != NULL)
+        uninstall_scrollbar_support_hook_from(0);
+    if(inject_sb_data.gsinfo_data->hook[1] != NULL)
+        uninstall_scrollbar_support_hook_from(1);
+
+    /* release shared memory */
+    close_shared_mem(inject_sb_data.gsinfo_data, inject_sb_data.fmap);
+    inject_sb_data.gsinfo_data = NULL;
+    inject_sb_data.fmap = NULL;
 }
 
 static
@@ -151,6 +212,10 @@ void inject_scrollbar_support_proc(HWND hwnd1, HWND hwnd2, int is_control)
         return;
     }
     memset(inject_sb_data.gsinfo_data, 0, sizeof(fake_gsinfo_data_t));
+
+    /* install hook */
+    if(hwnd1 != NULL) install_scrollbar_support_hook_to(hwnd1);
+    if(hwnd2 != NULL) install_scrollbar_support_hook_to(hwnd2);
 
     /* DLL injection */
     {
@@ -289,6 +354,7 @@ int scrollbar_r_scroll(HWND hwnd, int bar,
         inject_sb_data.gsinfo_data->bar = bar;
         inject_sb_data.gsinfo_data->track_pos = pos;
         inject_sb_data.gsinfo_data->valid = 1;
+        DBG("sbs: enable: %p, %d\n", hwnd, pos);
     }
 
     SendMessageTimeout(msg_hwnd, msg,
@@ -302,6 +368,7 @@ int scrollbar_r_scroll(HWND hwnd, int bar,
 
     if(inject_sb_data.gsinfo_data != NULL) {
         inject_sb_data.gsinfo_data->valid = 0;
+        DBG("sbs: disable: %p, %d\n", hwnd, pos);
     }
 
     memset(&si, 0, sizeof(si));
