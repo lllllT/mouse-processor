@@ -1,7 +1,7 @@
 /*
  * scroll.c  -- scroll window
  *
- * $Id: scroll.c,v 1.10 2005/01/09 21:35:30 hos Exp $
+ * $Id: scroll.c,v 1.11 2005/01/10 07:47:36 hos Exp $
  *
  */
 
@@ -209,8 +209,7 @@ LRESULT scroll_modech(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
     ctx.scroll_data.y_ratio = ctx.app_conf.cur_conf->scroll_mode.y_ratio;
 
     /* target window */
-    ctx.scroll_data.target =
-        get_target_window_from_point(ctx.scroll_data.start_pt);
+    ctx.scroll_data.target = WindowFromPoint(ctx.scroll_data.start_pt);
 
     /* scroll mode */
     {
