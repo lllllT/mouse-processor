@@ -1,7 +1,7 @@
 /*
  * hook.c  -- hook funcs
  *
- * $Id: hook.c,v 1.17 2005/01/10 07:47:35 hos Exp $
+ * $Id: hook.c,v 1.18 2005/01/11 09:38:01 hos Exp $
  *
  */
 
@@ -229,13 +229,13 @@ void CALLBACK comb_timer(HWND hwnd, UINT msg, UINT_PTR id, DWORD time)
 {
     KillTimer(hwnd, id);
 
-    if(! ctx.pressed) {
+    if(! ctx.hook_data.pressed) {
         return;
     }
-    ctx.pressed = 0;
+    ctx.hook_data.pressed = 0;
 
-    do_action(&ctx.app_conf.cur_conf->button[ctx.pressed_btn].act,
-              &ctx.pressed_btn_data, MOTION_DOWN);
+    do_action(&ctx.app_conf.cur_conf->button[ctx.hook_data.pressed_btn].act,
+              &ctx.hook_data.pressed_btn_data, MOTION_DOWN);
 }
 
 
@@ -260,36 +260,40 @@ LRESULT CALLBACK mouse_ll_proc(int code, WPARAM wparam, LPARAM lparam)
         motion = msg_to_motion(wparam);
         btn = msg_to_button(wparam, msll->mouseData);
 
-        if(ctx.pressed) {
-            ctx.pressed = 0;
+        if(ctx.hook_data.pressed) {
+            ctx.hook_data.pressed = 0;
             KillTimer(NULL, comb_timer_id);
 
             if(motion == MOTION_DOWN) {
                 /* combination press */
                 if(ctx.app_conf.cur_conf->
-                   button[ctx.pressed_btn].comb_act[btn].code !=
+                   button[ctx.hook_data.pressed_btn].comb_act[btn].code !=
                    MOUSE_ACT_NONE) {
                     do_action(
                         &ctx.app_conf.cur_conf->
-                        button[ctx.pressed_btn].comb_act[btn],
+                        button[ctx.hook_data.pressed_btn].comb_act[btn],
                         msll, MOTION_DOWN);
 
-                    ctx.combination[ctx.combinated * 2] = ctx.pressed_btn;
-                    ctx.combination[ctx.combinated * 2 + 1] = btn;
-                    ctx.combinated += 1;
+                    ctx.hook_data.
+                        combination[ctx.hook_data.combinated * 2] =
+                        ctx.hook_data.pressed_btn;
+                    ctx.hook_data.
+                        combination[ctx.hook_data.combinated * 2 + 1] = btn;
+                    ctx.hook_data.combinated += 1;
 
                     return 1;
                 }
             }
 
-            do_action(&ctx.app_conf.cur_conf->button[ctx.pressed_btn].act,
-                      &ctx.pressed_btn_data, MOTION_DOWN);
+            do_action(&ctx.app_conf.cur_conf->
+                      button[ctx.hook_data.pressed_btn].act,
+                      &ctx.hook_data.pressed_btn_data, MOTION_DOWN);
         }
 
         if(btn >= 0) {
             /* check ignore mask */
-            if(ctx.ignore_btn_mask & MOUSE_BTN_BIT(btn)) {
-                ctx.ignore_btn_mask &= ~MOUSE_BTN_BIT(btn);
+            if(ctx.hook_data.ignore_btn_mask & MOUSE_BTN_BIT(btn)) {
+                ctx.hook_data.ignore_btn_mask &= ~MOUSE_BTN_BIT(btn);
                 return 1;
             }
 
@@ -297,9 +301,9 @@ LRESULT CALLBACK mouse_ll_proc(int code, WPARAM wparam, LPARAM lparam)
                 /* try combination */
                 if(ctx.app_conf.cur_conf->button[btn].flags &
                    MOUSE_BTN_CONF_ENABLE_COMB) {
-                    ctx.pressed = 1;
-                    ctx.pressed_btn = btn;
-                    memcpy(&ctx.pressed_btn_data, msll,
+                    ctx.hook_data.pressed = 1;
+                    ctx.hook_data.pressed_btn = btn;
+                    memcpy(&ctx.hook_data.pressed_btn_data, msll,
                            sizeof(MSLLHOOKSTRUCT));
                     comb_timer_id = SetTimer(NULL, 0,
                                              ctx.app_conf.comb_time,
@@ -309,29 +313,30 @@ LRESULT CALLBACK mouse_ll_proc(int code, WPARAM wparam, LPARAM lparam)
             }
 
             if(motion == MOTION_UP) {
-                if(ctx.combinated) {
+                if(ctx.hook_data.combinated) {
                     int i;
 
-                    for(i = 0; i < ctx.combinated; i++) {
+                    for(i = 0; i < ctx.hook_data.combinated; i++) {
                         /* combination release */
-                        if(ctx.combination[i * 2] == btn ||
-                           ctx.combination[i * 2 + 1] == btn) {
+                        if(ctx.hook_data.combination[i * 2] == btn ||
+                           ctx.hook_data.combination[i * 2 + 1] == btn) {
                             do_action(
                                 &ctx.app_conf.cur_conf->
-                                button[ctx.combination[i * 2]].
-                                comb_act[ctx.combination[i * 2 + 1]],
+                                button[ctx.hook_data.combination[i * 2]].
+                                comb_act[ctx.hook_data.combination[i * 2 + 1]],
                                 msll, MOTION_UP);
 
-                            ctx.ignore_btn_mask |= 
-                                MOUSE_BTN_BIT(btn == ctx.combination[i * 3] ?
-                                              ctx.combination[i * 3 + 1] :
-                                              ctx.combination[i * 3]);
+                            ctx.hook_data.ignore_btn_mask |= 
+                                MOUSE_BTN_BIT(
+                                    btn == ctx.hook_data.combination[i * 3] ?
+                                    ctx.hook_data.combination[i * 3 + 1] :
+                                    ctx.hook_data.combination[i * 3]);
 
-                            memmove(&ctx.combination[i * 2],
-                                    &ctx.combination[(i + 1) * 2],
-                                    sizeof(ctx.combination[0]) *
-                                    (ctx.combinated - i - 1));
-                            ctx.combinated -= 1;
+                            memmove(&ctx.hook_data.combination[i * 2],
+                                    &ctx.hook_data.combination[(i + 1) * 2],
+                                    sizeof(ctx.hook_data.combination[0]) *
+                                    (ctx.hook_data.combinated - i - 1));
+                            ctx.hook_data.combinated -= 1;
 
                             return 1;
                         }

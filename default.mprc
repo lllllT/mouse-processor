@@ -1,19 +1,9 @@
 ;;;; -*- coding: utf-8; mode: lisp -*-
 
 (global
- ;; threshold time to detect combination [msec]
+ ;; threshold time to detect button combination [msec]
  (combination-time . 300)
  )
-
-(native-scroll
- (x-ratio 1.0 0.0)
- (y-ratio 0.0 1.0))
-(line-scroll
- (x-ratio 0.1 0.0)
- (y-ratio 0.0 0.1))
-(wheel
- (ratio 0.0 -5.0)
- (tick . 120))
 
 (normal-mode
  ;; normal mode:
@@ -72,4 +62,80 @@
   (button-5 (normal-mode normal))
   (wheel (post-wheel-message))
   )
+ )
+
+(scroll-window
+ ("Internet Explorer_Server$" (or (ie-scroll)
+				  (window-scrollbar line-scroll)))
+ ("SysListView32$" (window-scrollbar line-scroll))
+ ("ScrollBar$" (scrollbar-control))
+ ("msctls_trackbar32$" (trackbar-control))
+ ("SysTabControl32$" (tab-control))
+
+ (".*" (or (window-scrollbar)
+	   (neighborhood-scrollbar)
+	   (wheel-message 0.0 1.0)))
+ )
+
+(scroll-operator
+ (window-scrollbar
+  (default-mode . drag)
+  (line-scroll 1.0 1.0)
+  (page-scroll 0.1 0.1)
+  (drag 1.0 1.0)
+  (percentage 1.0 1.0)
+  (bar-unit 1.0 1.0)
+  )
+
+ (neighborhood-scrollbar
+  (default-mode . drag)
+  (line-scroll 1.0 1.0)
+  (page-scroll 0.1 0.1)
+  (drag 1.0 1.0)
+  (percentage 1.0 1.0)
+  (bar-unit 1.0 1.0)
+  )
+
+ (ie-scroll
+  (default-mode . drag)
+  (drag 1.0 1.0)
+  (percentage 1.0 1.0)
+  (pixel 1.0 1.0)
+  )
+
+ (scrollbar-control
+  (default-mode . drag)
+  (h-bar
+   (drag 1.0 0.0)
+   (percentage 1.0 0.0)
+   (bar-unit 1.0 0.0)
+   )
+  (v-bar
+   (drag 0.0 1.0)
+   (percentage 0.0 1.0)
+   (bar-unit 0.0 1.0)
+   )
+  )
+
+ (trackbar-control
+  (default-mode . drag)
+  (h-bar
+   (drag 1.0 0.0)
+   (percentage 1.0 0.0)
+   (bar-unit 1.0 0.0)
+   )
+  (v-bar
+   (drag 0.0 1.0)
+   (percentage 0.0 1.0)
+   (bar-unit 0.0 1.0)
+   )
+  )
+
+ (tab-control
+  (ratio 0.0 5.0)
+  (tick . 120))
+
+ (wheel-message
+  (ratio 0.0 -5.0)
+  (tick . 120))
  )

@@ -1,7 +1,7 @@
 #
 # Makefile
 #
-# $Id: Makefile,v 1.8 2005/01/08 21:47:51 hos Exp $
+# $Id: Makefile,v 1.9 2005/01/11 09:38:01 hos Exp $
 #
 
 DEFINES = -D_WIN32_WINNT=0x0500 -DUNICODE -D_UNICODE
@@ -14,7 +14,7 @@ UTIL_LIBS = util/util.a
 EXE_NAME = mp.exe
 EXE_OBJS = main.o hook.o scroll.o ie.o conf.o resource.o
 EXE_HEADERS = main.h resource.h
-EXE_LDLIBS = $(UTIL_LIBS) -lole32 -loleaut32 -loleacc -luuid
+EXE_LDLIBS = $(UTIL_LIBS) -lpsapi -lole32 -loleaut32 -loleacc -luuid
 EXE_LDFLAGS = $(LDFLAGS)
 
 SUBDIRS = util

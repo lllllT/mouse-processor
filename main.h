@@ -1,7 +1,7 @@
 /*
  * main.h  --
  *
- * $Id: main.h,v 1.18 2005/01/10 07:47:36 hos Exp $
+ * $Id: main.h,v 1.19 2005/01/11 09:38:03 hos Exp $
  *
  */
 
@@ -99,18 +99,46 @@ struct mouse_conf {
 
 /* scroll context */
 struct scroll_context {
-    POINT start_pt;
     int mode;
 
-    HWND target;
     SIZE target_size;
 
     IDispatch *ie_target;
 
+    double dw;
+};
+
+/* scroll mode context */
+struct scroll_mode_context {
+    POINT start_pt;
+
+    HWND target;
+    LPWSTR class;
+    LPWSTR title;
+
     double x_ratio, y_ratio;
     double dx, dy;
+};
 
-    double dw;
+/* mode context */
+struct mode_context {
+    int cur_mode;
+
+    union {
+        struct scroll_mode_context scroll;
+    };
+};
+
+/* hook context */
+struct hook_context {
+    unsigned int ignore_btn_mask;
+
+    int pressed;
+    int pressed_btn;
+    MSLLHOOKSTRUCT pressed_btn_data;
+
+    int combinated;
+    int combination[MOUSE_BTN_MAX * 3];
 };
 
 /* application setting */
@@ -146,15 +174,9 @@ struct app_context {
         double y_ratio;
     } scroll_line;
 
-    unsigned int ignore_btn_mask;
+    struct hook_context hook_data;
 
-    int pressed;
-    int pressed_btn;
-    MSLLHOOKSTRUCT pressed_btn_data;
-
-    int combinated;
-    int combination[MOUSE_BTN_MAX * 3];
-
+    struct mode_context mode_data;
     struct scroll_context scroll_data;
 };
 

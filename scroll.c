@@ -1,13 +1,14 @@
 /*
  * scroll.c  -- scroll window
  *
- * $Id: scroll.c,v 1.11 2005/01/10 07:47:36 hos Exp $
+ * $Id: scroll.c,v 1.12 2005/01/11 09:38:03 hos Exp $
  *
  */
 
 #include "main.h"
 #include "util.h"
 #include <commctrl.h>
+#include <psapi.h>
 
 
 static
@@ -106,15 +107,15 @@ void scroll_line(HWND hwnd, int bar, int delta)
 static
 void scrolling_native_h(int x, int y)
 {
-    scroll_window(ctx.scroll_data.target, SB_HORZ,
-                  &ctx.scroll_data.dx, ctx.scroll_data.target_size.cx);
+    scroll_window(ctx.mode_data.scroll.target, SB_HORZ,
+                  &ctx.mode_data.scroll.dx, ctx.scroll_data.target_size.cx);
 }
 
 static
 void scrolling_native_v(int x, int y)
 {
-    scroll_window(ctx.scroll_data.target, SB_VERT,
-                  &ctx.scroll_data.dy, ctx.scroll_data.target_size.cy);
+    scroll_window(ctx.mode_data.scroll.target, SB_VERT,
+                  &ctx.mode_data.scroll.dy, ctx.scroll_data.target_size.cy);
 }
 
 static
@@ -129,24 +130,24 @@ void scrolling_line(int x, int y)
 {
     int dxi, dyi;
 
-    dxi = ctx.scroll_data.dx * ctx.scroll_line.x_ratio;
-    dyi = ctx.scroll_data.dy * ctx.scroll_line.y_ratio;
+    dxi = ctx.mode_data.scroll.dx * ctx.scroll_line.x_ratio;
+    dyi = ctx.mode_data.scroll.dy * ctx.scroll_line.y_ratio;
 
-    scroll_line(ctx.scroll_data.target, SB_HORZ, dxi);
-    scroll_line(ctx.scroll_data.target, SB_VERT, dyi);
+    scroll_line(ctx.mode_data.scroll.target, SB_HORZ, dxi);
+    scroll_line(ctx.mode_data.scroll.target, SB_VERT, dyi);
 
-    ctx.scroll_data.dx -= dxi / ctx.scroll_line.x_ratio;
-    ctx.scroll_data.dy -= dyi / ctx.scroll_line.y_ratio;
+    ctx.mode_data.scroll.dx -= dxi / ctx.scroll_line.x_ratio;
+    ctx.mode_data.scroll.dy -= dyi / ctx.scroll_line.y_ratio;
 }
 
 static
 void scrolling_ie(int x, int y)
 {
     scroll_ie_h(ctx.scroll_data.ie_target,
-                &ctx.scroll_data.dx, ctx.scroll_data.target_size.cx);
+                &ctx.mode_data.scroll.dx, ctx.scroll_data.target_size.cx);
 
     scroll_ie_v(ctx.scroll_data.ie_target,
-                &ctx.scroll_data.dy, ctx.scroll_data.target_size.cy);
+                &ctx.mode_data.scroll.dy, ctx.scroll_data.target_size.cy);
 }
 
 static
@@ -155,10 +156,10 @@ void scrolling_wheel(int x, int y)
     int wn, data, i;
 
     ctx.scroll_data.dw +=
-        ctx.scroll_data.dx * ctx.scroll_wheel.x_ratio +
-        ctx.scroll_data.dy * ctx.scroll_wheel.y_ratio;
-    ctx.scroll_data.dx = 0;
-    ctx.scroll_data.dy = 0;
+        ctx.mode_data.scroll.dx * ctx.scroll_wheel.x_ratio +
+        ctx.mode_data.scroll.dy * ctx.scroll_wheel.y_ratio;
+    ctx.mode_data.scroll.dx = 0;
+    ctx.mode_data.scroll.dy = 0;
 
     wn= ctx.scroll_data.dw / ctx.scroll_wheel.tick;
     if(wn == 0) {
@@ -173,7 +174,7 @@ void scrolling_wheel(int x, int y)
 
     for(i = 0; i < wn; i++) {
         PostMessage(
-            ctx.scroll_data.target,
+            ctx.mode_data.scroll.target,
             WM_MOUSEWHEEL,
             MAKEWPARAM(
                 (GetAsyncKeyState(VK_CONTROL) & 0x8000 ? MK_CONTROL : 0) |
@@ -191,32 +192,140 @@ void scrolling_wheel(int x, int y)
 }
 
 
-/* WM_MOUSEHOOK_MODECH */
-LRESULT scroll_modech(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+static
+void get_hierarchial_window_class_title(HWND hwnd,
+                                        LPWSTR *class, LPWSTR *title)
 {
-    struct mode_conf *data;
+    HWND w;
+    WCHAR buf[256];
+    WCHAR *cp = NULL, *tp = NULL, *p;
+    int clen = 0, tlen = 0;
 
-    ctx.scroll_data.start_pt.x = LOWORD(wparam);
-    ctx.scroll_data.start_pt.y = HIWORD(wparam);
+    w = hwnd;
+    while(w) {
+        /* class */
+        buf[0] = 0;
+        GetClassNameW(w, buf, 256);
 
-    data = (struct mode_conf *)lparam;
+        clen += wcslen(buf) + 2;
 
-    if(data->mode != MODE_CH_SCROLL) {
-        return 0;
+        p = (WCHAR *)malloc(clen * sizeof(WCHAR));
+        if(p == NULL) {
+            free(cp);
+            free(tp);
+            return;
+        }
+        wcscpy(p, L":");
+        wcscat(p, buf);
+        if(cp != NULL) {
+            wcscat(p, cp);
+            free(cp);
+        }
+        cp = p;
+
+        /* title */
+        buf[0] = 0;
+        GetWindowTextW(w, buf, 256);
+
+        tlen += wcslen(buf) + 2;
+
+        p = (WCHAR *)malloc(tlen * sizeof(WCHAR));
+        if(p == NULL) {
+            free(cp);
+            free(tp);
+            return;
+        }
+        wcscpy(p, L":");
+        wcscat(p, buf);
+        if(tp != NULL) {
+            wcscat(p, tp);
+            free(tp);
+        }
+        tp = p;
+
+        /* next window */
+        w = GetParent(w);
     }
 
-    ctx.scroll_data.x_ratio = ctx.app_conf.cur_conf->scroll_mode.x_ratio;
-    ctx.scroll_data.y_ratio = ctx.app_conf.cur_conf->scroll_mode.y_ratio;
+    /* window module filename */
+    memset(buf, 0, sizeof(buf));
+    {
+        HINSTANCE inst;
+        DWORD pid = 0;
+        HANDLE ph;
+
+        inst = (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE);
+        GetWindowThreadProcessId(hwnd, &pid);
+        ph = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,
+                         FALSE, pid);
+        if(ph != NULL) {
+            inst = NULL;
+            GetModuleFileNameExW(ph, inst, buf, sizeof(buf));
+
+            CloseHandle(ph);
+        }
+    }
+
+    /* prepend to class */
+    clen += wcslen(buf) + 1;
+
+    p = (WCHAR *)malloc(clen * sizeof(WCHAR));
+    if(p == NULL) {
+        free(cp);
+        free(tp);
+        return;
+    }
+    wcscpy(p, buf);
+    if(cp != NULL) {
+        wcscat(p, cp);
+        free(cp);
+    }
+    cp = p;
+
+    /* prepend to title */
+    tlen += wcslen(buf) + 1;
+
+    p = (WCHAR *)malloc(tlen * sizeof(WCHAR));
+    if(p == NULL) {
+        free(cp);
+        free(tp);
+        return;
+    }
+    wcscpy(p, buf);
+    if(tp != NULL) {
+        wcscat(p, tp);
+        free(tp);
+    }
+    tp = p;
+
+    /* return value */
+    *class = cp;
+    *title = tp;
+}
+
+static
+LRESULT start_scroll_mode(struct mode_conf *data)
+{
+    ctx.mode_data.scroll.x_ratio = ctx.app_conf.cur_conf->scroll_mode.x_ratio;
+    ctx.mode_data.scroll.y_ratio = ctx.app_conf.cur_conf->scroll_mode.y_ratio;
 
     /* target window */
-    ctx.scroll_data.target = WindowFromPoint(ctx.scroll_data.start_pt);
+    ctx.mode_data.scroll.target =
+        WindowFromPoint(ctx.mode_data.scroll.start_pt);
+
+    /* hierarchical window class/title */
+    ctx.mode_data.scroll.class = NULL;
+    ctx.mode_data.scroll.title = NULL;
+    get_hierarchial_window_class_title(ctx.mode_data.scroll.target,
+                                       &ctx.mode_data.scroll.class,
+                                       &ctx.mode_data.scroll.title);
 
     /* scroll mode */
     {
         TCHAR class[256];
 
         memset(class, 0, sizeof(class));
-        GetClassName(ctx.scroll_data.target, class, 256);
+        GetClassName(ctx.mode_data.scroll.target, class, 256);
 
         if(_tcscmp(class, _T("SysListView32")) == 0) {
             ctx.scroll_data.mode = SCROLL_MODE_LINESCRL;
@@ -225,9 +334,9 @@ LRESULT scroll_modech(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
             ctx.scroll_data.mode = SCROLL_MODE_IE;
 
-            hres = get_ie_target(ctx.scroll_data.target,
-                                 ctx.scroll_data.start_pt.x,
-                                 ctx.scroll_data.start_pt.y,
+            hres = get_ie_target(ctx.mode_data.scroll.target,
+                                 ctx.mode_data.scroll.start_pt.x,
+                                 ctx.mode_data.scroll.start_pt.y,
                                  &ctx.scroll_data.ie_target);
             if(FAILED(hres)) {
                 ctx.scroll_data.mode = SCROLL_MODE_LINESCRL;
@@ -235,7 +344,7 @@ LRESULT scroll_modech(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
         } else {
             LONG_PTR style;
 
-            style = GetWindowLongPtr(ctx.scroll_data.target, GWL_STYLE);
+            style = GetWindowLongPtr(ctx.mode_data.scroll.target, GWL_STYLE);
 
             if((style & WS_HSCROLL) && (style & WS_VSCROLL)) {
                 ctx.scroll_data.mode = SCROLL_MODE_NATIVE_HV;
@@ -256,18 +365,69 @@ LRESULT scroll_modech(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
        FAILED(init_ie_dpids(ctx.scroll_data.ie_target))) {
         RECT rt;
 
-        GetClientRect(ctx.scroll_data.target, &rt);
+        GetClientRect(ctx.mode_data.scroll.target, &rt);
 
         ctx.scroll_data.target_size.cx = rt.right - rt.left + 1;
         ctx.scroll_data.target_size.cy = rt.bottom - rt.top + 1;
     }
 
-    ctx.scroll_data.dx = 0;
-    ctx.scroll_data.dy = 0;
+    ctx.mode_data.scroll.dx = 0;
+    ctx.mode_data.scroll.dy = 0;
 
     ctx.scroll_data.dw = 0;
 
     return 0;
+}
+
+static
+LRESULT shift_scroll_mode(struct mode_conf *data)
+{
+    ctx.mode_data.scroll.x_ratio = ctx.app_conf.cur_conf->scroll_mode.x_ratio;
+    ctx.mode_data.scroll.y_ratio = ctx.app_conf.cur_conf->scroll_mode.y_ratio;
+
+    return 0;
+}
+
+static
+LRESULT end_scroll_mode(struct mode_conf *data)
+{
+    if(ctx.mode_data.scroll.class != NULL) free(ctx.mode_data.scroll.class);
+    if(ctx.mode_data.scroll.title != NULL) free(ctx.mode_data.scroll.title);
+
+    return 0;
+}
+
+/* WM_MOUSEHOOK_MODECH */
+LRESULT scroll_modech(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+{
+    struct mode_conf *data;
+    LRESULT ret;
+
+    ctx.mode_data.scroll.start_pt.x = LOWORD(wparam);
+    ctx.mode_data.scroll.start_pt.y = HIWORD(wparam);
+
+    data = (struct mode_conf *)lparam;
+
+    switch(data->mode) {
+      case MODE_CH_SCROLL:
+          if(ctx.mode_data.cur_mode == MODE_CH_SCROLL) {
+              ret = shift_scroll_mode(data);
+          } else {
+              ret = start_scroll_mode(data);
+          }
+          break;
+
+      case MODE_CH_NORMAL:
+          ret = end_scroll_mode(data);
+          break;
+
+      default:
+          return 0;
+    }
+
+    ctx.mode_data.cur_mode = data->mode;
+
+    return ret;
 }
 
 
@@ -301,8 +461,8 @@ LRESULT scroll_modemsg_scroll(int x, int y, struct mode_conf *data)
 static
 LRESULT scroll_modemsg_mulratio(int x, int y, struct mode_conf *data)
 {
-    ctx.scroll_data.x_ratio *= data->ratio.x;
-    ctx.scroll_data.y_ratio *= data->ratio.y;
+    ctx.mode_data.scroll.x_ratio *= data->ratio.x;
+    ctx.mode_data.scroll.y_ratio *= data->ratio.y;
 
     return 0;
 }
@@ -311,8 +471,8 @@ LRESULT scroll_modemsg_mulratio(int x, int y, struct mode_conf *data)
 static
 LRESULT scroll_modemsg_setratio(int x, int y, struct mode_conf *data)
 {
-    ctx.scroll_data.x_ratio = data->ratio.x;
-    ctx.scroll_data.y_ratio = data->ratio.y;
+    ctx.mode_data.scroll.x_ratio = data->ratio.x;
+    ctx.mode_data.scroll.y_ratio = data->ratio.y;
 
     return 0;
 }
@@ -340,10 +500,10 @@ LRESULT scroll_modemsg(HWND hwnd, UINT msgid, WPARAM wparam, LPARAM lparam)
     data = (struct mode_conf *)lparam;
 
     if(data->mode == MODE_MSG_SCROLL) {
-        ctx.scroll_data.dx += (x - ctx.scroll_data.start_pt.x) *
-                              ctx.scroll_data.x_ratio;
-        ctx.scroll_data.dy += (y - ctx.scroll_data.start_pt.y) *
-                              ctx.scroll_data.y_ratio;
+        ctx.mode_data.scroll.dx += (x - ctx.mode_data.scroll.start_pt.x) *
+                                   ctx.mode_data.scroll.x_ratio;
+        ctx.mode_data.scroll.dy += (y - ctx.mode_data.scroll.start_pt.y) *
+                                   ctx.mode_data.scroll.y_ratio;
 
         while(PeekMessage(&msg, hwnd,
                           WM_MOUSEHOOK_MODECH, WM_MOUSEHOOK_MODEMSG,
@@ -360,10 +520,10 @@ LRESULT scroll_modemsg(HWND hwnd, UINT msgid, WPARAM wparam, LPARAM lparam)
                 break;
             }
 
-            ctx.scroll_data.dx += (x - ctx.scroll_data.start_pt.x) *
-                                  ctx.scroll_data.x_ratio;
-            ctx.scroll_data.dy += (y - ctx.scroll_data.start_pt.y) *
-                                  ctx.scroll_data.y_ratio;
+            ctx.mode_data.scroll.dx += (x - ctx.mode_data.scroll.start_pt.x) *
+                                       ctx.mode_data.scroll.x_ratio;
+            ctx.mode_data.scroll.dy += (y - ctx.mode_data.scroll.start_pt.y) *
+                                       ctx.mode_data.scroll.y_ratio;
 
             /* discard */
             PeekMessage(&msg, hwnd,
