@@ -1,7 +1,7 @@
 /*
  * log.c  -- logging procs
  *
- * $Id: log.c,v 1.4 2005/01/15 14:09:42 hos Exp $
+ * $Id: log.c,v 1.5 2005/01/15 15:09:32 hos Exp $
  *
  */
 
@@ -282,6 +282,8 @@ void __cdecl log_thread(void *arg)
 
             SendMessageW(log_edit, EM_SETSEL, log_size, log_size);
             SendMessageW(log_edit, EM_REPLACESEL, FALSE, (LPARAM)wbuf);
+            SendMessageW(log_edit, WM_VSCROLL, MAKEWPARAM(SB_BOTTOM, 0), 0);
+            SendMessageW(log_edit, WM_HSCROLL, MAKEWPARAM(SB_LEFT, 0), 0);
 
             free(wbuf);
 
