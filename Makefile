@@ -1,7 +1,7 @@
 #
 # Makefile
 #
-# $Id: Makefile,v 1.39 2005/02/10 17:34:17 hos Exp $
+# $Id: Makefile,v 1.40 2005/02/18 08:34:03 hos Exp $
 #
 
 DEFINES = -D_WIN32_WINNT=0x0500 -DUNICODE=1 -D_UNICODE=1
@@ -48,6 +48,7 @@ SBH_DLL_LDFLAGS = $(LDFLAGS) -shared -nostdlib -e _DllMain@12 \
 ALL_SRCS = $(EXE_SRCS) $(SBI_DLL_SRCS) $(SBH_DLL_SRCS)
 ALL_RSRC = $(EXE_RSRC) $(SBI_DLL_RSRC) $(SBH_DLL_RSRC)
 ALL_HEADERS = $(EXE_HEADERS) $(SBI_DLL_HEADERS) $(SBH_DLL_HEADERS)
+ALL_DEPS = $(ALL_SRCS:%.c=%.d) $(ALL_RSRC:%.rc=%.d)
 
 PACK_BIN_FILES = $(EXE_NAME) $(SBI_DLL_NAME) $(SBH_DLL_NAME)
 PACK_BIN_ADD_FILES = README.txt VERSION default.mprc
@@ -65,9 +66,11 @@ GTAR = tar
 INSTALL = install -p
 
 
-.SUFFIXES: .rc .res
+.SUFFIXES: .rc .res .d
 
 all: all-rec $(TARGET)
+
+-include $(ALL_DEPS)
 
 %-rec:
 	for d in $(SUBDIRS); do \
@@ -87,17 +90,17 @@ $(SBH_DLL_NAME): $(SBH_DLL_OBJS)
 
 lib$(SBH_DLL_NAME).a: $(SBH_DLL_NAME)
 
-$(EXE_OBJS) : $(EXE_HEADERS)
-
-$(SBI_DLL_OBJS) : $(SBI_DLL_HEADERS)
-
-$(SBH_DLL_OBJS) : $(SBH_DLL_HEADERS)
-
 .rc.res:
 	$(RC) /fo$@ $<
 
 .res.o:
 	$(WINDRES) -o $@ $<
+
+.c.d:
+	$(CC) $(CFLAGS) -MM -MF $@ $<
+
+.rc.d:
+	$(CC) $(CFLAGS) -MM -MF $@ -x c $<
 
 resource.o: icon.ico
 
@@ -137,4 +140,4 @@ pack-clean:
 	-$(RM) -r $(TARGET_NAME)-$(VERSION) $(TARGET_NAME)_src-$(VERSION)
 
 clean: clean-rec pack-clean
-	-$(RM) $(TARGET) *.a *.o *.res *.tmp *~
+	-$(RM) $(TARGET) *.a *.o *.d *.res *.tmp *~
