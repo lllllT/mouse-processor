@@ -1,7 +1,7 @@
 #
 # Makefile
 #
-# $Id: Makefile,v 1.37 2005/02/10 09:24:40 hos Exp $
+# $Id: Makefile,v 1.38 2005/02/10 17:19:23 hos Exp $
 #
 
 DEFINES = -D_WIN32_WINNT=0x0500 -DUNICODE=1 -D_UNICODE=1
@@ -43,7 +43,7 @@ SBH_DLL_OBJS = $(SBH_DLL_SRCS:%.c=%.o) $(SBH_DLL_RSRC:%.rc=%.o)
 SBH_DLL_HEADERS = scroll_op_scrollbar.h shmem.h
 SBH_DLL_LDLIBS = -lkernel32 -luser32
 SBH_DLL_LDFLAGS = $(LDFLAGS) -shared -nostdlib -e _DllMain@12 \
-                  --output-lib lib$(SBH_DLL_NAME).a
+                  -Wl,--out-implib,lib$(SBH_DLL_NAME).a
 
 ALL_SRCS = $(EXE_SRCS) $(SBI_DLL_SRCS) $(SBH_DLL_SRCS)
 ALL_RSRC = $(EXE_RSRC) $(SBI_DLL_RSRC) $(SBH_DLL_RSRC)
