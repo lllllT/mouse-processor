@@ -1,12 +1,12 @@
 /*
- * scroll_op.h  -- scroll operators
+ * operator.h  -- operator definition
  *
- * $Id: operator.h,v 1.2 2005/01/13 09:39:57 hos Exp $
+ * $Id: operator.h,v 1.3 2005/01/21 05:00:58 hos Exp $
  *
  */
 
-#ifndef __SCROLL_OP_H__
-#define __SCROLL_OP_H__ 1
+#ifndef __OPERATOR_H__
+#define __OPERATOR_H__ 1
 
 #define _WIN32_WINNT 0x0500
 #define UNICODE 1
@@ -17,29 +17,44 @@
 
 
 /* API version */
-#define SCROLL_OP_API_VERSION 0x0100
+#define MP_OP_API_VERSION 0x0100
 
 /* calling convention */
-#define SCROLL_OP_API __cdecl
+#define MP_OP_API __cdecl
 
-/* arguments for scroll operator */
-struct scroll_operator_arg {
-    s_exp_data_t *conf;         /* operator-wide configuration */
-    s_exp_data_t *arg;          /* inline argument */
+/* type of operator */
+enum {
+    MP_OP_TYPE_SCROLL
+};
+
+
+/* arguments for operator */
+struct operator_arg {
+    const s_exp_data_t *conf;   /* operator-wide configuration */
+    const s_exp_data_t *arg;    /* inline argument */
     HWND hwnd;                  /* handle to target window */
     POINT pos;                  /* cursor position */
 };
-typedef struct scroll_operator_arg scroll_op_arg_t;
+typedef struct operator_arg op_arg_t;
 
+/* operator procedure data header */
+struct operator_procs_header {
+    int api_ver;                /* target API version of operator */
+    int type;                   /* type of operator */
+};
+typedef struct operator_procs_header op_procs_hdr_t;
+
+
 /* scroll operator procedure types */
-typedef int (SCROLL_OP_API * get_context_size_proc_t)(const scroll_op_arg_t *);
-typedef int (SCROLL_OP_API * init_context_proc_t)(void *, int,
-                                                  const scroll_op_arg_t *);
-typedef int (SCROLL_OP_API * scroll_proc_t)(void *, double, double);
-typedef int (SCROLL_OP_API * end_scroll_proc_t)(void *);
+typedef int (MP_OP_API * get_context_size_proc_t)(const op_arg_t *);
+typedef int (MP_OP_API * init_context_proc_t)(void *, int, const op_arg_t *);
+typedef int (MP_OP_API * scroll_proc_t)(void *, double, double);
+typedef int (MP_OP_API * end_scroll_proc_t)(void *);
 
 /* scroll operator procedures */
 struct scroll_operator_procs {
+    op_procs_hdr_t hdr;
+
     get_context_size_proc_t get_context_size;
     init_context_proc_t init_context;
     scroll_proc_t scroll;
@@ -50,4 +65,4 @@ typedef struct scroll_operator_procs scroll_op_procs_t;
 typedef int (SCROLL_OP_API * get_operator_proc_t)(scroll_op_procs_t *, int);
 
 
-#endif /* __SCROLL_OP_H__ */
+#endif /* __OPERATOR_H__ */
