@@ -1,7 +1,7 @@
 /*
  * window.c  -- window utils
  *
- * $Id: window.c,v 1.1 2005/01/18 10:28:26 hos Exp $
+ * $Id: window.c,v 1.2 2005/01/18 12:47:16 hos Exp $
  *
  */
 
@@ -19,32 +19,43 @@ BOOL CALLBACK enum_nontr_window(HWND hwnd, LPARAM lparam)
 {
     struct enum_notr_data *data;
     LONG_PTR style;
+    HRGN rg;
     RECT rt;
     LRESULT ht;
 
     data = (struct enum_notr_data *)lparam;
 
+    /* visible? */
     style = GetWindowLongPtr(hwnd, GWL_STYLE);
     if((style & WS_VISIBLE) != WS_VISIBLE) {
         return TRUE;
     }
 
-    if(GetWindowRect(hwnd, &rt) == 0) {
+    /* inside window rect? */
+    if(GetWindowRect(hwnd, &rt) == 0 ||
+       PtInRect(&rt, data->spt) == 0) {
         return TRUE;
     }
 
-    if(data->spt.x < rt.left || rt.right <= data->spt.x ||
-       data->spt.y < rt.top || rt.bottom <= data->spt.y) {
+    /* inside window region? */
+    rg = CreateRectRgn(0, 0, 0, 0);
+    if(rg == NULL) {
         return TRUE;
     }
 
+    if(GetWindowRgn(hwnd, rg) != ERROR &&
+       PtInRegion(rg, data->spt.x - rt.left, data->spt.y - rt.top) == 0) {
+        DeleteObject(rg);
+        return TRUE;
+    }
+
+    DeleteObject(rg);
+
+    /* hittest is not transparent? */
     if(SendMessageTimeout(hwnd, WM_NCHITTEST,
                           0, MAKELPARAM(data->spt.x, data->spt.y),
-                          SMTO_ABORTIFHUNG, 500, &ht) == 0) {
-        return TRUE;
-    }
-
-    if(ht == HTTRANSPARENT) {
+                          SMTO_ABORTIFHUNG, 500, &ht) == 0 ||
+       ht == HTTRANSPARENT) {
         return TRUE;
     }
 
