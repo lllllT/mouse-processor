@@ -1,7 +1,7 @@
 /*
  * scroll_op_scrollbar.c  -- scroll operators for scrollbar
  *
- * $Id: scroll_op_scrollbar.c,v 1.7 2005/01/21 08:54:53 hos Exp $
+ * $Id: scroll_op_scrollbar.c,v 1.8 2005/01/24 04:39:12 hos Exp $
  *
  */
 
@@ -72,7 +72,7 @@ int scrollbar_r_scroll(HWND hwnd, int bar,
                        int mode)
 {
     SCROLLINFO si;
-    int dd, pos, min, max;
+    int dd, pos, org_pos, min, max;
     double rest;
 
     memset(&si, 0, sizeof(si));
@@ -84,6 +84,7 @@ int scrollbar_r_scroll(HWND hwnd, int bar,
 
     min = si.nMin;
     max = si.nMax - (si.nPage ? si.nPage - 1 : 0);
+    org_pos = si.nPos;
 
     if(mode == 0) {             /* drag */
         dd = get_drag_scroll_delta(length, min, max,
@@ -99,7 +100,7 @@ int scrollbar_r_scroll(HWND hwnd, int bar,
         return 1;
     }
 
-    pos = si.nPos + dd;
+    pos = org_pos + dd;
     if(pos < min) {
         pos = min;
     } else if(pos > max) {
@@ -116,12 +117,19 @@ int scrollbar_r_scroll(HWND hwnd, int bar,
                        (bar == SB_CTL ? (LPARAM)hwnd : 0),
                        SMTO_ABORTIFHUNG, 500, NULL);
 
-    if(mode == 0) {             /* drag */
-        *delta = rest;
-    } else if(mode == 1) {      /* percentage */
-        *delta -= dd * 100.0 / (max - min);
-    } else {                    /* bar-unit */
-        *delta -= dd;
+    memset(&si, 0, sizeof(si));
+    si.cbSize = sizeof(si);
+    si.fMask = SIF_POS;
+    GetScrollInfo(hwnd, bar, &si);
+
+    if(si.nPos != org_pos) {
+        if(mode == 0) {             /* drag */
+            *delta = rest;
+        } else if(mode == 1) {      /* percentage */
+            *delta -= dd * 100.0 / (max - min);
+        } else {                    /* bar-unit */
+            *delta -= dd;
+        }
     }
 
     return 1;
