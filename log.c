@@ -1,7 +1,7 @@
 /*
  * log.c  -- logging procs
  *
- * $Id: log.c,v 1.14 2005/01/21 08:54:49 hos Exp $
+ * $Id: log.c,v 1.15 2005/01/21 11:10:53 hos Exp $
  *
  */
 
@@ -461,7 +461,7 @@ int log_print_errid(int level, const wchar_t *msg, int id,
     } else {
         ret = log_printf(level, L"%ls", msg);
     }
-    log_printf(level, (is_hex ? L" (0x%08X%hs)" : L" (%d%hs)"),
+    log_printf(level, (is_hex ? L" (0x%08X)%hs" : L" (%d)%hs"),
                id, (add_nl ? "\n" : ""));
 
     return ret;
