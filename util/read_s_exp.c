@@ -1,7 +1,7 @@
 /*
  * read_s_exp.c  -- read s-expression
  *
- * $Id: read_s_exp.c,v 1.2 2005/01/06 08:49:04 hos Exp $
+ * $Id: read_s_exp.c,v 1.3 2005/01/06 09:20:59 hos Exp $
  *
  */
 
@@ -11,6 +11,7 @@
  *
  * <datum> = <boolean>
  *         | <number>
+ *         | <float>
  *         | <symbol>
  *         | <string>
  *         | <list>
@@ -37,7 +38,12 @@
  * <digit 8> = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7
  * <digit 10> = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
  * <digit 16> = <digit 10> | a | b | c | e | f
- * 
+ *
+ * <float> = <sign> <fraction>
+ *
+ * <fraction> = . <digit 10>+
+ *            | <digit 10>+ . <digit 10>*
+ *
  * <symbol> = <identifier>
  * 
  * <identifier> = <initial> <subsequent>*

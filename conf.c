@@ -1,7 +1,7 @@
 /*
  * conf.h  -- configuration
  *
- * $Id: conf.c,v 1.1 2005/01/06 08:49:02 hos Exp $
+ * $Id: conf.c,v 1.2 2005/01/06 09:20:40 hos Exp $
  *
  */
 
@@ -46,8 +46,9 @@ LPWSTR get_module_path(void)
 {
     DWORD size;
     LPWSTR path;
+    WCHAR buf[512];
 
-    size = GetModuleFileName(NULL, NULL, 0);
+    size = GetModuleFileName(NULL, buf, 512);
     if(size == 0) {
         return NULL;
     }
@@ -57,9 +58,8 @@ LPWSTR get_module_path(void)
     if(path == NULL) {
         return NULL;
     }
-    memset(path, 0, sizeof(WCHAR) * size);
 
-    GetModuleFileName(NULL, path, size);
+    wcscpy(path, buf);
     {
         LPWSTR p;
 
