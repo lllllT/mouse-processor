@@ -1,7 +1,7 @@
 /*
  * scroll.c  -- scroll window
  *
- * $Id: scroll.c,v 1.16 2005/01/14 14:54:37 hos Exp $
+ * $Id: scroll.c,v 1.17 2005/01/14 18:05:49 hos Exp $
  *
  */
 
@@ -17,7 +17,7 @@ void get_hierarchial_window_class_title(HWND hwnd,
 {
     HWND w;
     WCHAR buf[256];
-    WCHAR *cp = NULL, *tp = NULL, *p;
+    WCHAR *cp = NULL, *tp = NULL, *p, *t;
     int clen = 0, tlen = 0;
 
     w = hwnd;
@@ -45,6 +45,8 @@ void get_hierarchial_window_class_title(HWND hwnd,
         /* title */
         buf[0] = 0;
         GetWindowTextW(w, buf, 256);
+        t = wcschr(buf, L'\n');
+        if(t != NULL) t[0] = 0;
 
         tlen += wcslen(buf) + 2;
 
@@ -146,7 +148,7 @@ LRESULT start_scroll_mode(struct mode_conf *data)
     log_printf(LOG_LEVEL_DEBUG,
                L"\n"
                L"start scroll mode: %ls\n"
-               L"X ratio: %lf\nY ratio: %lf\n"
+               L"scroll ratio: %8.3lf, %8.3lf\n"
                L"window class: %ls\n"
                L"window title: %ls\n",
                ctx.app_conf.cur_conf->mode_name,
@@ -268,7 +270,7 @@ LRESULT shift_scroll_mode(struct mode_conf *data)
     log_printf(LOG_LEVEL_DEBUG,
                L"\n"
                L"shift scroll mode: %ls\n"
-               L"X ratio: %lf\nY ratio: %lf\n",
+               L"scroll ratio: %8.3lf, %8.3lf\n",
                ctx.app_conf.cur_conf->mode_name,
                ctx.mode_data.scroll.x_ratio, ctx.mode_data.scroll.y_ratio);
 
@@ -357,6 +359,11 @@ LRESULT scroll_modemsg_mulratio(struct mode_conf *data)
     ctx.mode_data.scroll.x_ratio *= data->ratio.x;
     ctx.mode_data.scroll.y_ratio *= data->ratio.y;
 
+    log_printf(LOG_LEVEL_DEBUG,
+               L"\n"
+               L"mul scroll ratio: %8.3lf, %8.3lf\n",
+               ctx.mode_data.scroll.x_ratio, ctx.mode_data.scroll.y_ratio);
+
     return 0;
 }
 
@@ -366,6 +373,11 @@ LRESULT scroll_modemsg_setratio(struct mode_conf *data)
 {
     ctx.mode_data.scroll.x_ratio = data->ratio.x;
     ctx.mode_data.scroll.y_ratio = data->ratio.y;
+
+    log_printf(LOG_LEVEL_DEBUG,
+               L"\n"
+               L"set scroll ratio: %8.3lf, %8.3lf\n",
+               ctx.mode_data.scroll.x_ratio, ctx.mode_data.scroll.y_ratio);
 
     return 0;
 }

@@ -1,12 +1,13 @@
 #
 # Makefile
 #
-# $Id: Makefile,v 1.14 2005/01/14 09:32:36 hos Exp $
+# $Id: Makefile,v 1.15 2005/01/14 18:05:48 hos Exp $
 #
 
 DEFINES = 
 INCLUDES = -I./util
-CFLAGS = -Wall -g -mwindows -mno-cygwin $(DEFINES) $(INCLUDES)
+OPT_CFLAGS = 
+CFLAGS = -Wall -g -mwindows -mno-cygwin $(DEFINES) $(INCLUDES) $(OPT_CFLAGS)
 LDFLAGS = -Wall -g -mwindows -mno-cygwin
 
 UTIL_LIBS = util/util.a

@@ -1,7 +1,7 @@
 /*
  * hook.c  -- hook funcs
  *
- * $Id: hook.c,v 1.18 2005/01/11 09:38:01 hos Exp $
+ * $Id: hook.c,v 1.19 2005/01/14 18:09:31 hos Exp $
  *
  */
 
@@ -379,6 +379,7 @@ LRESULT CALLBACK mouse_ll_proc(int code, WPARAM wparam, LPARAM lparam)
 
 struct hook_data {
     int ret;
+    DWORD last_error;
     HANDLE start_evt;
 };
 
@@ -402,6 +403,7 @@ void __cdecl hook_thread(void *arg)
     } else {
         data->ret = 1;
     }
+    data->last_error = GetLastError();
     SetEvent(data->start_evt);
 
     while(hook_thread_id > 0) {
@@ -457,6 +459,7 @@ int set_hook(void)
             return 0;
         }
 
+        SetLastError(data.last_error);
         return data.ret;
     }
 }

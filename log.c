@@ -1,7 +1,7 @@
 /*
  * log.c  -- logging procs
  *
- * $Id: log.c,v 1.2 2005/01/14 14:54:37 hos Exp $
+ * $Id: log.c,v 1.3 2005/01/14 18:05:48 hos Exp $
  *
  */
 
@@ -139,9 +139,19 @@ INT_PTR log_dlg_close(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
     return TRUE;
 }
 
+/* SC_MINIMIZE */
+static
+INT_PTR log_dlg_minimize(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+{
+    show_logger(FALSE);
+
+    return TRUE;
+}
+
 
 typedef INT_PTR (* dlg_proc_t)(HWND, UINT, WPARAM, LPARAM);
 
+/* WM_COMMAND */
 static
 INT_PTR log_dlg_command(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
@@ -164,6 +174,26 @@ INT_PTR log_dlg_command(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
     return proc(hwnd, msg, wparam, lparam);
 }
 
+/* WM_SYSCOMMAND */
+static
+INT_PTR log_dlg_syscommand(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+{
+    dlg_proc_t proc;
+
+    static struct uint_ptr_pair msg_map[] = {
+        {SC_MINIMIZE, log_dlg_minimize},
+
+        {0, NULL}
+    };
+
+    proc = (dlg_proc_t)assq_pair(msg_map, wparam, NULL);
+    if(proc == NULL) {
+        return FALSE;
+    }
+
+    return proc(hwnd, msg, wparam, lparam);
+}
+
 static
 INT_PTR CALLBACK log_dlg_proc(HWND hwnd, UINT msg,
                               WPARAM wparam, LPARAM lparam)
@@ -173,6 +203,7 @@ INT_PTR CALLBACK log_dlg_proc(HWND hwnd, UINT msg,
     static struct uint_ptr_pair msg_map[] = {
         {WM_INITDIALOG, log_dlg_init},
         {WM_COMMAND, log_dlg_command},
+        {WM_SYSCOMMAND, log_dlg_syscommand},
         {WM_SIZE, log_dlg_size},
         {WM_CLOSE, log_dlg_close},
 
@@ -202,7 +233,7 @@ void __cdecl log_thread(void *arg)
         buf_start = buf + buf_offset;
         rest_size = sizeof(buf) - buf_offset - 2;
 
-        memset(buf_start, 0, rest_size + 1);
+        memset(buf_start, 0, rest_size + 2);
 
         if(ReadFile(log_rpipe_hdl,
                     buf_start, rest_size, &read_size, NULL) == 0) {
@@ -216,6 +247,7 @@ void __cdecl log_thread(void *arg)
         buf_start[read_size] = 0;
 
         plen = 0;
+        rest = "";
         while(1) {
             strcpy(text, buf + plen);
 
