@@ -2,7 +2,7 @@
 /*
  * style of manual
  *
- * $Id: manual.css,v 1.3 2005/01/26 15:58:28 hos Exp $
+ * $Id: manual.css,v 1.4 2005/01/27 09:32:59 hos Exp $
  *
  */
 
@@ -22,6 +22,24 @@ dl.ref dt {
   background: rgb(225, 240, 240);
   color: rgb(0, 0, 0);
   font-weight: normal;
+}
+
+dl.subitem dt {
+  background: transparent;
+}
+
+dl.subitem dd {
+  margin: 0.2em 0.2em 0.3em 2.0em;
+}
+
+.refp {
+  margin: 0.2em 2.0em 0.2em 2.5em;
+  padding: 0.7em 0.7em 0.7em 0.7em;
+  border: dotted thick rgb(193, 205, 193);
+}
+
+.refp dl.ref {
+  margin: 0.2em 0.2em 0.2em 0.2em;
 }
 
 .subref {
@@ -49,7 +67,7 @@ dl.ref dt {
 }
 
 .ex {
-  margin: 0.5em 0.2em 0.5em 0.3em;
+  margin: 0.5em 0.2em 1.0em 0.3em;
   padding: 0.3em 0.3em 0.3em 0.5em;
   background: rgb(230, 255, 230);
   border: dotted thin rgb(193, 205, 193);

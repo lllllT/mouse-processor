@@ -10,7 +10,7 @@
 
 <h1>Customize mouse-processor setting file</h1>
 
-<h2>Introduction</h2>
+<h2><a name="introduction">Introduction</a></h2>
 
 <p>
 д│д╬е╔енехесеєе╚д╟д╧ mouse-processor д╬└▀─ъе╒ебедеыд╬╞т═╞ (╜ё╝░бве╤ещесб╝е┐┼∙) д╦д─ддд╞└т╠└д╖д▐д╣бг<br>
@@ -19,7 +19,7 @@
 </p>
 
 
-<h2>Setting file</h2>
+<h2><a name="setting-file">Setting file</a></h2>
 
 <p>
 └▀─ъе╒ебедеыд╧е│е▐еєе╔ещедеє░·┐Їбвд▐д┐д╧╜ъ─ъд╬╛ь╜ъдлдщ╕б║ўд╡дьд▐д╣бг
@@ -36,9 +36,9 @@
 </ul>
 
 
-<h2>File format</h2>
+<h2><a name="file-format">File format</a></h2>
 
-<h3>Character Encoding</h3>
+<h3><a name="encoding">Character Encoding</a></h3>
 
 <p>
 └▀─ъе╒ебедеыд╬╩╕╗·еиеєе│б╝е╔д╧ UTF-8 д╟д╣бг
@@ -46,7 +46,7 @@ ASCII ╩╕╗·░╩│░бв╬удид╨╞№╦▄╕ь┼∙дЄ┤▐дсды╛ь╣чд╦д╧╔мд║ UTF-8 д╟е╒ебедеыдЄ╩▌┬╕д╖д╞▓╝д
 </p>
 
 
-<h3>Syntax</h3>
+<h3><a name="syntax">Syntax</a></h3>
 
 <p>
 └▀─ъд╧S╝░д╟╔╜╡нд╡дьбв╝чд╦╧в┴█еъе╣е╚д╟╣╜└од╡дьд▐д╣бг
@@ -80,14 +80,15 @@ S╝░д╬╛▄║┘д╦д─ддд╞д╧ <a href="#appendix:s-exp">Appendix: S-Expression</a> д╟└т╠└д
 </p>
 
 
-<h3>Setting</h3>
+<h3><a name="setting">Setting</a></h3>
 
 <dl class="ref">
-<dt><code>global</code> └▀─ъ</dt>
+<dt><a name="global"><code>global</code> └▀─ъ</a></dt>
 <dd>
 <code>global</code> └▀─ъ╣р╠▄д╟д╧┴┤┬╬д╬╞░║юд╦▒╞╢┴д╣ды└▀─ъдЄ╡н╜╥д╖д▐д╣бг
+<div class="subref">
   <dl>
-  <dt><code>(combination-time . <span class="var">threshold-time</span>)</code></dt>
+  <dt><a name="global:combination-time"><code>(combination-time . <span class="var">threshold-time</span>)</code></a></dt>
   <dd>
   2е▄е┐еє╞▒╗■▓бд╖дЄ╟з╝▒д╣ды║╟┬чд╬╗■┤╓┤╓│╓дЄе▀еъ╔├├▒░╠д╟╗╪─ъд╖д▐д╣бг<br>
   1д─дсд╬е▄е┐еєдЄ▓бд╖д╞длдщбв<code><span class="var">threshold-time</span></code> е▀еъ╔├░╩╞тд╦2д─дсд╬е▄е┐еєдЄ▓бд╣д╚бв2е▄е┐еє╞▒╗■▓бд╖дЄд╡дьд┐дтд╬д╚╟з╝▒д╖д▐д╣бг<br>
@@ -105,7 +106,31 @@ S╝░д╬╛▄║┘д╦д─ддд╞д╧ <a href="#appendix:s-exp">Appendix: S-Expression</a> д╟└т╠└д
   </div>
   </dd>
 
-  <dt><code>(tray-icon <span class="var">icon-file</span> [<span class="var">index</span>])</code></dt>
+  <dt><a name="global:priority"><code>(priority . <span class="var">process-priority</span>)</code></a></dt>
+  <dd>
+  mp.exe е╫еэе╗е╣д╬═е└ш┼┘дЄ╗╪─ъд╖д▐д╣бг<br>
+  ┬╛д╬е╫еэе╗е╣д╬╔щ▓┘дм╣тддд╚днд╦е▐еже╣елб╝е╜еыд╬╞░дндм├╟┬│┼кд╦д╩ды┼∙д╬╕╜╛▌дм╚п└╕д╣ды╛ь╣чбве╫еэе╗е╣д╬═е└ш┼┘дЄ╣тдпд╣дыд│д╚д╟▓■┴▒д╡дьдыд│д╚дмдвдъд▐д╣бг<br>
+  ─╠╛яд╧бв╠ф┬ъдм╠╡дд╕┬дъ═е└ш┼┘дЄ╩╤╣╣д╣ды╔м═╫д╧двдъд▐д╗дєбг<br>
+  <code><span class="var">process-priority</span></code> д╧╝бд╬ддд║дьдлдлдщ╗╪─ъд╖д▐д╣бг
+    <dl class="subitem">
+    <dt><code>high</code></dt>         <dd>╣т</dd>
+    <dt><code>above-normal</code></dt> <dd>─╠╛я░╩╛х</dd>
+    <dt><code>normal</code></dt>       <dd>─╠╛я</dd>
+    <dt><code>below-normal</code></dt> <dd>─╠╛я░╩▓╝</dd>
+    <dt><code>idle</code></dt>         <dd>─у</dd>
+    </dl>
+  <div class="ex">
+  ╬у: ═е└ш┼┘дЄ─╠╛я░╩╛хд╦└▀─ъ
+<pre>
+(global
+ (priority . above-normal)
+ <span class="omit">...</span>
+ )
+</pre>
+  </div>
+  </dd>
+
+  <dt><a name="global:tray-icon"><code>(tray-icon <span class="var">icon-file</span> [<span class="var">index</span>])</code></a></dt>
   <dd>
   е┐е╣епе╚еьедд╦╔╜╝ид╣дыеведе│еєдЄ╗╪─ъд╖д▐д╣бг<br>
   ╩╕╗·╬є <code><span class="var">icon-file</span></code> д╟╗╪─ъд╡дьд┐е╒ебедеыд╬ <code><span class="var">index</span></code> ╚╓╠▄д╬еведе│еєдЄ═°═╤д╖д▐д╣бг
@@ -125,16 +150,18 @@ S╝░д╬╛▄║┘д╦д─ддд╞д╧ <a href="#appendix:s-exp">Appendix: S-Expression</a> д╟└т╠└д
   </dd>
 
   </dl>
+</div>
 </dd>
 
-<dt><code>normal-mode</code>бв<code>scroll-mode</code> └▀─ъ</dt>
+<dt><a name="mode"><code>normal-mode</code>бв<code>scroll-mode</code> └▀─ъ</a></dt>
 <dd>
 <code>normal-mode</code> дкдшд╙ <code>scroll-mode</code> └▀─ъ╣р╠▄д╟д╧бв
 д╜дьд╛дь─╠╛яетб╝е╔д╚е╣епеэб╝еыетб╝е╔д╬╞░║юдЄ╡н╜╥д╖д▐д╣бг<br>
 ─╠╛яетб╝е╔д╧е▐еже╣░▄╞░дм▓─╟╜д╩етб╝е╔д╟бв╔с├╩═°═╤д╣дыд╚днд╬е▄е┐еє│фдъ┼Ўд╞д╩д╔дЄ└▀─ъд╖д▐д╣бг
 е╣епеэб╝еыетб╝е╔д╧ежегеєе╔еже╣епеэб╝еы╗■д╬етб╝е╔д╟д╣бг<br>
 │╞етб╝е╔д╧╩г┐Їд╬╞░║ю└▀─ъдЄдтд─д│д╚дмд╟днбвд╜дьд╛дьд╦╠╛┴░ (етб╝е╔╠╛) дЄд─д▒дщдьд▐д╣бг
-│╞╞░║ю└▀─ъд╧бв└ш╞мдметб╝е╔╠╛д╟двдыеъе╣е╚д╚д╖д╞╡н╜╥д╖д▐д╣бг
+│╞╞░║ю└▀─ъд╧бв└ш╞мдметб╝е╔╠╛д╟двдыеъе╣е╚д╚д╖д╞╡н╜╥д╖д▐д╣бг<br>
+е╫еэе░ещер╡п╞░╗■дф└▀─ъ║╞╞╔д▀╣■д▀╗■д╦д╧бв╞░║юетб╝е╔д╧║╟╜щд╦╜ёдлдьд╞ддды─╠╛яетб╝е╔д╦д╩дъд▐д╣бг
 <div class="ex">
 ╬у: <code>abc</code>бв<code>def</code> д╚дддж╠╛┴░д╬2д─д╬─╠╛яетб╝е╔д╚бв<code>uvw</code>бв<code>xyz</code> д╚дддж╠╛┴░д╬2д─д╬е╣епеэб╝еыетб╝е╔дЄ└▀─ъ
 <pre>
@@ -160,8 +187,8 @@ S╝░д╬╛▄║┘д╦д─ддд╞д╧ <a href="#appendix:s-exp">Appendix: S-Expression</a> д╟└т╠└д
 </pre>
 </div>
 
-<div class="subref">
 │╞етб╝е╔└▀─ъд╦д╧░╩▓╝д╬еде┘еєе╚╚п└╕╗■д╬╞░║юдЄ╡н╜╥д╟днд▐д╣бг
+<div class="subref">
   <dl>
   <dt><a name="evt:button-d"><code>(button-d-<span class="var">X</span> (<span class="var">action</span> [<span class="var">args</span>]))</code></a></dt>
   <dt><a name="evt:button-u"><code>(button-u-<span class="var">X</span> (<span class="var">action</span> [<span class="var">args</span>]))</code></a></dt>
@@ -216,12 +243,12 @@ S╝░д╬╛▄║┘д╦д─ддд╞д╧ <a href="#appendix:s-exp">Appendix: S-Expression</a> д╟└т╠└д
   </dl>
 </div>
 
-<div class="subref">
 е╣епеэб╝еыетб╝е╔д╬└▀─ъд╦д╧░╩▓╝д╬└▀─ъдЄ╡н╜╥д╟днд▐д╣бг
+<div class="subref">
   <dl>
   <dt><a name="mode-spec:scroll-ratio"><code>(scroll-ratio <span class="var">x-ratio</span> <span class="var">y-ratio</span>)</code></a></dt>
   <dd>
-  е╣епеэб╝еы┬о┼┘дЄ╗╪─ъд╖д▐д╣бг<code>scroll-mode</code> ╞тд╟д╬д▀═н╕·д╟д╣бг<br>
+  е╣епеэб╝еы┬о┼┘дЄ╗╪─ъд╖д▐д╣бге╣епеэб╝еыетб╝е╔д╟д╬д▀═н╕·д╟д╣бг<br>
   <code><span class="var">x-ratio</span></code> дкдшд╙ <code><span class="var">y-ratio</span></code> д╧бвд╜дьд╛дь X ╩¤╕■ (▓г)бвY ╩¤╕■ (╜─) д╬е╣епеэб╝еы┬о┼┘д╟бв▓┐╟▄д╬┬о┼┘д╟е╣епеэб╝еыд╣дыдлдЄ╗╪─ъд╖д▐д╣бг
   ╔щд╬┐ЇдЄ╗╪─ъд╣дыд╚е╣епеэб╝еыд╬╕■дндм╡╒д╦д╩дъд▐д╣бг
   <div class="ex">
@@ -239,8 +266,8 @@ S╝░д╬╛▄║┘д╦д─ддд╞д╧ <a href="#appendix:s-exp">Appendix: S-Expression</a> д╟└т╠└д
   </dl>
 </div>
 
-<div class="subref">
 │╞╞░║ю└▀─ъд╟ <code><span class="var">action</span></code> д╚д╖д╞╗╪─ъд╟днды└▀─ъд╦д╧░╩▓╝д╬дтд╬дмдвдъд▐д╣бг
+<div class="subref">
   <dl>
   <dt><a name="act:button-d"><code>(butto-d <span class="var">N</span>)</code></a></dt>
   <dt><a name="act:button-u"><code>(butto-u <span class="var">N</span>)</code></a></dt>
@@ -310,18 +337,18 @@ S╝░д╬╛▄║┘д╦д─ддд╞д╧ <a href="#appendix:s-exp">Appendix: S-Expression</a> д╟└т╠└д
     <li><a href="#evt:button-u-cmb"><code>button-u-<span class="var">X+Y</span></code></a></li>
     </ul>
   <div class="ex">
-  ╬у: ─╠╛яетб╝е╔ <code>mode-N</code> ╗■д╦е▄е┐еє1д╚2дЄ╞▒╗■▓бд╖д╖д╞ддды┤╓д└д▒е╣епеэб╝еыетб╝е╔ <code>mode-S</code> д╦└┌дъ┬╪дибве▄е┐еєдЄ╬ед╣д╚─╠╛яетб╝е╔д╦╠сды
+  ╬у: ─╠╛яетб╝е╔ <code>mode-N</code> ╗■д╦е▄е┐еє3дЄ▓бд╖д╖д╞ддды┤╓д└д▒е╣епеэб╝еыетб╝е╔ <code>mode-S</code> д╦└┌дъ┬╪дибве▄е┐еє3дЄ╬ед╣д╚─╠╛яетб╝е╔д╦╠сды
 <pre>
 (normal-mode
  (mode-N
-  (button-d-1+2 (scroll-mode mode-S))
+  (button-d-3 (scroll-mode mode-S))
   <span class="omit">...</span>
   )
  )
 
 (scroll-mode
  (mode-S
-  (button-u-1+2 (normal-mode mode-N))
+  (button-u-3 (normal-mode mode-N))
   <span class="omit">...</span>
   )
  )
@@ -331,7 +358,7 @@ S╝░д╬╛▄║┘д╦д─ддд╞д╧ <a href="#appendix:s-exp">Appendix: S-Expression</a> д╟└т╠└д
 
   <dt><a name="act:set-scroll-ratio"><code>(set-scroll-ratio <span class="var">x-ratio</span> <span class="var">y-ratio</span>)</code></a></dt>
   <dd>
-  е╣епеэб╝еы┬о┼┘дЄ└▀─ъд╖д╩дкд╖д▐д╣бг<code>scroll-mode</code> ╞тд╟д╬д▀═н╕·д╟д╣бг<br>
+  е╣епеэб╝еы┬о┼┘дЄ└▀─ъд╖д╩дкд╖д▐д╣бге╣епеэб╝еыетб╝е╔д╟д╬д▀═н╕·д╟д╣бг<br>
   <code><span class="var">x-ratio</span></code> д╚ <code><span class="var">y-ratio</span></code> д╬░╒╠гд╧ <a href="#mode-spec:scroll-ratio"><code>scroll-ratio</code></a> д╚╞▒д╕д╟д╣бг<br>
   д│д╬╞░║юдЄ╗╪─ъд╟дндыд╬д╧░╩▓╝д╬еде┘еєе╚└▀─ъд╟д╣бг
     <ul>
@@ -344,7 +371,7 @@ S╝░д╬╛▄║┘д╦д─ддд╞д╧ <a href="#appendix:s-exp">Appendix: S-Expression</a> д╟└т╠└д
 
   <dt><a name="act:mul-scroll-ratio"><code>(mul-scroll-ratio <span class="var">x-ratio</span> <span class="var">y-ratio</span>)</code></a></dt>
   <dd>
-  е╣епеэб╝еы┬о┼┘дЄ╩╤╣╣д╖д▐д╣бг<code>scroll-mode</code> ╞тд╟д╬д▀═н╕·д╟д╣бг<br>
+  е╣епеэб╝еы┬о┼┘дЄ╩╤╣╣д╖д▐д╣бге╣епеэб╝еыетб╝е╔д╟д╬д▀═н╕·д╟д╣бг<br>
   <a href="#mode-spec:scroll-ratio"><code>scroll-ratio</code></a>бв<a href="#act:set-scroll-ratio"><code>set-scroll-ratio</code></a> д╟└▀─ъд╖д┐ X ╩¤╕■д╬е╣епеэб╝еы┬о┼┘д╦ <code><span class="var">x-ratio</span></code> дЄ╛шд╕бвY ╩¤╕■д╬е╣епеэб╝еы┬о┼┘д╦ <code><span class="var">y-ratio</span></code> дЄ╛шд╕д▐д╣бг<br>
   д│д╬╞░║юдЄ╗╪─ъд╟дндыд╬д╧░╩▓╝д╬еде┘еєе╚└▀─ъд╟д╣бг
     <ul>
@@ -397,14 +424,172 @@ S╝░д╬╛▄║┘д╦д─ддд╞д╧ <a href="#appendix:s-exp">Appendix: S-Expression</a> д╟└т╠└д
 
 </dd>
 
-<dt><code>scroll-window</code> └▀─ъ</dt>
+<dt><a name="scroll-window"><code>scroll-window</code> └▀─ъ</a></dt>
+<dd>
+<code>scroll-window</code> └▀─ъ╣р╠▄д╟д╧ежегеєе╔ежд┤д╚д╬е╣епеэб╝еы╩¤╦бдЄ╡н╜╥д╖д▐д╣бг<br>
+ежегеєе╔ежд╬╝я╬рд┤д╚д╦░ьд─д╬еъе╣е╚д╟╔╜╡нд╖бвеъе╣е╚д╬░ьд─дсд╬═╫┴╟дмд╔д╬ежегеєе╔ежд╦░ь├╫д╣дыдлдЄ╝ид╖бв╞єд─дсд╬═╫┴╟дме╣епеэб╝еы╩¤╦бдЄ╝ид╖д▐д╣бг<br>
+<br>
+ежегеєе╔ежд╧ежегеєе╔ежепеще╣д╚е┐еде╚еыд╟╢ш╩╠д╖д▐д╣бг<br>
+епеще╣д╚е┐еде╚еыд╧бвежегеєе╔ежд╬┐╞╗╥┤╪╖╕дЄдвдщдяд╣д┐дсд╦ "<code>:</code>" (е│еэеє) д╟┐╞ежегеєе╔ежд╬епеще╣бже┐еде╚еыд╚╧в╖ыд╖д╞╔╜╕╜д╖д▐д╣бг
+║╟дт▒ж┬ждм┬╨╛▌д╚д╩ды╗╥ежегеєе╔ежд╟бв░ьд─║╕┬ждм┐╞ежегеєе╔ежбвд╜д╬║╕дм┐╞д╬┐╞бвд╚дддждшджд╦╧в╖ыд╖д▐д╣бг
+д┐д└д╖бв░ь╚╓║╟╜щд╬ежегеєе╔ежд╬║╕┬жд╧д╜д╬е╫еэе░ещерд╬е╤е╣д╚д╩дъд▐д╣бг<br>
+ежегеєе╔ежд╬епеще╣д╚е┐еде╚еыд╧бвеэе░ежегеєе╔ежд╬ "╛▄║┘дЄ╔╜╝и" д╦е┴езе├епдЄ╞■дьбв
+─╠╛яетб╝е╔длдще╣епеэб╝еыетб╝е╔д╦░▄╣╘д╣дыд╚днд╦╔╜╝ид╡дьдыеэе░длдщ├╬дыд│д╚дмд╟днд▐д╣бг
+"window class" д╬▒жд╦╔╜╝ид╡дьдыд╬дмежегеєе╔ежепеще╣бв"window title" д╬▒жд╦╔╜╝ид╡дьдыд╬дмежегеєе╔еже┐еде╚еыд╟д╣бг
+<div class="ex">
+╬у: есет─вд╬еие╟еге├е╚е│еєе╚еэб╝еыд╬епеще╣
+<pre>
+C:\WINNT\system32\notepad.exe:Notepad:Edit
+</pre>
+</div>
+
+<code>scroll-window</code> └▀─ъ╣р╠▄д╟д╧бвежегеєе╔ежд╬епеще╣бже┐еде╚еыд╬╗╪─ъд╦└╡╡м╔╜╕╜дЄ╗╚дид▐д╣бг
+└╡╡м╔╜╕╜д╬╛▄║┘д╦д─ддд╞д╧ <a href="#appendix:regexp">Appendix: Regular Expression</a> дЄ╗▓╛╚д╖д╞▓╝д╡ддбг
+└╡╡м╔╜╕╜д╧╩╕╗·╬єд╚д╖д╞╡н╜╥д╖д▐д╣бг
+<div class="ex">
+╬у: ┴┤д╞д╬еие╟еге├е╚е│еєе╚еэб╝еыд╬епеще╣д╦░ь├╫д╣ды└╡╡м╔╜╕╜
+<pre>
+":Edit$"
+</pre>
+</div>
+
+д│д╬д╚днбв╩╕╗·╬єд╚└╡╡м╔╜╕╜д╬╬╛╩¤д╟ "<code>\</code>" дмеие╣е▒б╝е╫╩╕╗·д╚д╖д╞═°═╤д╡дьд╞дддыд│д╚д╦├э░╒д╖д╞▓╝д╡ддбг
+"<code>\</code>" ╝л┐╚дЄ╔╜╕╜д╣дыд╦д╧ "<code>\\\\</code>" д╚╡н╜╥д╣ды╔м═╫дмдвдъд▐д╣бг
+<div class="ex">
+╬у: есет─вд╬еие╟еге├е╚е│еєе╚еэб╝еыд╬епеще╣д╦┤░┴┤д╦░ь├╫д╣ды└╡╡м╔╜╕╜
+<pre>
+"^C:\\\\WINNT\\\\system32\\\\notepad\\.exe:Notepad:Edit$"
+</pre>
+</div>
+
+<code>scroll-window</code> └▀─ъ╣р╠▄д╬ежегеєе╔еждЄ╗╪─ъд╣ды░╠├╓д╦╩╕╗·╬єд╬д▀дЄ╡н╜╥д╣дыд╚бвд╜дьд╧ежегеєе╔ежепеще╣дЄ╝ид╣└╡╡м╔╜╕╜д╟двдыд╚д▀д╩д╡дьд▐д╣бг<br>
+ежегеєе╔еже┐еде╚еыдЄ╗╪─ъд╣дыд╦д╧бв<code>(title <span class="var">"title-regexp"</span>)</code> д╚╡н╜╥д╖д▐д╣бг
+╞▒══д╦бвежегеєе╔ежепеще╣дЄ╗╪─ъд╣дыд╬д╦ <code>(class <span class="var">"class-regexp"</span>)</code> д╚╡н╜╥д╣дыд│д╚дтд╟днд▐д╣бг<br>
+ежегеєе╔ежепеще╣д╚е┐еде╚еыд╬╬╛╩¤дЄ╗╪─ъд╣дыд╦д╧бв<code>(and <span class="omit">...</span>)</code> д▐д┐д╧ <code>(or <span class="omit">...</span>)</code> дЄ╗╚ддд▐д╣бг
+<code>and</code> д╧╬╛╩¤д╦░ь├╫д╣дыежегеєе╔еждЄбв<code>or</code> д╧д╔д┴дщдлд╦░ь├╫д╣дыежегеєе╔еждЄ╝ид╖д▐д╣бг
+<div class="ex">
+╬у: есет─вд╟ "<span class="fname">default.mprc</span>" д╚дддже╒ебедеыдЄ╩╘╜╕д╖д╞дддыд╚днд╬еие╟еге├е╚е│еєе╚еэб╝еыд╦д╬д▀░ь├╫
+<pre>
+(and (class "notepad\\.exe:.*:Edit$")
+     (title ":default.mprc - есет─в:"))
+</pre>
+</div>
+
+ежегеєе╔ежд╬е╣епеэб╝еы╩¤╦бд╦д╧ <a href="#scroll-op">Scroll operator</a> дЄ╗╪─ъд╖д▐д╣бг
+</dd>
+
+<dt><a name="operator-config"><code>operator-config</code> └▀─ъ</a></dt>
+<dd>
+<code>operator-config</code> └▀─ъ╣р╠▄д╟д╧бв<a href="#scroll-op">Scroll operator</a> д╬╞░║ю└▀─ъдЄ╡н╜╥д╖д▐д╣бг
+</dd>
+</dl>
+
+
+<h2><a name="scroll-op">Scroll operator</a></h2>
+
+<p>
+Scroll operator д╧бве╣епеэб╝еыетб╝е╔╗■д╦е▐еже╣д╬╞░днд╦▒■д╕д╞ежегеєе╔еждЄе╣епеэб╝еыд╡д╗д▐д╣бг<br>
+д╔д╬ежегеєе╔ежд╟д╔д╬ Scroll operator дЄ═╤дддыдлд╧ <a href="#scroll-window"><code>scroll-window</code></a> └▀─ъд╟╗╪─ъд╖д▐д╣бг
+е╣епеэб╝еы┬о┼┘дф╩¤╕■д╩д╔д╬│╞ Scroll operator д┤д╚д╬└▀─ъд╧бв<a href="#operator-config"><code>operator-config</code></a> └▀─ъд╟╡н╜╥д╖д▐д╣бг
+д▐д┐бв<a href="#scroll-window"><code>scroll-window</code></a> └▀─ъд╟ Scroll operator дЄ╗╪─ъд╣дыд╚днд╬░·┐Їд╚д╖д╞╡н╜╥д╣дыд│д╚дтд╟днд▐д╣бг
+</p>
+
+<p>
+Scroll operator д╦д╧░╩▓╝д╬дтд╬дЄ╗╪─ъд╟днд▐д╣бг
+<div class="refp">
+<dl class="ref">
+<dt><a name="op:window-scrollbar"><code>(window-scrollbar <span class="var">[mode x-ratio y-ratio]</span>)</code></a></dt>
+<dd>
+Windows ╔╕╜рд╬е╣епеэб╝еые╨б╝дЄ╗¤д─ежегеєе╔еждЄе╣епеэб╝еыд╡д╗д▐д╣бг<br>
+<code><span class="var">mode</span></code> д╦д╧е▐еже╣дЄ╞░длд╣┬о┼┘д╚е╣епеэб╝еыд╬┬о┼┘дЄд╔д╬дшджд╦┬╨▒■д┼д▒дыдлдЄ╗╪─ъд╖д▐д╣бг
+╛╩╬мд╖д┐╛ь╣чд╧бв<code>operator-config</code> └▀─ъд╬ <code>default-mode</code> д╬└▀─ъдЄ╗╚═╤д╖д▐д╣бг<br>
+<code><span class="var">x-ratio</span></code> д╚ <code><span class="var">y-ratio</span></code> д╦д╧е╣епеэб╝еы┬о┼┘д╬╚ц╬идЄ╗╪─ъд╖д▐д╣бг
+╛╩╬мд╖д┐╛ь╣чд╧бв<code>operator-config</code> └▀─ъд╬ <code><span class="var">mode</span></code> д╦┬╨▒■д╣ды╣р╠▄д╦└▀─ъд╖д╞двды├═дЄ╗╚═╤д╖д▐д╣бг
+║╟╜к┼кд╩е╣епеэб╝еы┬о┼┘д╧бв<a href="#mode-spec:scroll-ratio"><code>scroll-ratio</code></a> д╬└▀─ъ├═д╚ <code><span class="var">x-ratio</span></code>бв<code><span class="var">y-ratio</span></code> д╜дьд╛дьд╬┬╨▒■д╣ды├═дЄ╛шд╕д┐╖ы▓╠д╦╚ц╬уд╖д▐д╣бг<br>
+<code><span class="var">mode</span></code> д╦д╧░╩▓╝д╬етб╝е╔дЄ╗╪─ъд╟днд▐д╣бг
+  <dl class="subitem">
+  <dt><code>drag</code></dt>
+  <dd>
+  е╣епеэб╝еые╨б╝д╬е╡ердЄе╔еще├е░д╖д┐д╚днд╚д█д▄╞▒д╕┬о┼┘д╟е╣епеэб╝еыд╖д▐д╣бг<br>
+  <a href="#mode-spec:scroll-ratio"><code>scroll-ratio</code></a>бв<code><span class="var">x-ratio</span></code>бв<code><span class="var">y-ratio</span></code> д╟└▀─ъд╖д┐├═дм┴┤д╞ <code>1</code> д└д├д┐╛ь╣чд╦бве▐еже╣елб╝е╜еыдм1е╘епе╗еы░▄╞░д╣дыд╓дєе▐еже╣дЄ╞░длд╣д╚бве╡ердЄ1е╘епе╗еы╩ме╔еще├е░д╣дыд╬д╚╞▒д╕д└д▒е╣епеэб╝еыд╖д▐д╣бг
+  </dd>
+
+  <dt><code>percentage</code></dt>
+  <dd>
+  е╣епеэб╝еые╨б╝д╬─╣д╡д╦┤╪дядщд║░ь─ъд╬│ф╣чд╟е╣епеэб╝еыд╖д▐д╣бг<br>
+  <a href="#mode-spec:scroll-ratio"><code>scroll-ratio</code></a>бв<code><span class="var">x-ratio</span></code>бв<code><span class="var">y-ratio</span></code> д╟└▀─ъд╖д┐├═дм┴┤д╞ <code>1</code> д└д├д┐╛ь╣чд╦бве▐еже╣елб╝е╜еыдм1е╘епе╗еы░▄╞░д╣дыд╓дєе▐еже╣дЄ╞░длд╣д╚бве╣епеэб╝еые╨б╝▓─╞░╚╧░╧д╬1%╩мдме╣епеэб╝еыд╖д▐д╣бг
+  </dd>
+
+  <dt><code>bar-unit</code></dt>
+  <dd>
+  е╣епеэб╝еые╨б╝д╦└▀─ъд╡дьд╞ддды║╟╛од╬├▒░╠д╦╚ц╬уд╖д┐┬о┼┘д╟е╣епеэб╝еыд╖д▐д╣бг<br>
+  <a href="#mode-spec:scroll-ratio"><code>scroll-ratio</code></a>бв<code><span class="var">x-ratio</span></code>бв<code><span class="var">y-ratio</span></code> д╟└▀─ъд╖д┐├═дм┴┤д╞ <code>1</code> д└д├д┐╛ь╣чд╦бве▐еже╣елб╝е╜еыдм1е╘епе╗еы░▄╞░д╣дыд╓дєе▐еже╣дЄ╞░длд╣д╚бве╣епеэб╝еые╨б╝д╬░╠├╓дЄ1├▒░╠е╣епеэб╝еыд╖д▐д╣бг
+  </dd>
+
+  <dt><code>line-scroll</code></dt>
+  <dd>
+  е╣епеэб╝еые╨б╝д╬╬╛├╝д╬е▄е┐еєдЄ▓бд╖д┐д╚днд╚╞▒д╕д└д▒е╣епеэб╝еыд╖д▐д╣бг<br>
+  <a href="#mode-spec:scroll-ratio"><code>scroll-ratio</code></a>бв<code><span class="var">x-ratio</span></code>бв<code><span class="var">y-ratio</span></code> д╟└▀─ъд╖д┐├═дм┴┤д╞ <code>1</code> д└д├д┐╛ь╣чд╦бве▐еже╣елб╝е╜еыдм1е╘епе╗еы░▄╞░д╣дыд╓дєе▐еже╣дЄ╞░длд╣д╚бве╣епеэб╝еые╨б╝╬╛├╝д╬е▄е┐еєдЄ1▓є▓бд╖д┐д╬д╚╞▒д╕д└д▒е╣епеэб╝еыд╖д▐д╣бг
+  </dd>
+
+  <dt><code>page-scroll</code></dt>
+  <dd>
+  е╣епеэб╝еые╨б╝д╬╬╛├╝д╬е▄е┐еєд╚е╡ерд╬┤╓дЄ▓бд╖д┐д╚днд╚╞▒д╕д└д▒е╣епеэб╝еыд╖д▐д╣бг<br>
+  <a href="#mode-spec:scroll-ratio"><code>scroll-ratio</code></a>бв<code><span class="var">x-ratio</span></code>бв<code><span class="var">y-ratio</span></code> д╟└▀─ъд╖д┐├═дм┴┤д╞ <code>1</code> д└д├д┐╛ь╣чд╦бве▐еже╣елб╝е╜еыдм1е╘епе╗еы░▄╞░д╣дыд╓дєе▐еже╣дЄ╞░длд╣д╚бве╣епеэб╝еые╨б╝╬╛├╝д╬е▄е┐еєд╚е╡ерд╬┤╓дЄ1▓є▓бд╖д┐д╬д╚╞▒д╕д└д▒е╣епеэб╝еыд╖д▐д╣бг
+  </dd>
+  </dl>
+
+<div class="ex">
+╬у: есет─вд╬еие╟еге├е╚е│еєе╚еэб╝еыд╧ <code>line-scroll</code> етб╝е╔д╟е╣епеэб╝еыбвд╜д╬┬╛д╬еие╟еге├е╚е│еєе╚еэб╝еыд╧ <code>drag</code> етб╝е╔бж─╠╛яд╬ 1/10 д╬┬о┼┘д╟е╣епеэб╝еыбвеяб╝е╔е╤е├е╔д╬еъе├е┴еие╟еге├е╚е│еєе╚еэб╝еыд╧ <code>page-scroll</code> етб╝е╔д╟е╣епеэб╝еы
+<pre>
+(scroll-window
+ ("notepad\\.exe:.*:Edit$" (window-scroll))
+ (":Edit$" (window-scroll drag 0.1 0.1))
+ ("wordpad\\.exe:.*:RichEdit" (window-scroll page-scroll))
+ <span class="omit">...</span>
+ )
+
+(operator-config
+ (window-scrollbar
+  (default-mode . line-scroll)
+  (line-scroll 1 1)
+  (drag 1 1)
+  (page-scroll 0.1 0.1)
+  <span class="omit">...</span>
+  )
+ <span class="omit">...</span>
+ )
+</pre>
+</div>
+</dd>
+
+<dt><a name="op:neighborhood-scrollbar"><code>neighborhood-scrollbar</code></a></dt>
 <dd>
 </dd>
 
-<dt><code>operator-config</code> └▀─ъ</dt>
+<dt><a name="op:scrollbar-control"><code>scrollbar-control</code></a></dt>
 <dd>
 </dd>
+
+<dt><a name="op:trackbar-control"><code>trackbar-control</code></a></dt>
+<dd>
+</dd>
+
+<dt><a name="op:ie-scroll"><code>ie-scroll</code></a></dt>
+<dd>
+</dd>
+
+<dt><a name="op:wheel-message"><code>wheel-message</code></a></dt>
+<dd>
+</dd>
+
+<dt><a name="op:or"><code>or</code></a></dt>
+<dd>
+</dd>
+
 </dl>
+</div>
+</p>
 
 
 <h2><a name="appendix">Appendix</a></h2>
@@ -418,13 +603,13 @@ S╝░д╧░╩▓╝д╬═╫┴╟д╟╣╜└од╡дьд▐д╣бг
 <dl>
 <dt>е│есеєе╚</dt>
 <dd>
-";" (е╗е▀е│еэеє) длдщбвд╜д╬╣╘д╬╦Ў╚°д▐д╟д╧е│есеєе╚д╚д╖д╞░╖дядьд▐д╣бг
+"<code>;</code>" (е╗е▀е│еэеє) длдщбвд╜д╬╣╘д╬╦Ў╚°д▐д╟д╧е│есеєе╚д╚д╖д╞░╖дядьд▐д╣бг
 </dd>
 
 <dt>└░┐Ї</dt>
 <dd>
 ┐Ї├═дЄ╔╜дяд╖д▐д╣бг
-└▄╞м╝н #o #d #x дЄ╔╒д▒дыд│д╚д╟бвд╜дьд╛дь8┐╩┐Їбв10┐╩┐Їбв16┐╩┐Їд╟╔╜╡нд╟днд▐д╣бг
+└▄╞м╝н <code>#o #d #x</code> дЄ╔╒д▒дыд│д╚д╟бвд╜дьд╛дь8┐╩┐Їбв10┐╩┐Їбв16┐╩┐Їд╟╔╜╡нд╟днд▐д╣бг
 <div class="ex">
 ╬у: ░╩▓╝д╧┴┤д╞10┐╩┐Їд╬ 26 д╚╞▒д╕├═д╦д╩дъд▐д╣бг
 <pre>
@@ -435,7 +620,7 @@ S╝░д╧░╩▓╝д╬═╫┴╟д╟╣╜└од╡дьд▐д╣бг
 
 <dt>╔т╞░╛о┐Ї┼└┐Ї</dt>
 <dd>
-┐Ї╗·д╦╛о┐Ї┼└ "." дЄ┤▐дсдыд│д╚д╟═н╕┬└║┼┘д╬╝┬┐ЇдЄ╔╜╡нд╟днд▐д╣бг
+┐Ї╗·д╦╛о┐Ї┼└ "<code>.</code>" дЄ┤▐дсдыд│д╚д╟═н╕┬└║┼┘д╬╝┬┐ЇдЄ╔╜╡нд╟днд▐д╣бг
 </dd>
 
 <dt>е╖еєе▄еы</dt>
@@ -446,7 +631,7 @@ S╝░д╧░╩▓╝д╬═╫┴╟д╟╣╜└од╡дьд▐д╣бг
 <dt>╩╕╗·╬є</dt>
 <dd>
 е└е╓еыепекб╝е╞б╝е╖ечеє (╞є╜┼░·═╤╔фбв"")д╟дпдпдщдьбв╟д░╒д╬╩╕╗·дЄ┤▐дсдыд│д╚дмд╟днд▐д╣бг
-е└е╓еыепекб╝е╞б╝е╖ечеєдЄ┤▐дсды╛ь╣чд╧─╛┴░д╦ "\" дЄ┴░├╓д╖д▐д╣бг"\" ╝л┐╚дЄ┤▐дсд┐дд╛ь╣чдт╞▒══д╟д╣бг
+е└е╓еыепекб╝е╞б╝е╖ечеєдЄ┤▐дсды╛ь╣чд╧─╛┴░д╦ "<code>\</code>" дЄ┴░├╓д╖д▐д╣бг"<code>\</code>" ╝л┐╚дЄ┤▐дсд┐дд╛ь╣чдт╞▒══д╟д╣бг
 </dd>
 
 <dt>┐┐╡╢├═</dt>
@@ -459,9 +644,9 @@ S╝░д╧░╩▓╝д╬═╫┴╟д╟╣╜└од╡дьд▐д╣бг
 <dt>cons е╗еы</dt>
 <dd>
 car ╔Їд╚ cdr ╔Їд╬╞єд─д╟╣╜└од╡дьбвд╜дьд╛дьд╦╟д░╒д╬├═дЄ╞■дьдыд│д╚дмд╟днд▐д╣бг
-car д╚ cdr д╬┤╓дЄ "." д╟╢ш└┌дъбв┴┤┬╬дЄ│ч╕╠ () д╟дпдпд├д╞╔╜╡нд╖д▐д╣бг
+car д╚ cdr д╬┤╓дЄ "<code>.</code>" д╟╢ш└┌дъбв┴┤┬╬дЄ│ч╕╠ () д╟дпдпд├д╞╔╜╡нд╖д▐д╣бг
 <div class="ex">
-╬у: car ╔Їд╦ "car" д╚дддже╖еєе▄еыбвcdr ╔Їд╦ "cdr" д╚дддж╩╕╗·╬єдЄ╞■дьд┐ cons е╗еыд╧бв░╩▓╝д╬дшджд╦╔╜╡нд╖д▐д╣бг
+╬у: car ╔Їд╦ <code>car</code> д╚дддже╖еєе▄еыбвcdr ╔Їд╦ <code>"cdr"</code> д╚дддж╩╕╗·╬єдЄ╞■дьд┐ cons е╗еыд╧бв░╩▓╝д╬дшджд╦╔╜╡нд╖д▐д╣бг
 <pre>
 (car . "cdr")
 </pre>
@@ -490,13 +675,15 @@ n╕─д╬═╫┴╟дЄ╗¤д─еъе╣е╚д╧ n╕─д╬ cons е╗еыд╟╣╜└од╡дьбвд╜дьд╛дьд╬ car ╔Їд╧═╫┴╟дЄ cdr
 </dd>
 </dl>
 
+<h3><a name="appendix:regexp">Regular Expression</a></h3>
+
 <hr>
 
 <address>
 webmaster@tamanegi.org
 </address>
 
-<!-- $Id: CUSTOMIZE.html,v 1.3 2005/01/26 15:58:28 hos Exp $ -->
+<!-- $Id: CUSTOMIZE.html,v 1.4 2005/01/27 09:32:58 hos Exp $ -->
 
 <!--
 Local Variables:
