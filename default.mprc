@@ -1,0 +1,11 @@
+;;;; -*- coding: utf-8; mode: lisp -*-
+
+(global
+ (combination-time . 300)
+ (scroll (x-ratio . 1.0)
+	 (y-ratio . 1.0))
+ (line-scroll (x-ratio . 0.1)
+	      (y-ratio . 0.1))
+ (wheel (x-ratio . 0)
+	(y-ratio . -5))
+ )
