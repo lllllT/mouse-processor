@@ -1,7 +1,7 @@
 #
 # Makefile
 #
-# $Id: Makefile,v 1.23 2005/01/29 20:53:02 hos Exp $
+# $Id: Makefile,v 1.24 2005/01/31 16:58:10 hos Exp $
 #
 
 DEFINES = 
@@ -26,12 +26,20 @@ EXE_HEADERS = main.h operator.h scroll_op_utils.h resource.h
 EXE_LDLIBS = $(UTIL_LIBS) -lpsapi -lole32 -loleaut32 -loleacc -luuid
 EXE_LDFLAGS = $(LDFLAGS)
 
+DLL_NAME = $(TARGET_NAME)sup.dll
+DLL_SRCS = dllinj.c
+DLL_RSRC = 
+DLL_OBJS = $(DLL_SRCS:%.c=%.o) $(DLL_RSRC:%.rc=%.o)
+DLL_HEADERS = 
+DLL_LDLIBS = -lpsapi
+DLL_LDFLAGS = $(LDFLAGS) -shared
+
 PACK_BIN_FILES = $(EXE_NAME)
 PACK_BIN_ADD_FILES = README.txt VERSION default.mprc
 PACK_SRC_FILES = $(EXE_SRCS) $(EXE_RSRC) $(EXE_HEADERS) icon.ico Makefile
 
 SUBDIRS = util doc
-TARGET = $(EXE_NAME)
+TARGET = $(DLL_NAME) $(EXE_NAME)
 VERSION = `cat VERSION`
 
 RC = rc
@@ -55,7 +63,12 @@ all: all-rec $(TARGET)
 $(EXE_NAME): $(EXE_OBJS) $(UTIL_LIBS)
 	$(CC) $(EXE_LDFLAGS) $(EXE_OBJS) $(EXE_LDLIBS) -o $@
 
+$(DLL_NAME): $(DLL_OBJS)
+	$(CC) $(DLL_LDFLAGS) $(DLL_OBJS) $(DLL_LDLIBS) -o $@
+
 $(EXE_OBJS) : $(EXE_HEADERS)
+
+$(DLL_OBJS) : $(DLL_HEADERS)
 
 .rc.res:
 	$(RC) /fo$@ $<
