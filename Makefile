@@ -1,7 +1,7 @@
 #
 # Makefile
 #
-# $Id: Makefile,v 1.35 2005/02/04 18:49:41 hos Exp $
+# $Id: Makefile,v 1.36 2005/02/10 05:30:01 hos Exp $
 #
 
 DEFINES = -D_WIN32_WINNT=0x0500 -DUNICODE=1 -D_UNICODE=1
@@ -44,12 +44,14 @@ SBH_DLL_HEADERS = scroll_op_scrollbar.h shmem.h
 SBH_DLL_LDLIBS = 
 SBH_DLL_LDFLAGS = $(LDFLAGS) -e _DllMain@12 --output-lib lib$(SBH_DLL_NAME).a
 
+ALL_SRCS = $(EXE_SRCS) $(SBI_DLL_SRCS) $(SBH_DLL_SRCS)
+ALL_RSRC = $(EXE_RSRC) $(SBI_DLL_RSRC) $(SBH_DLL_RSRC)
+ALL_HEADERS = $(EXE_HEADERS) $(SBI_DLL_HEADERS) $(SBH_DLL_HEADERS)
+
 PACK_BIN_FILES = $(EXE_NAME) $(SBI_DLL_NAME) $(SBH_DLL_NAME)
 PACK_BIN_ADD_FILES = README.txt VERSION default.mprc
-PACK_SRC_FILES = $(EXE_SRCS) $(EXE_RSRC) $(EXE_HEADERS) icon.ico \
-                 $(SBI_DLL_SRCS) $(SBI_DLL_RSRC) $(SBI_DLL_HEADERS) \
-                 $(SBH_DLL_SRCS) $(SBH_DLL_RSRC) $(SBH_DLL_HEADERS) \
-                 Makefile
+PACK_SRC_FILES = $(ALL_SRCS) $(ALL_RSRC) $(ALL_HEADERS) \
+                 icon.ico Makefile
 
 SUBDIRS = util doc
 TARGET = $(SBI_DLL_NAME) $(SBH_DLL_NAME) $(EXE_NAME)
