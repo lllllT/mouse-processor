@@ -1,5 +1,110 @@
 
+    mouse-processor  -- マウスボタンの割当変更、移動によるスクロール等
+
+Introduction
+ 「mouse-processor」は、マウスボタンの割り当てを任意に変更したり、マウ
+スの移動でウィンドウのスクロールを可能にするプログラムです。
+2つのボタンの同時押しへの機能割り当てにも対応しています。
+スクロール機能はトラックボールで利用すると効果的だと思われます。多分。
+
+このソフトウェアは、無償、無保証、無制限にて公開します。
+(つまり、パブリックドメインソフトウェア (PDS) と同等ということ。)
+
+
+Requirements
+ OS : Windows2000 以降
+
+
+Install
+ - mouse-processor の圧縮ファイルを任意の場所に展開させます。
+ - mp.exe を実行させます。必要に応じてスタートアップ等に登録して下さい。
+
+
+Uninstall
+ - mp.exe を削除して下さい。不必要なら設定ファイルも削除して下さい。
+   レジストリ等は使用していません。
+
+
+Tasktray Menu
+ タスクトレイのアイコンを右クリックするとメニューが開きます。各項目は
+ 以下の動作をします。
+
+ - 再読み込み(R)
+   設定ファイルを再度読み直します。設定ファイルについては Setting の項
+   を参照して下さい。
+
+ - 一時停止(P)
+   動作を一時停止します。停止状態ではこのメニュー項目にチェックマーク
+   が付き、再度選択すると動作が再開されます。
+   動作を停止すると、マウス入力はプログラム起動前と同様の動作をします。
+
+ - ログ(L)...
+   ログウィンドウを開きます。ログについては Log の項を参照して下さい。
+
+ - 終了(X)
+   このプログラムを終了させます。
+
+
+Setting
+ - 設定ファイルはコマンドライン引数、または所定の場所から検索されます。
+   コマンドライン引数で設定ファイルを指定した場合は他の場所からの検索
+   は行なわれません。
+   コマンドライン引数を指定しなかった場合は以下の場所を順に検索し、最
+   初に見付かったファイルを使用します。
+
+   - 環境変数 HOME が設定してある場合、そのディレクトリのにある
+     ".mprc" ファイル。
+   - mp.exe と同じディレクトリにある "default.mprc" ファイル。
+
+ - タスクトレイのアイコンを右クリックして出るメニューから "再読み込み"
+   を選択すると、設定ファイルを再度読み直します。
+
+ - 設定ファイルの書式、内容については別途ドキュメントを書く予定。
+
+
+Log
+ タスクトレイのメニューからログウィンドウを開くことで、ログを参照する
+ ことができます。ログには各種情報やメッセージ等が出力されます。
+
+ - クリア(L)
+   ログを消去します。
+ 
+ - 詳細を表示(D)
+   この項目をチェックすると、スクロールモード時等に情報が表示されます。
+
+ - 閉じる(C)
+   ログウィンドウを閉じます。
+
+
+Known Problem
+ - 他のマウスユーティリティーや、非標準のマウスドライバと同時に使用す
+   ると動作が干渉し、予期せぬ挙動をする可能性があります。
+   その場合は、他のマウスユーティリティーを終了、標準のマウスドライバ
+   に変更するか、互いの動作に影響しないよう設定する等して下さい。
+
+ - window-scroll、neighborhood-scrollbar、scrollbar-control の各
+   operator の drag、percentage、bar-unit モードではスクロールできない
+   ウィンドウがあります。(ListView control、MS Word 等)
+   その場合は、line-scroll または page-scroll モードを使用するか、
+   wheel-message operator を使用して下さい。
+   (drag、percentage、bar-unit は SetScrollInfo() で位置を設定してから
+    WM_HSCROLL または WM_VSCROLL メッセージを SB_THUMBPOSITION で発行、
+    line-scroll、page-scroll は WM_HSCROLL または WM_VSCROLL メッセー
+    ジを SB_LINELEFT/RIHT、SB_PAGELEFT/RIGHT で発行している。
+    うまく動作しない原因を知っている方がいたら教えて下さい。)
+
 
 TODO
-icon
-MS Word
+ - 設定に関するドキュメント
+ - キーボードとの連携
+
+
+Link
+ - TrackScroll <http://members.jcom.home.ne.jp/0718057904/ts.htm>
+ - Wheel Ball <http://homepage1.nifty.com/jesus/>
+ - X Wheel <http://www5b.biglobe.ne.jp/~hokko2nd/Windows/#XWheel>
+   X Wheel NT <http://www5b.biglobe.ne.jp/~hokko2nd/Windows/#XWheelNT>
+ - mouse-processor <http://www.tamanegi.org/prog/mouse-processor>
+
+
+$Id: README.txt,v 1.2 2005/01/20 16:21:28 hos Exp $
