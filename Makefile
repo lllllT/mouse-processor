@@ -1,7 +1,7 @@
 #
 # Makefile
 #
-# $Id: Makefile,v 1.28 2005/02/01 17:05:11 hos Exp $
+# $Id: Makefile,v 1.29 2005/02/01 17:12:56 hos Exp $
 #
 
 DEFINES = 
@@ -33,7 +33,7 @@ SB_DLL_RSRC =
 SB_DLL_OBJS = $(SB_DLL_SRCS:%.c=%.o) $(SB_DLL_RSRC:%.rc=%.o)
 SB_DLL_HEADERS = dllinj.h scroll_op_scrollbar.h shmem.h
 SB_DLL_LDLIBS = -lpsapi -lkernel32
-SB_DLL_LDFLAGS = $(LDFLAGS) -mdll -nostartfiles -nostdlib -e _DllMain@12
+SB_DLL_LDFLAGS = $(LDFLAGS) -shared -nostartfiles -nostdlib
 
 PACK_BIN_FILES = $(EXE_NAME) $(SB_DLL_NAME)
 PACK_BIN_ADD_FILES = README.txt VERSION default.mprc
@@ -68,14 +68,7 @@ $(EXE_NAME): $(EXE_OBJS) $(UTIL_LIBS)
 	$(CC) $(EXE_LDFLAGS) $(EXE_OBJS) $(EXE_LDLIBS) -o $@
 
 $(SB_DLL_NAME): $(SB_DLL_OBJS)
-	$(CC) $(SB_DLL_LDFLAGS) $(SB_DLL_OBJS) $(SB_DLL_LDLIBS) \
-	      -Wl,--base-file,base.tmp -o 1st.tmp
-	-$(RM) 1st.tmp
-	$(DLLTOOL) --dllname $@ --base-file base.tmp --output-exp exp.tmp
-	-$(RM) base.tmp
-	$(CC) $(SB_DLL_LDFLAGS) $(SB_DLL_OBJS) $(SB_DLL_LDLIBS) \
-	      -Wl,exp.tmp -o $@
-	-$(RM) exp.tmp
+	$(CC) $(SB_DLL_LDFLAGS) $(SB_DLL_OBJS) $(SB_DLL_LDLIBS) -o $@
 
 $(EXE_OBJS) : $(EXE_HEADERS)
 
