@@ -1,7 +1,7 @@
 /*
  * main.h  --
  *
- * $Id: main.h,v 1.27 2005/01/17 06:14:30 hos Exp $
+ * $Id: main.h,v 1.28 2005/01/18 05:40:13 hos Exp $
  *
  */
 
@@ -24,10 +24,11 @@
 
 /* mouse_action.code */
 #define MOUSE_ACT_NONE        0x00 /* for all */
-#define MOUSE_ACT_BUTTON      0x01 /* for button */
-#define MOUSE_ACT_WHEEL       0x02 /* for wheel */
-#define MOUSE_ACT_WHEELPOST   0x03 /* for wheel */
-#define MOUSE_ACT_MOVE        0x04 /* for move */
+#define MOUSE_ACT_BUTTON_D    0x01 /* for button */
+#define MOUSE_ACT_BUTTON_U    0x02 /* for button */
+#define MOUSE_ACT_WHEEL       0x03 /* for wheel */
+#define MOUSE_ACT_WHEELPOST   0x04 /* for wheel */
+#define MOUSE_ACT_MOVE        0x05 /* for move */
 #define MOUSE_ACT_MODECH      0x10 /* for button */
 #define MOUSE_ACT_MODEMSG     0x11 /* for button, move */
 
@@ -86,8 +87,10 @@ struct mouse_conf {
     struct {
         unsigned int flags;
 
-        struct mouse_action act;
-        struct mouse_action comb_act[MOUSE_BTN_MAX];
+        struct mouse_action d_act;
+        struct mouse_action u_act;
+        struct mouse_action comb_d_act[MOUSE_BTN_MAX];
+        struct mouse_action comb_u_act[MOUSE_BTN_MAX];
     } button[MOUSE_BTN_MAX];
 
     struct mouse_action move_act;

@@ -1,7 +1,7 @@
 /*
  * conf.h  -- configuration
  *
- * $Id: conf.c,v 1.10 2005/01/17 06:14:28 hos Exp $
+ * $Id: conf.c,v 1.11 2005/01/18 05:40:12 hos Exp $
  *
  */
 
@@ -296,9 +296,9 @@ int apply_action_none(struct mouse_action *act,
 }
 
 static
-int apply_action_button(struct mouse_action *act,
-                        const struct app_setting *app_conf,
-                        const s_exp_data_t *conf)
+int apply_action_button_d(struct mouse_action *act,
+                          const struct app_setting *app_conf,
+                          const s_exp_data_t *conf)
 {
     if(S_EXP_CDR(conf)->type != S_EXP_TYPE_CONS ||
        S_EXP_CADR(conf)->type != S_EXP_TYPE_INTEGER ||
@@ -307,7 +307,25 @@ int apply_action_button(struct mouse_action *act,
         return 0;
     }
 
-    act->code = MOUSE_ACT_BUTTON;
+    act->code = MOUSE_ACT_BUTTON_D;
+    act->conf.button = S_EXP_CADR(conf)->number.val - 1;
+
+    return 1;
+}
+
+static
+int apply_action_button_u(struct mouse_action *act,
+                          const struct app_setting *app_conf,
+                          const s_exp_data_t *conf)
+{
+    if(S_EXP_CDR(conf)->type != S_EXP_TYPE_CONS ||
+       S_EXP_CADR(conf)->type != S_EXP_TYPE_INTEGER ||
+       S_EXP_CADR(conf)->number.val < 1 ||
+       S_EXP_CADR(conf)->number.val > MOUSE_BTN_MAX) {
+        return 0;
+    }
+
+    act->code = MOUSE_ACT_BUTTON_U;
     act->conf.button = S_EXP_CADR(conf)->number.val - 1;
 
     return 1;
@@ -428,7 +446,8 @@ int apply_button_act(struct mouse_action *act,
 {
     static struct action_conf_map map[] = {
         {L"none", apply_action_none},
-        {L"button", apply_action_button},
+        {L"button-d", apply_action_button_d},
+        {L"button-u", apply_action_button_u},
         {L"normal-mode", apply_action_change_normal},
         {L"scroll-mode", apply_action_change_scroll},
         {L"set-scroll-ratio", apply_action_set_ratio},
@@ -459,49 +478,57 @@ int apply_wheel_act(struct mouse_action *act,
 static
 int apply_comm_mode_conf(struct mouse_conf *conf,
                          const struct app_setting *app_conf,
-                         const s_exp_data_t *mode)
+                         const s_exp_data_t *mode,
+                         BOOL set_default_p)
 {
     const s_exp_data_t *c;
 
     {
-        int n, m;
-        wchar_t btn_name[] = L"button-N";
-        wchar_t cmb_name[] = L"button-N+M";
-        wchar_t *name;
+        int n, m, s;
+        wchar_t name[64];
         struct mouse_action *act[2];
 
         for(n = 0; n < MOUSE_BTN_MAX; n++) {
             for(m = n; m < MOUSE_BTN_MAX; m++) {
-                if(n == m) {
-                    btn_name[7] = L'1' + n;
-
-                    name = btn_name;
-                    act[0] = &conf->button[n].act;
-                } else {
-                    cmb_name[7] = L'1' + n;
-                    cmb_name[9] = L'1' + m;
-
-                    name = cmb_name;
-                    act[0] = &conf->button[n].comb_act[m];
-                    act[1] = &conf->button[m].comb_act[n];
-                }
-
-                c = s_exp_massq(mode, S_EXP_TYPE_CONS, name, NULL);
-                if(c == NULL || S_EXP_CAR(c)->type != S_EXP_TYPE_CONS ||
-                   apply_button_act(act[0], app_conf, S_EXP_CAR(c)) == 0) {
+                for(s = 0; s < 2; s++) {
                     if(n == m) {
-                        act[0]->code = MOUSE_ACT_BUTTON;
-                        act[0]->conf.button = n;
+                        wsprintfW(name, L"button-%hs-%d",
+                                  (s == 0 ? "d" : "u"), n + 1);
+
+                        act[0] = (s == 0 ?
+                                  &conf->button[n].d_act :
+                                  &conf->button[n].u_act);
                     } else {
-                        continue;
+                        wsprintfW(name, L"button-%hs-%d+%d",
+                                  (s == 0 ? "d" : "u"), n + 1, m + 1);
+
+                        act[0] = (s == 0 ?
+                                  &conf->button[n].comb_d_act[m] :
+                                  &conf->button[n].comb_u_act[m]);
+                        act[1] = (s == 0 ?
+                                  &conf->button[m].comb_d_act[n] :
+                                  &conf->button[m].comb_u_act[n]);
                     }
-                }
 
-                if(n != m) {
-                    conf->button[n].flags |= MOUSE_BTN_CONF_ENABLE_COMB;
-                    conf->button[m].flags |= MOUSE_BTN_CONF_ENABLE_COMB;
+                    c = s_exp_massq(mode, S_EXP_TYPE_CONS, name, NULL);
+                    if(c == NULL || S_EXP_CAR(c)->type != S_EXP_TYPE_CONS ||
+                       apply_button_act(act[0], app_conf, S_EXP_CAR(c)) == 0) {
+                        if(n == m && set_default_p) {
+                            act[0]->code =
+                                (s == 0 ?
+                                 MOUSE_ACT_BUTTON_D : MOUSE_ACT_BUTTON_U);
+                            act[0]->conf.button = n;
+                        } else {
+                            continue;
+                        }
+                    }
 
-                    memcpy(act[1], act[0], sizeof(struct mouse_action));
+                    if(n != m) {
+                        conf->button[n].flags |= MOUSE_BTN_CONF_ENABLE_COMB;
+                        conf->button[m].flags |= MOUSE_BTN_CONF_ENABLE_COMB;
+
+                        memcpy(act[1], act[0], sizeof(struct mouse_action));
+                    }
                 }
             }
         }
@@ -558,7 +585,8 @@ int apply_mode_conf(struct app_setting *app_conf)
         i = 0;
         S_EXP_FOR_EACH(normal_mode, p) {
             apply_comm_mode_conf(&app_conf->normal_conf[i],
-                                 app_conf, S_EXP_CDAR(p));
+                                 app_conf, S_EXP_CDAR(p),
+                                 TRUE);
 
             app_conf->normal_conf[i].move_act.code = MOUSE_ACT_MOVE;
 
@@ -570,7 +598,8 @@ int apply_mode_conf(struct app_setting *app_conf)
             s_exp_data_t *sr;
 
             apply_comm_mode_conf(&app_conf->scroll_conf[i],
-                                 app_conf, S_EXP_CDAR(p));
+                                 app_conf, S_EXP_CDAR(p),
+                                 FALSE);
 
             app_conf->scroll_conf[i].move_act.code = MOUSE_ACT_MODEMSG;
             app_conf->scroll_conf[i].move_act.conf.mode_msg.data.mode =
@@ -598,8 +627,10 @@ int apply_mode_conf(struct app_setting *app_conf)
 
         for(i = 0; i < MOUSE_BTN_MAX; i++) {
             conf->button[i].flags = 0;
-            conf->button[i].act.code = MOUSE_ACT_BUTTON;
-            conf->button[i].act.conf.button = i;
+            conf->button[i].d_act.code = MOUSE_ACT_BUTTON_D;
+            conf->button[i].d_act.conf.button = i;
+            conf->button[i].u_act.code = MOUSE_ACT_BUTTON_U;
+            conf->button[i].u_act.conf.button = i;
         }
         conf->wheel_act.code = MOUSE_ACT_WHEEL;
         conf->move_act.code = MOUSE_ACT_MOVE;

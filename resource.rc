@@ -1,7 +1,7 @@
 /*                                                -*- coding: sjis -*-
  * resource.rc  -- resource
  *
- * $Id: resource.rc,v 1.5 2005/01/17 07:41:51 hos Exp $
+ * $Id: resource.rc,v 1.6 2005/01/18 05:40:14 hos Exp $
  *
  */
 
@@ -51,7 +51,6 @@ END
 
 LANGUAGE LANG_JAPANESE, SUBLANG_DEFAULT
 #pragma code_page(932)
-
 
 ID_MENU_TRAY MENU 
 BEGIN

@@ -1,7 +1,7 @@
 /*
  * hook.c  -- hook funcs
  *
- * $Id: hook.c,v 1.20 2005/01/17 06:14:29 hos Exp $
+ * $Id: hook.c,v 1.21 2005/01/18 05:40:13 hos Exp $
  *
  */
 
@@ -149,72 +149,84 @@ void fill_input(INPUT *in, int motion, int data)
 }
 
 inline static
-void do_action(struct mouse_action *act, MSLLHOOKSTRUCT *msll, int motion)
+void do_action(struct mouse_action *act, MSLLHOOKSTRUCT *msll)
 {
     switch(act->code) {
-      case MOUSE_ACT_BUTTON:
-          if(motion == MOTION_DOWN || motion == MOTION_UP) {
-              INPUT in;
+      case MOUSE_ACT_BUTTON_D:
+      {
+          INPUT in;
 
-              memset(&in, 0, sizeof(in));
+          memset(&in, 0, sizeof(in));
 
-              in.type = INPUT_MOUSE;
-              in.mi.time = msll->time;
-              in.mi.dwExtraInfo = msll->dwExtraInfo;
-              fill_input(&in, motion, act->conf.button);
+          in.type = INPUT_MOUSE;
+          in.mi.time = msll->time;
+          in.mi.dwExtraInfo = msll->dwExtraInfo;
+          fill_input(&in, MOTION_DOWN, act->conf.button);
 
-              SendInput(1, &in, sizeof(INPUT));
-          }
+          SendInput(1, &in, sizeof(INPUT));
           break;
+      }
+
+      case MOUSE_ACT_BUTTON_U:
+      {
+          INPUT in;
+
+          memset(&in, 0, sizeof(in));
+
+          in.type = INPUT_MOUSE;
+          in.mi.time = msll->time;
+          in.mi.dwExtraInfo = msll->dwExtraInfo;
+          fill_input(&in, MOTION_UP, act->conf.button);
+
+          SendInput(1, &in, sizeof(INPUT));
+          break;
+      }
 
       case MOUSE_ACT_WHEEL:
           break;
 
       case MOUSE_ACT_WHEELPOST:
-          if(motion == MOTION_WHEEL) {
-              HWND target;
+      {
+          HWND target;
 
-              target = WindowFromPoint(msll->pt);
-              if(target == NULL) {
-                  break;
-              }
+          target = WindowFromPoint(msll->pt);
+          if(target == NULL) {
+              break;
+          }
 
 #define KEY_STATE(key) (GetAsyncKeyState(VK_ ## key) & 0x8000 ? MK_ ## key : 0)
 
-              PostMessage(
-                  target, WM_MOUSEWHEEL,
-                  MAKEWPARAM(KEY_STATE(CONTROL) |
-                             KEY_STATE(LBUTTON) |
-                             KEY_STATE(MBUTTON) |
-                             KEY_STATE(RBUTTON) |
-                             KEY_STATE(SHIFT) |
-                             KEY_STATE(XBUTTON1) |
-                             KEY_STATE(XBUTTON2),
-                             (short)HIWORD(msll->mouseData)),
-                  MAKELPARAM(msll->pt.x, msll->pt.y));
+          PostMessage(
+              target, WM_MOUSEWHEEL,
+              MAKEWPARAM(KEY_STATE(CONTROL) |
+                         KEY_STATE(LBUTTON) |
+                         KEY_STATE(MBUTTON) |
+                         KEY_STATE(RBUTTON) |
+                         KEY_STATE(SHIFT) |
+                         KEY_STATE(XBUTTON1) |
+                         KEY_STATE(XBUTTON2),
+                         (short)HIWORD(msll->mouseData)),
+              MAKELPARAM(msll->pt.x, msll->pt.y));
 
 #undef KEY_STATE
-          }
+
           break;
+      }
 
       case MOUSE_ACT_MOVE:
           break;
 
       case MOUSE_ACT_MODECH:
-          if(motion == MOTION_UP) {
-              ctx.mode_data.cur_conf = act->conf.mode_change.mode;
-              PostMessage(ctx.main_window, WM_MOUSEHOOK_MODECH,
-                          MAKEWPARAM(msll->pt.x, msll->pt.y),
-                          (LPARAM)&act->conf.mode_change.data);
-          }
+          ctx.mode_data.cur_conf = act->conf.mode_change.mode;
+          PostMessage(ctx.main_window, WM_MOUSEHOOK_MODECH,
+                      MAKEWPARAM(msll->pt.x, msll->pt.y),
+                      (LPARAM)&act->conf.mode_change.data);
           break;
 
       case MOUSE_ACT_MODEMSG:
-          if(motion == MOTION_UP || motion == MOTION_MOVE) {
-              PostMessage(ctx.main_window, WM_MOUSEHOOK_MODEMSG,
-                          MAKEWPARAM(msll->pt.x, msll->pt.y),
-                          (LPARAM)&act->conf.mode_msg.data);
-          }
+          PostMessage(ctx.main_window, WM_MOUSEHOOK_MODEMSG,
+                      MAKEWPARAM(msll->pt.x, msll->pt.y),
+                      (LPARAM)&act->conf.mode_msg.data);
           break;
 
       case MOUSE_ACT_NONE:
@@ -234,8 +246,8 @@ void CALLBACK comb_timer(HWND hwnd, UINT msg, UINT_PTR id, DWORD time)
     }
     ctx.hook_data.pressed = 0;
 
-    do_action(&ctx.mode_data.cur_conf->button[ctx.hook_data.pressed_btn].act,
-              &ctx.hook_data.pressed_btn_data, MOTION_DOWN);
+    do_action(&ctx.mode_data.cur_conf->button[ctx.hook_data.pressed_btn].d_act,
+              &ctx.hook_data.pressed_btn_data);
 }
 
 
@@ -271,12 +283,15 @@ LRESULT CALLBACK mouse_ll_proc(int code, WPARAM wparam, LPARAM lparam)
             if(motion == MOTION_DOWN) {
                 /* combination press */
                 if(ctx.mode_data.cur_conf->
-                   button[ctx.hook_data.pressed_btn].comb_act[btn].code !=
+                   button[ctx.hook_data.pressed_btn].comb_d_act[btn].code !=
+                   MOUSE_ACT_NONE ||
+                   ctx.mode_data.cur_conf->
+                   button[ctx.hook_data.pressed_btn].comb_u_act[btn].code !=
                    MOUSE_ACT_NONE) {
                     do_action(
                         &ctx.mode_data.cur_conf->
-                        button[ctx.hook_data.pressed_btn].comb_act[btn],
-                        msll, MOTION_DOWN);
+                        button[ctx.hook_data.pressed_btn].comb_d_act[btn],
+                        msll);
 
                     ctx.hook_data.
                         combination[ctx.hook_data.combinated * 2] =
@@ -290,8 +305,8 @@ LRESULT CALLBACK mouse_ll_proc(int code, WPARAM wparam, LPARAM lparam)
             }
 
             do_action(&ctx.mode_data.cur_conf->
-                      button[ctx.hook_data.pressed_btn].act,
-                      &ctx.hook_data.pressed_btn_data, MOTION_DOWN);
+                      button[ctx.hook_data.pressed_btn].d_act,
+                      &ctx.hook_data.pressed_btn_data);
         }
 
         if(btn >= 0) {
@@ -327,8 +342,9 @@ LRESULT CALLBACK mouse_ll_proc(int code, WPARAM wparam, LPARAM lparam)
                             do_action(
                                 &ctx.mode_data.cur_conf->
                                 button[ctx.hook_data.combination[i * 2]].
-                                comb_act[ctx.hook_data.combination[i * 2 + 1]],
-                                msll, MOTION_UP);
+                                comb_u_act[
+                                    ctx.hook_data.combination[i * 2 + 1]],
+                                msll);
 
                             ctx.hook_data.ignore_btn_mask |= 
                                 MOUSE_BTN_BIT(
@@ -349,8 +365,11 @@ LRESULT CALLBACK mouse_ll_proc(int code, WPARAM wparam, LPARAM lparam)
             }
 
             /* generic action */
-            do_action(&ctx.mode_data.cur_conf->button[btn].act,
-                      msll, motion);
+            if(motion == MOTION_DOWN) {
+                do_action(&ctx.mode_data.cur_conf->button[btn].d_act, msll);
+            } else {
+                do_action(&ctx.mode_data.cur_conf->button[btn].u_act, msll);
+            }
 
             return 1;
         }
@@ -360,7 +379,7 @@ LRESULT CALLBACK mouse_ll_proc(int code, WPARAM wparam, LPARAM lparam)
                 goto norm_end;
             }
 
-            do_action(&ctx.mode_data.cur_conf->wheel_act, msll, MOTION_WHEEL);
+            do_action(&ctx.mode_data.cur_conf->wheel_act, msll);
 
             return 1;
         }
@@ -370,7 +389,7 @@ LRESULT CALLBACK mouse_ll_proc(int code, WPARAM wparam, LPARAM lparam)
                 goto norm_end;
             }
 
-            do_action(&ctx.mode_data.cur_conf->move_act, msll, MOTION_MOVE);
+            do_action(&ctx.mode_data.cur_conf->move_act, msll);
 
             return 1;
         }

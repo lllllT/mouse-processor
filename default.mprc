@@ -13,9 +13,10 @@
  ;;   button 3+4   => button 5 click
  ;;   wheel        => post wheel message to under pointer window
  (normal
-  (button-1+2 (scroll-mode scroll-hv))
-  (button-1+4 (scroll-mode scroll-v))
-  (button-3+4 (button 5))
+  (button-u-1+2 (scroll-mode scroll-hv))
+  (button-u-1+4 (scroll-mode scroll-v))
+  (button-d-3+4 (button-d 5))
+  (button-u-3+4 (button-u 5))
   (wheel (post-wheel-message))
   )
  )
@@ -32,13 +33,13 @@
  ;;   wheel        => post wheel message to under pointer window
  (scroll-hv
   (scroll-ratio 1.0 1.0)
-  (button-1 (normal-mode normal))
-  (button-1+2 (normal-mode normal))
-  (button-2 (scroll-mode scroll-v))
-  (button-3 (mul-scroll-ratio 0.5 0.5))
-  (button-4 (mul-scroll-ratio 2.0 2.0))
-  (button-3+4 (set-scroll-ratio 1.0 1.0))
-  (button-5 (normal-mode normal))
+  (button-u-1 (normal-mode normal))
+  (button-u-1+2 (normal-mode normal))
+  (button-u-2 (scroll-mode scroll-v))
+  (button-u-3 (mul-scroll-ratio 0.5 0.5))
+  (button-u-4 (mul-scroll-ratio 2.0 2.0))
+  (button-u-3+4 (set-scroll-ratio 1.0 1.0))
+  (button-u-5 (normal-mode normal))
   (wheel (post-wheel-message))
   )
 
@@ -53,13 +54,13 @@
  ;;   button 5     => return to normal mode
  ;;   wheel        => post wheel message to under pointer window
   (scroll-ratio 0.0 1.0)
-  (button-1 (normal-mode normal))
-  (button-2 (scroll-mode scroll-hv))
-  (button-1+2 (normal-mode normal))
-  (button-3 (mul-scroll-ratio 0.0 0.5))
-  (button-4 (mul-scroll-ratio 0.0 2.0))
-  (button-3+4 (set-scroll-ratio 0.0 1.0))
-  (button-5 (normal-mode normal))
+  (button-u-1 (normal-mode normal))
+  (button-u-2 (scroll-mode scroll-hv))
+  (button-u-1+2 (normal-mode normal))
+  (button-u-3 (mul-scroll-ratio 0.0 0.5))
+  (button-u-4 (mul-scroll-ratio 0.0 2.0))
+  (button-u-3+4 (set-scroll-ratio 0.0 1.0))
+  (button-u-5 (normal-mode normal))
   (wheel (post-wheel-message))
   )
  )
