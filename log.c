@@ -1,7 +1,7 @@
 /*
  * log.c  -- logging procs
  *
- * $Id: log.c,v 1.5 2005/01/15 15:09:32 hos Exp $
+ * $Id: log.c,v 1.6 2005/01/17 07:41:50 hos Exp $
  *
  */
 
@@ -25,6 +25,8 @@ static int log_level = LOG_LEVEL_NOTIFY;
 static HWND log_edit = NULL;
 static HWND log_close_btn = NULL, log_clear_btn = NULL;
 static HWND log_detail_chk = NULL;
+
+static HFONT log_edit_font = NULL;
 
 static HANDLE log_rpipe_hdl = INVALID_HANDLE_VALUE;
 static HANDLE log_wpipe_hdl = INVALID_HANDLE_VALUE;
@@ -118,9 +120,41 @@ INT_PTR log_dlg_init(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
             GetDlgItem(ctx.log_window, item_map[i].key);
     }
 
+    SendMessageW(log_edit, EM_SETLIMITTEXT, EDIT_TEXT_MAX, 0);
+
+    {
+        TCHAR name[64], size[64], charset[64];
+
+        memset(name, 0, sizeof(name));
+        memset(size, 0, sizeof(size));
+        memset(charset, 0, sizeof(charset));
+
+        LoadString(ctx.instance, ID_STR_LOG_EDIT_FONT, name, 64);
+        LoadString(ctx.instance, ID_STR_LOG_EDIT_FONT_SIZE, size, 64);
+        LoadString(ctx.instance, ID_STR_LOG_EDIT_FONT_CS, charset, 64);
+
+        log_edit_font = CreateFont(_ttoi(size), 0, 0, 0,
+                                   FW_NORMAL, FALSE, FALSE, FALSE,
+                                   _ttoi(charset),
+                                   OUT_STRING_PRECIS, CLIP_STROKE_PRECIS,
+                                   DEFAULT_QUALITY,
+                                   FIXED_PITCH | FF_MODERN,
+                                   name);
+        if(log_edit_font != NULL) {
+            SendMessageW(log_edit, WM_SETFONT, (WPARAM)log_edit_font, FALSE);
+        }
+    }
+
     log_dlg_arrannge();
 
-    SendMessageW(log_edit, EM_SETLIMITTEXT, EDIT_TEXT_MAX, 0);
+    return TRUE;
+}
+
+/* WM_DESTROY */
+static
+INT_PTR log_dlg_destroy(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+{
+    DeleteObject(log_edit_font);
 
     return TRUE;
 }
@@ -206,6 +240,7 @@ INT_PTR CALLBACK log_dlg_proc(HWND hwnd, UINT msg,
 
     static struct uint_ptr_pair msg_map[] = {
         {WM_INITDIALOG, log_dlg_init},
+        {WM_DESTROY, log_dlg_destroy},
         {WM_COMMAND, log_dlg_command},
         {WM_SYSCOMMAND, log_dlg_syscommand},
         {WM_SIZE, log_dlg_size},

@@ -1,7 +1,7 @@
 /*
  * header for resource
  *
- * $Id: resource.h,v 1.3 2005/01/17 06:14:30 hos Exp $
+ * $Id: resource.h,v 1.4 2005/01/17 07:41:51 hos Exp $
  *
  */
 
@@ -19,3 +19,5 @@
 #define ID_CHK_LOG_DETAIL 303
 
 #define ID_STR_LOG_EDIT_FONT 400
+#define ID_STR_LOG_EDIT_FONT_SIZE 401
+#define ID_STR_LOG_EDIT_FONT_CS 402

@@ -1,7 +1,7 @@
 #
 # Makefile
 #
-# $Id: Makefile,v 1.16 2005/01/17 01:57:45 hos Exp $
+# $Id: Makefile,v 1.17 2005/01/17 07:41:50 hos Exp $
 #
 
 DEFINES = 
@@ -25,8 +25,11 @@ EXE_LDFLAGS = $(LDFLAGS)
 SUBDIRS = util
 TARGET = $(EXE_NAME)
 
+RC = rc
 WINDRES = windres
 
+
+.SUFFIXES: .rc .res
 
 all: all-rec $(TARGET)
 
@@ -42,11 +45,14 @@ $(EXE_NAME): $(EXE_OBJS) $(UTIL_LIBS)
 
 $(EXE_OBJS) : $(EXE_HEADERS)
 
-.rc.o:
+.rc.res:
+	$(RC) /fo$@ $<
+
+.res.o:
 	$(WINDRES) -o $@ $<
 
 resource.o: icon.ico
 
 
 clean: clean-rec
-	-$(RM) $(EXE_NAME) *.o *~
+	-$(RM) $(EXE_NAME) *.o *.res *~

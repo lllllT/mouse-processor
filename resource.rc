@@ -1,5 +1,18 @@
+/*                                                -*- coding: sjis -*-
+ * resource.rc  -- resource
+ *
+ * $Id: resource.rc,v 1.5 2005/01/17 07:41:51 hos Exp $
+ *
+ */
+
 #include "resource.h"
 #include <windows.h>
+
+
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+
+ID_ICON_TRAY ICON icon.ico
 
 ID_MENU_TRAY MENU 
 BEGIN
@@ -17,7 +30,7 @@ END
 ID_DLG_LOG DIALOG 0, 0, 300, 400
  STYLE WS_POPUP | WS_OVERLAPPEDWINDOW | DS_SHELLFONT
  CAPTION "mouse-processor - Log"
- FONT 9, "MS Shell Dlg"
+ FONT 8, "MS Shell Dlg"
 BEGIN
   DEFPUSHBUTTON "&Close", IDOK, 247, 381, 50, 15
   EDITTEXT ID_EDIT_LOG, 0, 0, 300, 378,
@@ -30,7 +43,46 @@ END
 
 STRINGTABLE
 BEGIN
-  ID_STR_LOG_EDIT_FONT "MS Gothic"
+  ID_STR_LOG_EDIT_FONT "Terminal"
+  ID_STR_LOG_EDIT_FONT_SIZE "-13"
+  ID_STR_LOG_EDIT_FONT_CS "1"
 END
 
-ID_ICON_TRAY ICON icon.ico
+
+LANGUAGE LANG_JAPANESE, SUBLANG_DEFAULT
+#pragma code_page(932)
+
+
+ID_MENU_TRAY MENU 
+BEGIN
+  POPUP "menu"
+  BEGIN
+    MENUITEM "再読み込み(&R)", ID_MENU_RELOAD
+    MENUITEM "一時停止(&P)", ID_MENU_PAUSE
+    MENUITEM SEPARATOR
+    MENUITEM "ログ(&L)...", ID_MENU_LOG
+    MENUITEM SEPARATOR
+    MENUITEM "終了(&X)", ID_MENU_EXIT
+  END
+END
+
+ID_DLG_LOG DIALOG 0, 0, 300, 400
+ STYLE WS_POPUP | WS_OVERLAPPEDWINDOW | DS_SHELLFONT
+ CAPTION "mouse-processor - Log"
+ FONT 9, "MS Shell Dlg"
+BEGIN
+  DEFPUSHBUTTON "閉じる(&C)", IDOK, 247, 381, 50, 15
+  EDITTEXT ID_EDIT_LOG, 0, 0, 300, 378,
+           WS_HSCROLL | WS_VSCROLL | WS_TABSTOP |
+           ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL |
+           ES_NOHIDESEL | ES_READONLY
+  PUSHBUTTON "クリア(&L)", ID_BTN_LOG_CLEAR, 3, 381, 50, 15
+  AUTOCHECKBOX "詳細を表示(&D)", ID_CHK_LOG_DETAIL, 167, 381, 80, 15
+END
+
+STRINGTABLE
+BEGIN
+  ID_STR_LOG_EDIT_FONT "Terminal"
+  ID_STR_LOG_EDIT_FONT_SIZE "-13"
+  ID_STR_LOG_EDIT_FONT_CS "128"
+END
