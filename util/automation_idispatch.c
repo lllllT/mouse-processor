@@ -1,7 +1,7 @@
 /*
  * automation.c  -- COM automation helper
  *
- * $Id: automation_idispatch.c,v 1.2 2005/01/12 02:25:14 hos Exp $
+ * $Id: automation_idispatch.c,v 1.3 2005/03/01 02:52:27 hos Exp $
  *
  */
 
@@ -108,6 +108,9 @@ HRESULT get_property_v(IDispatch *dpch, LPOLESTR *name, VARIANT *result)
             IDispatch_Release(d);
             if(FAILED(hres)) {
                 return hres;
+            }
+            if(dd == NULL) {
+                return E_FAIL;
             }
 
             d = dd;
