@@ -1,0 +1,13 @@
+#include "resource.h"
+
+ID_MENU_TRAY MENU 
+BEGIN
+    POPUP "menu"
+    BEGIN
+        MENUITEM "&Pause", ID_MENU_PAUSE
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit", ID_MENU_EXIT
+    END
+END
+
+ID_ICON_TRAY ICON icon.ico
