@@ -1,7 +1,7 @@
 /*
  * scroll_op_scrollbar.c  -- scroll operators for scrollbar
  *
- * $Id: scroll_op_scrollbar.c,v 1.8 2005/01/24 04:39:12 hos Exp $
+ * $Id: scroll_op_scrollbar.c,v 1.9 2005/01/24 05:06:14 hos Exp $
  *
  */
 
@@ -122,7 +122,7 @@ int scrollbar_r_scroll(HWND hwnd, int bar,
     si.fMask = SIF_POS;
     GetScrollInfo(hwnd, bar, &si);
 
-    if(si.nPos != org_pos) {
+    if(si.nPos != org_pos || pos == min || pos == max) {
         if(mode == 0) {             /* drag */
             *delta = rest;
         } else if(mode == 1) {      /* percentage */
