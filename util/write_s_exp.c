@@ -1,7 +1,7 @@
 /*
  * write_s_exp.c  -- write s-expression
  *
- * $Id: write_s_exp.c,v 1.4 2005/01/14 14:54:38 hos Exp $
+ * $Id: write_s_exp.c,v 1.5 2005/01/17 05:51:28 hos Exp $
  *
  */
 
@@ -48,7 +48,7 @@ static unsigned char *u8s_write_list(const s_exp_data_t *data)
     } else if(S_EXP_CDR(data) == S_EXP_NIL) {
         return car;
     } else {
-        cdr = u8s_write_list(S_EXP_CDR(data));
+        cdr = u8s_write_s_exp(S_EXP_CDR(data));
         if(cdr == NULL) {
             free(car);
             return NULL;
