@@ -1,12 +1,16 @@
 /*
  * scroll_op.h  -- scroll operators
  *
- * $Id: operator.h,v 1.1 2005/01/12 09:39:47 hos Exp $
+ * $Id: operator.h,v 1.2 2005/01/13 09:39:57 hos Exp $
  *
  */
 
 #ifndef __SCROLL_OP_H__
 #define __SCROLL_OP_H__ 1
+
+#define _WIN32_WINNT 0x0500
+#define UNICODE 1
+#define _UNICODE 1
 
 #include "s_exp.h"
 #include <windows.h>

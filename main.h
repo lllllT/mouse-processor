@@ -1,7 +1,7 @@
 /*
  * main.h  --
  *
- * $Id: main.h,v 1.21 2005/01/12 09:39:46 hos Exp $
+ * $Id: main.h,v 1.22 2005/01/13 09:39:55 hos Exp $
  *
  */
 
@@ -113,7 +113,9 @@ struct scroll_operator_conf {
 
 /* window configuration */
 struct scroll_window_conf {
-    LPWSTR regexp;
+    BSTR class_regexp;
+    BSTR title_regexp;
+    int class_or_title;
 
     struct scroll_operator_conf *op;
     s_exp_data_t *args;
@@ -134,7 +136,7 @@ struct app_setting {
     int scroll_conf_num;
     struct mouse_conf *scroll_conf;
 
-    int scroll_window_num;
+    int window_conf_num;
     struct scroll_window_conf *window_conf;
 
     int scroll_operator_num;
@@ -241,3 +243,6 @@ int scroll_ie_v(IDispatch *elem, double *delta, int length);
 
 s_exp_data_t *load_conf(LPCWSTR conf_file);
 int apply_setting(void);
+
+
+int is_regexp_match(BSTR re_str, BSTR test_str);

@@ -136,8 +136,13 @@
   )
 
  (tab-control
-  (ratio 0.0 5.0)
-  (tick . 120))
+  (h-tab
+   (ratio 5.0 0.0)
+   (tick . 120))
+  (v-tab
+   (ratio 0.0 5.0)
+   (tick . 120))
+  )
 
  (wheel-message
   (ratio 0.0 -5.0)

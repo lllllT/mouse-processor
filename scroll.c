@@ -1,7 +1,7 @@
 /*
  * scroll.c  -- scroll window
  *
- * $Id: scroll.c,v 1.12 2005/01/11 09:38:03 hos Exp $
+ * $Id: scroll.c,v 1.13 2005/01/13 09:39:56 hos Exp $
  *
  */
 
@@ -10,6 +10,7 @@
 #include <commctrl.h>
 #include <psapi.h>
 
+#include <math.h>
 
 static
 int get_scroll_pos(HWND hwnd, int bar, double *delta, int length, int *ret_pos)
@@ -38,8 +39,8 @@ int get_scroll_pos(HWND hwnd, int bar, double *delta, int length, int *ret_pos)
         pos = si.nPos;
     }
 
-    d = *delta * spd;
-    if((int)d == 0) {
+    d = trunc(*delta * spd);
+    if(d == 0) {
         *ret_pos = pos;
         return 0;
     }
@@ -51,7 +52,7 @@ int get_scroll_pos(HWND hwnd, int bar, double *delta, int length, int *ret_pos)
         pos = max;
     }
 
-    *delta -= (int)d / spd;
+    *delta -= d / spd;
     *ret_pos = pos;
     return 1;
 }
@@ -306,6 +307,10 @@ void get_hierarchial_window_class_title(HWND hwnd,
 static
 LRESULT start_scroll_mode(struct mode_conf *data)
 {
+    int i;
+    struct scroll_window_conf *target_win_conf;
+
+    /* x and y ratio */
     ctx.mode_data.scroll.x_ratio = ctx.app_conf.cur_conf->scroll_mode.x_ratio;
     ctx.mode_data.scroll.y_ratio = ctx.app_conf.cur_conf->scroll_mode.y_ratio;
 
@@ -319,6 +324,87 @@ LRESULT start_scroll_mode(struct mode_conf *data)
     get_hierarchial_window_class_title(ctx.mode_data.scroll.target,
                                        &ctx.mode_data.scroll.class,
                                        &ctx.mode_data.scroll.title);
+
+    /* search target window configuration */
+    {
+        BSTR class_re, title_re;
+        BSTR class, title;
+
+        class = SysAllocString(ctx.mode_data.scroll.class);
+        title = SysAllocString(ctx.mode_data.scroll.title);
+
+        target_win_conf = NULL;
+        for(i = 0; ctx.app_conf.window_conf_num; i++) {
+            class_re =
+                SysAllocString(ctx.app_conf.window_conf[i].class_regexp);
+            title_re =
+                SysAllocString(ctx.app_conf.window_conf[i].title_regexp);
+
+            if(ctx.app_conf.window_conf[i].class_or_title) {
+                if((class_re != NULL && is_regexp_match(class_re, class)) ||
+                   (title_re != NULL && is_regexp_match(title_re, title))) {
+                    target_win_conf = &ctx.app_conf.window_conf[i];
+
+                    SysFreeString(class_re);
+                    SysFreeString(title_re);
+                    break;
+                }
+            } else {
+                if((class_re != NULL && is_regexp_match(class_re, class)) &&
+                   (title_re != NULL && is_regexp_match(title_re, title))) {
+                    target_win_conf = &ctx.app_conf.window_conf[i];
+
+                    SysFreeString(class_re);
+                    SysFreeString(title_re);
+                    break;
+                }
+            }
+
+            SysFreeString(class_re);
+            SysFreeString(title_re);
+        }
+
+        SysFreeString(class);
+        SysFreeString(title);
+
+        if(target_win_conf == NULL) {
+            return 0;
+        }
+    }
+
+    /* start operator */
+    {
+        scroll_op_arg_t arg;
+        int ret;
+
+        memset(&arg, 0, sizeof(arg));
+        arg.conf = target_win_conf->op->conf;
+        arg.arg = target_win_conf->args;
+        arg.hwnd = ctx.mode_data.scroll.target;
+        arg.pos = ctx.mode_data.scroll.start_pt;
+
+        ctx.mode_data.scroll.op_context_size =
+            target_win_conf->op->proc.get_context_size(&arg);
+        if(ctx.mode_data.scroll.op_context_size < 0) {
+            return 0;
+        }
+
+        ctx.mode_data.scroll.op_context =
+            malloc(ctx.mode_data.scroll.op_context_size);
+        if(ctx.mode_data.scroll.op_context == NULL) {
+            return 0;
+        }
+        memset(ctx.mode_data.scroll.op_context, 0,
+               ctx.mode_data.scroll.op_context_size);
+
+        ret =
+            target_win_conf->op->proc.init_context(
+                ctx.mode_data.scroll.op_context,
+                ctx.mode_data.scroll.op_context_size,
+                &arg);
+
+        ctx.mode_data.scroll.op = target_win_conf->op;
+    }
 
     /* scroll mode */
     {
@@ -393,6 +479,14 @@ LRESULT end_scroll_mode(struct mode_conf *data)
 {
     if(ctx.mode_data.scroll.class != NULL) free(ctx.mode_data.scroll.class);
     if(ctx.mode_data.scroll.title != NULL) free(ctx.mode_data.scroll.title);
+
+    ctx.mode_data.scroll.class = NULL;
+    ctx.mode_data.scroll.title = NULL;
+
+    if(ctx.mode_data.scroll.op_context != NULL)
+        free(ctx.mode_data.scroll.op_context);
+
+    ctx.mode_data.scroll.op_context = NULL;
 
     return 0;
 }

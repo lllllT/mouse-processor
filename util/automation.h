@@ -1,12 +1,13 @@
 /*
  * automation.h  -- COM automation helper
  *
- * $Id: automation.h,v 1.1 2005/01/05 07:46:31 hos Exp $
+ * $Id: automation.h,v 1.2 2005/01/13 09:40:02 hos Exp $
  *
  */
 
 #include <objbase.h>
 
+HRESULT create_instance_from_progid(LPCOLESTR progid, IDispatch **dpch);
 HRESULT get_active_object(LPCOLESTR progid, IDispatch **dpch);
 
 HRESULT get_dpid(IDispatch *dpch, LPOLESTR name, DISPID *dpid);
