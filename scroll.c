@@ -1,7 +1,7 @@
 /*
  * scroll.c  -- scroll window
  *
- * $Id: scroll.c,v 1.26 2005/02/09 09:22:21 hos Exp $
+ * $Id: scroll.c,v 1.27 2005/03/13 11:23:25 hos Exp $
  *
  */
 
@@ -193,8 +193,8 @@ LRESULT scroll_modech(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
     struct mode_conf *data;
     LRESULT ret;
 
-    ctx.mode_data.start_pt.x = LOWORD(wparam);
-    ctx.mode_data.start_pt.y = HIWORD(wparam);
+    ctx.mode_data.start_pt.x = (short)LOWORD(wparam);
+    ctx.mode_data.start_pt.y = (short)HIWORD(wparam);
 
     data = (struct mode_conf *)lparam;
 
@@ -251,8 +251,8 @@ LRESULT scroll_modemsg_scroll(struct mode_conf *data)
                 break;
             }
 
-            x = LOWORD(msg.wParam);
-            y = HIWORD(msg.wParam);
+            x = (short)LOWORD(msg.wParam);
+            y = (short)HIWORD(msg.wParam);
             data = (struct mode_conf *)msg.lParam;
 
             if(data->mode != MODE_MSG_SCROLL) {
@@ -323,8 +323,8 @@ LRESULT scroll_modemsg(HWND hwnd, UINT msgid, WPARAM wparam, LPARAM lparam)
         {0, NULL}
     };
 
-    x = LOWORD(wparam);
-    y = HIWORD(wparam);
+    x = (short)LOWORD(wparam);
+    y = (short)HIWORD(wparam);
     data = (struct mode_conf *)lparam;
 
     if(data->mode == MODE_MSG_SCROLL) {

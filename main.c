@@ -1,7 +1,7 @@
 /*
  * main.c  -- main part of mouse-processor
  *
- * $Id: main.c,v 1.33 2005/02/09 11:05:35 hos Exp $
+ * $Id: main.c,v 1.34 2005/03/13 11:23:25 hos Exp $
  *
  */
 
@@ -397,8 +397,8 @@ LRESULT wheel_post(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
     {
         POINT pt;
 
-        pt.x = LOWORD(lparam);
-        pt.y = HIWORD(lparam);
+        pt.x = (short)LOWORD(lparam);
+        pt.y = (short)HIWORD(lparam);
         target = get_window_for_mouse_input(pt);
         if(target == NULL) {
             return 0;
