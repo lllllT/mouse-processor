@@ -59,7 +59,8 @@ Setting
  - タスクトレイのアイコンを右クリックして出るメニューから "再読み込み"
    を選択すると、設定ファイルを再度読み直します。
 
- - 設定ファイルの書式、内容については別途ドキュメントを書く予定。
+ - 設定ファイルの書式、内容については doc/CUSTOMIZE.html を参照して下
+   さい。
 
  - 標準添付してある設定ファイル default.mprc は、以下のような設定となっ
    ています。
@@ -132,6 +133,8 @@ Known Problem
 
 TODO
  - 設定に関するドキュメント
+    -> 0.1.2 で一応追加。
+
  - キーボードとの連携
 
 
@@ -143,4 +146,4 @@ Link
  - mouse-processor <http://www.tamanegi.org/prog/mouse-processor/>
 
 
-$Id: README.txt,v 1.6 2005/01/29 20:28:31 hos Exp $
+$Id: README.txt,v 1.7 2005/01/29 22:05:19 hos Exp $
