@@ -1,7 +1,7 @@
 /*
  * main.h  --
  *
- * $Id: main.h,v 1.4 2004/12/30 14:29:46 hos Exp $
+ * $Id: main.h,v 1.5 2004/12/30 15:31:02 hos Exp $
  *
  */
 
@@ -13,8 +13,12 @@
 #define MOUSE_BTN_CONF_ACTION      0x0002
 
 /* mouse_action.code */
-#define MOUSE_ACT_NONE   0x0000
-#define MOUSE_ACT_BUTTON 0x0001
+#define MOUSE_ACT_NONE   0x00
+#define MOUSE_ACT_BUTTON 0x01
+#define MOUSE_ACT_WHEEL  0x02
+#define MOUSE_ACT_MOVE   0x03
+#define MOUSE_ACT_MODECH 0x10
+#define MOUSE_ACT_SCROLL 0x20
 
 /* app_context.ignore_btn_mask */
 #define MOUSE_BTN_BIT(n) (1 << (n))
@@ -22,7 +26,7 @@
 /* custom action */
 struct mouse_action {
     unsigned int code;
-    int data;
+    LONG_PTR data;
 };
 
 /* mouse configuration */

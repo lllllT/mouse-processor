@@ -1,7 +1,7 @@
 /*
  * hook.c  -- hook funcs
  *
- * $Id: hook.c,v 1.6 2004/12/30 14:48:39 hos Exp $
+ * $Id: hook.c,v 1.7 2004/12/30 15:31:01 hos Exp $
  *
  */
 
@@ -167,6 +167,49 @@ void do_action(struct mouse_action *act, MSLLHOOKSTRUCT *msll, int motion)
 
           break;
       }
+
+      case MOUSE_ACT_WHEEL:
+      {
+          INPUT in;
+
+          memset(&in, 0, sizeof(in));
+
+          in.type = INPUT_MOUSE;
+          in.mi.dx = msll->pt.x;
+          in.mi.dy = msll->pt.y;
+          in.mi.time = msll->time;
+          in.mi.dwExtraInfo = msll->dwExtraInfo;
+          fill_input(&in, MOTION_WHEEL, HIWORD(msll->mouseData) * act->data);
+
+          SendInput(1, &in, sizeof(INPUT));
+
+          break;
+      }
+
+      case MOUSE_ACT_MOVE:
+      {
+          INPUT in;
+
+          memset(&in, 0, sizeof(in));
+
+          in.type = INPUT_MOUSE;
+          in.mi.dx = msll->pt.x;
+          in.mi.dy = msll->pt.y;
+          in.mi.time = msll->time;
+          in.mi.dwExtraInfo = msll->dwExtraInfo;
+          fill_input(&in, MOTION_MOVE, 0);
+
+          SendInput(1, &in, sizeof(INPUT));
+
+          break;
+      }
+
+      case MOUSE_ACT_MODECH:
+          ctx.conf = (struct mouse_conf *)act->data;
+          break;
+
+      case MOUSE_ACT_SCROLL:
+          break;
     }
 }
 
