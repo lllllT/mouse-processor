@@ -1,7 +1,7 @@
 /*
  * scroll_op_scrollbar.c  -- scroll operators for scrollbar
  *
- * $Id: scroll_op_scrollbar.c,v 1.19 2005/02/04 13:40:28 hos Exp $
+ * $Id: scroll_op_scrollbar.c,v 1.20 2005/02/10 07:51:20 hos Exp $
  *
  */
 
@@ -151,7 +151,7 @@ void inject_scrollbar_support_proc_to(HWND hwnd)
     inject_sb_data.pid[n] = pid;
 
   end:
-    if(name != NULL) VirtualFreeEx(ph, name, size, MEM_DECOMMIT);
+    if(name != NULL) VirtualFreeEx(ph, name, size, MEM_RELEASE);
     if(ph != NULL) CloseHandle(ph);
 }
 
