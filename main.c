@@ -1,7 +1,7 @@
 /*
  * main.c  -- main part of mouse-processor
  *
- * $Id: main.c,v 1.23 2005/01/19 09:16:05 hos Exp $
+ * $Id: main.c,v 1.24 2005/01/20 04:38:02 hos Exp $
  *
  */
 
@@ -385,6 +385,11 @@ int message_loop(void)
 
         if(ret == 0) {
             return msg.wParam;
+        }
+
+        if(ctx.log_window != NULL &&
+           IsDialogMessage(ctx.log_window, &msg) != 0) {
+            continue;
         }
 
         TranslateMessage(&msg);
