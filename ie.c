@@ -1,7 +1,7 @@
 /*
  * ie.c  -- ie compornent operation
  *
- * $Id: ie.c,v 1.9 2005/01/11 16:34:21 hos Exp $
+ * $Id: ie.c,v 1.10 2005/01/12 05:20:36 hos Exp $
  *
  */
 
@@ -98,24 +98,56 @@ HRESULT get_ie_elem_at(IDispatch *doc, int x, int y, IDispatch **ret_elem)
 
             while(1) {
                 IDispatch *parent = NULL;
-                long ox = 0, oy = 0, cx = 0, cy = 0;
+                long ox = 0, oy = 0, cx = 0, cy = 0, sx = 0, sy = 0;
+                BSTR tp = NULL;
+
+                get_property_long(elem, L"clientLeft", &cx);
+                get_property_long(elem, L"clientTop", &cy);
+                get_property_long(elem, L"offsetLeft", &ox);
+                get_property_long(elem, L"offsetTop", &oy);
+                get_property_long(elem, L"scrollLeft", &sx);
+                get_property_long(elem, L"scrollTop", &sy);
+
+                x -= cx + ox - sx;
+                y -= cy + oy - sy;
 
                 hres = get_property_dp(elem, L"offsetParent", &parent);
                 if(FAILED(hres) || parent == NULL) {
                     break;
                 }
 
-                get_property_long(elem, L"offsetLeft", &ox);
-                get_property_long(elem, L"offsetTop", &oy);
-                get_property_long(parent, L"clientLeft", &cx);
-                get_property_long(parent, L"clientTop", &cy);
-
-                x -= ox + cx;
-                y -= oy + cy;
+                get_property_str(parent, L"tagName", &tp);
+                if(tp != NULL && wcscmp(tp, L"FRAMESET") == 0) {
+                    SysFreeString(tp);
+                    IDispatch_Release(parent);
+                    break;
+                }
+                SysFreeString(tp);
 
                 IDispatch_Release(elem);
                 elem = parent;
             }
+
+            while(1) {
+                IDispatch *parent = NULL;
+                long sx = 0, sy = 0;
+
+                hres = get_property_dp(elem, L"parentElement", &parent);
+                if(FAILED(hres) || parent == NULL) {
+                    break;
+                }
+
+                get_property_long(parent, L"scrollLeft", &sx);
+                get_property_long(parent, L"scrollTop", &sy);
+
+                x += sx;
+                y += sy;
+
+                IDispatch_Release(elem);
+                elem = parent;
+            }
+
+            IDispatch_Release(elem);
         }
     }
 
