@@ -1,7 +1,7 @@
 /*
  * main.c  -- main part of mouse-processor
  *
- * $Id: main.c,v 1.29 2005/01/25 05:05:02 hos Exp $
+ * $Id: main.c,v 1.30 2005/01/25 09:02:47 hos Exp $
  *
  */
 
@@ -329,7 +329,7 @@ LRESULT main_tasktray_ch(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
         if(ExtractIconExW(ctx.app_conf.tray_icon_file,
                           ctx.app_conf.tray_icon_idx,
                           NULL, &icon, 1) != 1) {
-            error_message("ExtractIconEx() failed");
+            error_message(L"ExtractIconEx() failed");
             return 0;
         }
     } else {

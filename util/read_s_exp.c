@@ -1,7 +1,7 @@
 /*
  * read_s_exp.c  -- read s-expression
  *
- * $Id: read_s_exp.c,v 1.5 2005/01/21 08:54:56 hos Exp $
+ * $Id: read_s_exp.c,v 1.6 2005/01/25 09:02:48 hos Exp $
  *
  */
 
@@ -237,10 +237,6 @@ s_exp_data_t *read_s_exp(s_exp_read_context_t *ctx)
       case '5': case '6': case '7': case '8': case '9':
           pushback_char(ctx, c);
           return read_integer_or_flonum(ctx);
-
-      case ';':
-          skip_line(ctx);
-          return read_s_exp(ctx);
 
       case EOF:
           return NULL;
@@ -614,7 +610,7 @@ static s_exp_data_t *read_symbol_or_number(s_exp_read_context_t *ctx)
     if(get_char_type(s[0]) != CHAR_TYPE_LETTER &&
        get_char_type(s[0]) != CHAR_TYPE_SPECIAL_INITIAL) {
         s_exp_data_t *err;
-        err = s_exp_read_error(ctx, "bad symbol: \"%S\".", s);
+        err = s_exp_read_error(ctx, "bad symbol: \"%S\"", s);
         free_s_exp(data);
         return err;
     }
@@ -763,12 +759,21 @@ static int skip_ws_read_char(s_exp_read_context_t *ctx)
 {
     int c;
 
-    do {
+    while(1) {
         c = read_char(ctx);
         if(c == EOF) {
-            return c;
+            break;
         }
-    } while(get_char_type(c) == CHAR_TYPE_SPACE);
+
+        if(c == ';') {
+            skip_line(ctx);
+            continue;
+        }
+
+        if((get_char_type(c) != CHAR_TYPE_SPACE)) {
+            break;
+        }
+    }
 
     return c;
 }

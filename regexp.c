@@ -1,7 +1,7 @@
 /*
  * regexp.c  -- regular expression
  *
- * $Id: regexp.c,v 1.2 2005/01/21 04:38:15 hos Exp $
+ * $Id: regexp.c,v 1.3 2005/01/25 09:02:48 hos Exp $
  *
  */
 
@@ -14,7 +14,19 @@ static IDispatch *regexp = NULL;
 
 HRESULT init_regexp(void)
 {
-    return create_instance_from_progid(L"VBScript.RegExp", &regexp);
+    HRESULT hres;
+
+    hres = create_instance_from_progid(L"VBScript.RegExp", &regexp);
+    if(FAILED(hres)) {
+        return hres;
+    }
+
+    hres = put_property_long(regexp, L"IgnoreCase", 1);
+    if(FAILED(hres)) {
+        return hres;
+    }
+
+    return S_OK;
 }
 
 int is_regexp_match(BSTR re_str, BSTR test_str)
