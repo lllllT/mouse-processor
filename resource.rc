@@ -1,7 +1,7 @@
 /*                                                -*- coding: sjis -*-
  * resource.rc  -- resource
  *
- * $Id: resource.rc,v 1.6 2005/01/18 05:40:14 hos Exp $
+ * $Id: resource.rc,v 1.7 2005/01/20 08:15:14 hos Exp $
  *
  */
 
@@ -12,7 +12,7 @@
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
 
-ID_ICON_TRAY ICON icon.ico
+ID_ICON_MAIN ICON icon.ico
 
 ID_MENU_TRAY MENU 
 BEGIN

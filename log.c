@@ -1,7 +1,7 @@
 /*
  * log.c  -- logging procs
  *
- * $Id: log.c,v 1.12 2005/01/20 04:38:01 hos Exp $
+ * $Id: log.c,v 1.13 2005/01/20 08:15:13 hos Exp $
  *
  */
 
@@ -153,11 +153,11 @@ INT_PTR log_dlg_init(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
     {
         HICON icon;
 
-        icon = LoadImage(ctx.instance, MAKEINTRESOURCE(ID_ICON_TRAY),
+        icon = LoadImage(ctx.instance, MAKEINTRESOURCE(ID_ICON_MAIN),
                          IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR);
         SendMessage(ctx.log_window, WM_SETICON, ICON_SMALL, (LPARAM)icon);
 
-        icon = LoadImage(ctx.instance, MAKEINTRESOURCE(ID_ICON_TRAY),
+        icon = LoadImage(ctx.instance, MAKEINTRESOURCE(ID_ICON_MAIN),
                          IMAGE_ICON, 32, 32, LR_DEFAULTCOLOR);
         SendMessage(ctx.log_window, WM_SETICON, ICON_BIG, (LPARAM)icon);
     }

@@ -1,7 +1,7 @@
 /*
  * main.c  -- main part of mouse-processor
  *
- * $Id: main.c,v 1.24 2005/01/20 04:38:02 hos Exp $
+ * $Id: main.c,v 1.25 2005/01/20 08:15:13 hos Exp $
  *
  */
 
@@ -38,7 +38,7 @@ int set_tasktray_icon(HWND hwnd, int msg)
     NOTIFYICONDATA ni;
     HICON icon;
 
-    icon = LoadImage(ctx.instance, MAKEINTRESOURCE(ID_ICON_TRAY),
+    icon = LoadImage(ctx.instance, MAKEINTRESOURCE(ID_ICON_MAIN),
                      IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR);
     if(icon == NULL) {
         return 0;
