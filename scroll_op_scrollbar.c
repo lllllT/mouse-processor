@@ -1,12 +1,14 @@
 /*
  * scroll_op_scrollbar.c  -- scroll operators for scrollbar
  *
- * $Id: scroll_op_scrollbar.c,v 1.11 2005/02/01 04:09:13 hos Exp $
+ * $Id: scroll_op_scrollbar.c,v 1.12 2005/02/01 11:28:24 hos Exp $
  *
  */
 
 #include "operator.h"
 #include "scroll_op_utils.h"
+#include "scroll_op_scrollbar.h"
+#include "shmem.h"
 #include "util.h"
 #include <tchar.h>
 #include <commctrl.h>
@@ -14,6 +16,161 @@
 
 
 static const support_procs_t *spr = NULL;
+
+
+static struct {
+    fake_gsinfo_data_t *gsinfo_data;
+    HANDLE process[2];
+    HMODULE module[2];
+    WCHAR module_name[512];
+} inject_sb_data;
+
+#define INJECT_SB_MODULE_BASE L"\\mpsup.dll"
+
+static
+void inject_scrollbar_support_proc_to(HWND hwnd)
+{
+    DWORD pid = 0;
+    HANDLE ph = NULL;
+    LPVOID name = NULL;
+    HANDLE thread = NULL;
+    HMODULE mod = NULL;
+    SIZE_T size;
+    int n;
+
+    GetWindowThreadProcessId(hwnd, &pid);
+    ph = OpenProcess(PROCESS_VM_OPERATION |
+                     PROCESS_VM_WRITE | PROCESS_VM_READ |
+                     PROCESS_CREATE_THREAD | PROCESS_QUERY_INFORMATION,
+                     FALSE, pid);
+    if(ph == NULL) {
+        goto end;
+    }
+
+    size = wcslen(inject_sb_data.module_name) + 1;
+    name = VirtualAllocEx(ph, NULL, size, MEM_COMMIT, PAGE_READWRITE);
+    if(name == NULL) {
+        goto end;
+    }
+
+    if(WriteProcessMemory(ph, name,
+                          inject_sb_data.module_name, size,
+                          NULL) == 0) {
+        goto end;
+    }
+
+    thread =
+        CreateRemoteThread(ph, NULL, 0,
+                           (LPTHREAD_START_ROUTINE)
+                           GetProcAddress(GetModuleHandleA("KERNEL32.DLL"),
+                                          "LoadLibraryW"),
+                           name, 0, NULL);
+    if(thread == NULL) {
+        goto end;
+    }
+
+    WaitForSingleObject(thread, INFINITE);
+    GetExitCodeThread(thread, (LPDWORD)(void *)&mod);
+    CloseHandle(thread);
+
+    if(mod == NULL) {
+        goto end;
+    }
+
+    if(inject_sb_data.process[0] == NULL) {
+        n = 0;
+    } else {
+        n = 1;
+    }
+    DuplicateHandle(GetCurrentProcess(), ph,
+                    GetCurrentProcess(), &inject_sb_data.process[n],
+                    0, FALSE, DUPLICATE_SAME_ACCESS);
+    inject_sb_data.module[n] = mod;
+
+  end:
+    if(name != NULL) VirtualFreeEx(ph, name, size, MEM_DECOMMIT);
+    if(ph != NULL) CloseHandle(ph);
+}
+
+static
+void uninject_scrollbar_support_proc_from(int n)
+{
+    HANDLE thread;
+
+    thread =
+        CreateRemoteThread(inject_sb_data.process[n], NULL, 0,
+                           (LPTHREAD_START_ROUTINE)
+                           GetProcAddress(GetModuleHandleA("KERNEL32.DLL"),
+                                          "FreeLibrary"),
+                           inject_sb_data.module[n], 0, NULL);
+    if(thread == NULL) {
+        goto end;
+    }
+
+    WaitForSingleObject(thread, INFINITE);
+    CloseHandle(thread);
+
+  end:
+    inject_sb_data.process[n] = NULL;
+    inject_sb_data.module[n] = NULL;
+}
+
+static
+void inject_scrollbar_support_proc(HWND hwnd1, HWND hwnd2, int is_control)
+{
+    memset(&inject_sb_data, 0, sizeof(inject_sb_data));
+
+    /* allocate shared memory */
+    inject_sb_data.gsinfo_data =
+        create_shared_mem(FAKE_GSINFO_SHMEM_NAME, sizeof(fake_gsinfo_data_t));
+    if(inject_sb_data.gsinfo_data == NULL) {
+        return;
+    }
+    memset(inject_sb_data.gsinfo_data, 0, sizeof(fake_gsinfo_data_t));
+
+    /* DLL injection */
+    {
+        LPWSTR p;
+
+        if(GetModuleFileNameW(NULL, inject_sb_data.module_name,
+                              sizeof(inject_sb_data.module_name) /
+                              sizeof(WCHAR)) == 0) {
+            return;
+        }
+
+        p = (LPWSTR)wcsrchr(inject_sb_data.module_name, L'\\');
+        if(p != NULL) {
+            *(p + 1) = 0;
+        }
+
+        if(wcslen(inject_sb_data.module_name) +
+           wcslen(INJECT_SB_MODULE_BASE) + 1 >
+           sizeof(inject_sb_data.module_name) / sizeof(WCHAR)) {
+            return;
+        }
+
+        wcscat(inject_sb_data.module_name, INJECT_SB_MODULE_BASE);
+    }
+
+    if(is_control) {
+        hwnd1 = GetParent(hwnd1);
+        hwnd2 = GetParent(hwnd2);
+    }
+
+    if(hwnd1 != NULL) inject_scrollbar_support_proc_to(hwnd1);
+    if(hwnd2 != NULL) inject_scrollbar_support_proc_to(hwnd2);
+}
+
+static
+void uninject_scrollbar_support_proc(void)
+{
+    close_shared_mem(inject_sb_data.gsinfo_data);
+
+    if(inject_sb_data.process[0] != NULL)
+        uninject_scrollbar_support_proc_from(0);
+    if(inject_sb_data.process[1] != NULL)
+        uninject_scrollbar_support_proc_from(1);
+}
 
 
 #define SCROLLBAR_STYLE_MASK (SBS_HORZ | SBS_VERT | SBS_SIZEBOX | SBS_SIZEGRIP)
@@ -247,24 +404,6 @@ int MP_OP_API window_scrollbar_init_ctx(void *ctxp, int size,
     get_scroll_op_xy_ratio(s_exp_nth_cdr(arg->arg, 1), mode_conf,
                            &ctx->x_ratio, &ctx->y_ratio, 1.0, 1.0);
 
-    /* check window style */
-    switch(ctx->mode) {
-      case SCROLLBAR_MODE_DRAG:
-      case SCROLLBAR_MODE_PERCENTAGE:
-      case SCROLLBAR_MODE_BARUNIT:
-      {
-          ctx->style = GetWindowLong(ctx->target, GWL_STYLE);
-          if((ctx->style & (WS_HSCROLL | WS_VSCROLL)) == 0) {
-              spr->log_printf(LOG_LEVEL_DEBUG,
-                              L"window-scrollbar: window has no scrollbar: "
-                              L"style = 0x%08X\n", ctx->style);
-              return 0;
-          }
-
-          break;
-      }
-    }
-
     /* window size */
     {
         RECT rt;
@@ -276,6 +415,27 @@ int MP_OP_API window_scrollbar_init_ctx(void *ctxp, int size,
 
         ctx->target_size.cx = rt.right - rt.left + 1;
         ctx->target_size.cy = rt.bottom - rt.top + 1;
+    }
+
+    switch(ctx->mode) {
+      case SCROLLBAR_MODE_DRAG:
+      case SCROLLBAR_MODE_PERCENTAGE:
+      case SCROLLBAR_MODE_BARUNIT:
+      {
+          /* check window style */
+          ctx->style = GetWindowLong(ctx->target, GWL_STYLE);
+          if((ctx->style & (WS_HSCROLL | WS_VSCROLL)) == 0) {
+              spr->log_printf(LOG_LEVEL_DEBUG,
+                              L"window-scrollbar: window has no scrollbar: "
+                              L"style = 0x%08X\n", ctx->style);
+              return 0;
+          }
+
+          /* try to inject */
+          inject_scrollbar_support_proc(ctx->target, NULL, 0);
+
+          break;
+      }
     }
 
     /* initial delta */
@@ -311,6 +471,8 @@ int MP_OP_API window_scrollbar_scroll(void *ctxp, double dx, double dy)
 static
 int MP_OP_API window_scrollbar_end_scroll(void *ctxp)
 {
+    uninject_scrollbar_support_proc();
+
     return 1;
 }
 

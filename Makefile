@@ -1,7 +1,7 @@
 #
 # Makefile
 #
-# $Id: Makefile,v 1.25 2005/02/01 07:26:56 hos Exp $
+# $Id: Makefile,v 1.26 2005/02/01 11:28:21 hos Exp $
 #
 
 DEFINES = 
@@ -19,20 +19,21 @@ EXE_SRCS = main.c hook.c \
            scroll.c scroll_op.c \
            scroll_op_scrollbar.c scroll_op_trackbar.c \
            scroll_op_ie.c scroll_op_wheel.c \
-           log.c regexp.c conf.c window.c
+           log.c regexp.c conf.c window.c shmem.c
 EXE_RSRC = resource.rc
 EXE_OBJS = $(EXE_SRCS:%.c=%.o) $(EXE_RSRC:%.rc=%.o)
-EXE_HEADERS = main.h operator.h scroll_op_utils.h resource.h
+EXE_HEADERS = main.h operator.h resource.h \
+              scroll_op_utils.h scroll_op_scrollbar.h shmem.h
 EXE_LDLIBS = $(UTIL_LIBS) -lpsapi -lole32 -loleaut32 -loleacc -luuid
 EXE_LDFLAGS = $(LDFLAGS)
 
 DLL_NAME = $(TARGET_NAME)sup.dll
-DLL_SRCS = dllmain.c
+DLL_SRCS = dllmain.c dllinj.c shmem.c
 DLL_RSRC = 
 DLL_OBJS = $(DLL_SRCS:%.c=%.o) $(DLL_RSRC:%.rc=%.o)
-DLL_HEADERS = 
-DLL_LDLIBS = -lpsapi
-DLL_LDFLAGS = $(LDFLAGS) -shared
+DLL_HEADERS = dllinj.h scroll_op_scrollbar.h shmem.h
+DLL_LDLIBS = -lpsapi -lkernel32
+DLL_LDFLAGS = $(LDFLAGS) -mdll -nostartfiles -nostdlib -e _DllMain@12
 
 PACK_BIN_FILES = $(EXE_NAME)
 PACK_BIN_ADD_FILES = README.txt VERSION default.mprc
