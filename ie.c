@@ -1,7 +1,7 @@
 /*
  * ie.c  -- ie compornent operation
  *
- * $Id: ie.c,v 1.6 2005/01/09 14:48:04 hos Exp $
+ * $Id: ie.c,v 1.7 2005/01/11 02:15:14 hos Exp $
  *
  */
 
@@ -166,9 +166,11 @@ HRESULT get_ie_target(HWND hwnd, int x, int y, IDispatch **ret_elem)
             }
 
             if((tagname != NULL &&
-                ((wcscmp(tagname, L"BODY") == 0 ||
-                  wcscmp(tagname, L"TEXTAREA") == 0) &&
-                 overflow == NULL)) ||
+                (wcscmp(tagname, L"HTML") == 0 ||
+                 wcscmp(tagname, L"BODY") == 0 ||
+                 wcscmp(tagname, L"TEXTAREA") == 0) &&
+                (overflow == NULL ||
+                 wcscmp(overflow, L"visible") == 0)) ||
                (overflow != NULL &&
                 (wcscmp(overflow, L"auto") == 0 ||
                  wcscmp(overflow, L"scroll") == 0))) {
