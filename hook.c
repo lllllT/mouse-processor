@@ -1,7 +1,7 @@
 /*
  * hook.c  -- hook funcs
  *
- * $Id: hook.c,v 1.5 2004/12/30 14:29:46 hos Exp $
+ * $Id: hook.c,v 1.6 2004/12/30 14:48:39 hos Exp $
  *
  */
 
@@ -208,6 +208,7 @@ LRESULT CALLBACK mouse_ll_proc(int code, WPARAM wparam, LPARAM lparam)
         btn = msg_to_button(wparam, msll->mouseData);
 
         if(btn >= 0) {
+            /* check ignore mask */
             if(ctx.ignore_btn_mask & MOUSE_BTN_BIT(btn)) {
                 ctx.ignore_btn_mask &= ~MOUSE_BTN_BIT(btn);
                 return 1;
@@ -218,7 +219,7 @@ LRESULT CALLBACK mouse_ll_proc(int code, WPARAM wparam, LPARAM lparam)
                 KillTimer(ctx.main_window, COMB_TIMER_ID);
 
                 if(motion == MOTION_DOWN) {
-                    /* combination */
+                    /* combination press */
                     if(ctx.conf->button[ctx.pressed_btn].comb_act[btn].code !=
                        MOUSE_ACT_NONE) {
                         do_action(
@@ -264,6 +265,7 @@ LRESULT CALLBACK mouse_ll_proc(int code, WPARAM wparam, LPARAM lparam)
                     int i;
 
                     for(i = 0; i < ctx.combinated; i++) {
+                        /* combination release */
                         if(ctx.combination[i * 2] == btn ||
                            ctx.combination[i * 2 + 1] == btn) {
                             do_action(
@@ -288,6 +290,7 @@ LRESULT CALLBACK mouse_ll_proc(int code, WPARAM wparam, LPARAM lparam)
                 }
             }
 
+            /* generic action */
             do_action(&ctx.conf->button[btn].act,
                       msll, motion);
 
