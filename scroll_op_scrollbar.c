@@ -1,7 +1,7 @@
 /*
  * scroll_op_scrollbar.c  -- scroll operators for scrollbar
  *
- * $Id: scroll_op_scrollbar.c,v 1.6 2005/01/21 05:26:12 hos Exp $
+ * $Id: scroll_op_scrollbar.c,v 1.7 2005/01/21 08:54:53 hos Exp $
  *
  */
 
@@ -11,6 +11,9 @@
 #include <tchar.h>
 #include <commctrl.h>
 #include <math.h>
+
+
+static const support_procs_t *spr = NULL;
 
 
 #define SCROLLBAR_STYLE_MASK (SBS_HORZ | SBS_VERT | SBS_SIZEBOX | SBS_SIZEGRIP)
@@ -294,8 +297,11 @@ int MP_OP_API window_scrollbar_end_scroll(void *ctxp)
     return 1;
 }
 
-int MP_OP_API window_scrollbar_get_operator(scroll_op_procs_t *op, int size)
+int MP_OP_API window_scrollbar_get_operator(scroll_op_procs_t *op, int size,
+                                            const support_procs_t *sprocs)
 {
+    spr = sprocs;
+
     if(size < sizeof(scroll_op_procs_t)) {
         return 0;
     }
@@ -538,8 +544,11 @@ int MP_OP_API neighborhood_scrollbar_end_scroll(void *ctxp)
 }
 
 int MP_OP_API neighborhood_scrollbar_get_operator(scroll_op_procs_t *op,
-                                                  int size)
+                                                  int size,
+                                                  const support_procs_t *sproc)
 {
+    spr = sproc;
+
     if(size < sizeof(scroll_op_procs_t)) {
         return 0;
     }
@@ -688,9 +697,11 @@ int MP_OP_API scrollbar_control_end_scroll(void *ctxp)
     return 1;
 }
 
-int MP_OP_API scrollbar_control_get_operator(scroll_op_procs_t *op,
-                                             int size)
+int MP_OP_API scrollbar_control_get_operator(scroll_op_procs_t *op, int size,
+                                             const support_procs_t *sprocs)
 {
+    spr = sprocs;
+
     if(size < sizeof(scroll_op_procs_t)) {
         return 0;
     }

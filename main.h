@@ -1,7 +1,7 @@
 /*
  * main.h  --
  *
- * $Id: main.h,v 1.32 2005/01/21 05:26:09 hos Exp $
+ * $Id: main.h,v 1.33 2005/01/21 08:54:51 hos Exp $
  *
  */
 
@@ -194,6 +194,8 @@ struct app_context {
     struct hook_context hook_data;
 
     struct mode_context mode_data;
+
+    support_procs_t sprocs;
 };
 
 extern struct app_context ctx;
@@ -219,13 +221,19 @@ LRESULT scroll_modemsg(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 int load_setting(LPWSTR conf_file, int force_apply);
 
 
-int MP_OP_API window_scrollbar_get_operator(scroll_op_procs_t *op, int size);
+int MP_OP_API window_scrollbar_get_operator(scroll_op_procs_t *op, int size,
+                                            const support_procs_t *sprocs);
 int MP_OP_API neighborhood_scrollbar_get_operator(scroll_op_procs_t *op,
-                                                  int size);
-int MP_OP_API scrollbar_control_get_operator(scroll_op_procs_t *op, int size);
-int MP_OP_API trackbar_control_get_operator(scroll_op_procs_t *op, int size);
-int MP_OP_API ie_scroll_get_operator(scroll_op_procs_t *op, int size);
-int MP_OP_API wheel_message_get_operator(scroll_op_procs_t *op, int size);
+                                                  int size,
+                                                  const support_procs_t *spr);
+int MP_OP_API scrollbar_control_get_operator(scroll_op_procs_t *op, int size,
+                                             const support_procs_t *sprocs);
+int MP_OP_API trackbar_control_get_operator(scroll_op_procs_t *op, int size,
+                                            const support_procs_t *sprocs);
+int MP_OP_API ie_scroll_get_operator(scroll_op_procs_t *op, int size,
+                                     const support_procs_t *sprocs);
+int MP_OP_API wheel_message_get_operator(scroll_op_procs_t *op, int size,
+                                         const support_procs_t *sprocs);
 
 struct scroll_operator_def {
     wchar_t *name;
@@ -234,19 +242,15 @@ struct scroll_operator_def {
 extern struct scroll_operator_def builtin_scroll_op[];
 
 
-enum {
-    LOG_LEVEL_DEBUG = 0,
-    LOG_LEVEL_NOTIFY,
-    LOG_LEVEL_WARNING,
-    LOG_LEVEL_ERROR,
-};
-
 int create_logger(void);
 int destroy_logger(void);
 int show_logger(BOOL show);
 
-int log_printf(int level, const wchar_t *fmt, ...);
-int log_print_s_exp(int level, const s_exp_data_t *data);
+int MP_OP_API log_printf(int level, const wchar_t *fmt, ...);
+int MP_OP_API log_print_s_exp(int level, const s_exp_data_t *data, int add_nl);
+int MP_OP_API log_print_lasterror(int level, const wchar_t *msg, int add_nl);
+int MP_OP_API log_print_hresult(int level, const wchar_t *msg, HRESULT hr,
+                                int add_nl);
 
 
 void error_message_le(const char *msg);

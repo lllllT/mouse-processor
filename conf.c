@@ -1,7 +1,7 @@
 /*
  * conf.h  -- configuration
  *
- * $Id: conf.c,v 1.12 2005/01/21 05:26:08 hos Exp $
+ * $Id: conf.c,v 1.13 2005/01/21 08:54:48 hos Exp $
  *
  */
 
@@ -85,29 +85,32 @@ s_exp_data_t *load_file_conf(LPCWSTR path)
     s_exp_read_context_t *rc = NULL;
     s_exp_data_t *data = NULL;
 
-    log_printf(LOG_LEVEL_NOTIFY, L"Reading config file: %ls ... ", path);
+    log_printf(LOG_LEVEL_NOTIFY, L"Reading config file: %ls\n", path);
 
     u8s_path = u8s_dup_from_wcs(path);
     if(u8s_path == NULL) {
-        log_printf(LOG_LEVEL_NOTIFY, L"failed (%hs)\n", strerror(errno));
+        log_printf(LOG_LEVEL_NOTIFY,
+                   L"Failed to read: %ls: %hs\n", path, strerror(errno));
         goto end;
     }
 
     fp = _wfopen(path, L"r");
     if(fp == NULL) {
-        log_printf(LOG_LEVEL_NOTIFY, L"failed (%hs)\n", strerror(errno));
+        log_printf(LOG_LEVEL_NOTIFY,
+                   L"Failed to read: %ls: %hs\n", path, strerror(errno));
         goto end;
     }
 
     rc = open_s_exp_read_context_f(fp, u8s_path);
     if(rc == NULL) {
-        log_printf(LOG_LEVEL_NOTIFY, L"failed (%hs)\n", strerror(errno));
+        log_printf(LOG_LEVEL_NOTIFY,
+                   L"Failed to read: %ls: %hs\n", path, strerror(errno));
         goto end;
     }
 
     data = read_all_s_exp(rc);
 
-    log_printf(LOG_LEVEL_NOTIFY, L"done\n");
+    log_printf(LOG_LEVEL_NOTIFY, L"Read config file completed: %ls\n", path);
 
   end:
     if(u8s_path != NULL) free(u8s_path);
@@ -229,8 +232,7 @@ int apply_mode_name(struct mouse_conf *conf, const s_exp_data_t *mode)
         if(S_EXP_CAR(p)->type != S_EXP_TYPE_CONS ||
            S_EXP_CAAR(p)->type != S_EXP_TYPE_SYMBOL) {
             log_printf(LOG_LEVEL_ERROR, L"Invalid mode format: ");
-            log_print_s_exp(LOG_LEVEL_ERROR, S_EXP_CAR(p));
-            log_printf(LOG_LEVEL_ERROR, L"\n");
+            log_print_s_exp(LOG_LEVEL_ERROR, S_EXP_CAR(p), 1);
             return 0;
         }
 
@@ -281,6 +283,8 @@ int apply_act(struct mouse_action *act,
             return map[i].proc(act, app_conf, conf);
         }
     }
+    log_printf(LOG_LEVEL_WARNING, L"Invalid action format: unknown action: ");
+    log_print_s_exp(LOG_LEVEL_WARNING, conf, 1);
 
     return 0;
 }
@@ -304,6 +308,9 @@ int apply_action_button_d(struct mouse_action *act,
        S_EXP_CADR(conf)->type != S_EXP_TYPE_INTEGER ||
        S_EXP_CADR(conf)->number.val < 1 ||
        S_EXP_CADR(conf)->number.val > MOUSE_BTN_MAX) {
+        log_printf(LOG_LEVEL_WARNING,
+                   L"Invalid action format: button-d action: ");
+        log_print_s_exp(LOG_LEVEL_WARNING, conf, 1);
         return 0;
     }
 
@@ -322,6 +329,9 @@ int apply_action_button_u(struct mouse_action *act,
        S_EXP_CADR(conf)->type != S_EXP_TYPE_INTEGER ||
        S_EXP_CADR(conf)->number.val < 1 ||
        S_EXP_CADR(conf)->number.val > MOUSE_BTN_MAX) {
+        log_printf(LOG_LEVEL_WARNING,
+                   L"Invalid action format: button-u action: ");
+        log_print_s_exp(LOG_LEVEL_WARNING, conf, 1);
         return 0;
     }
 
@@ -340,6 +350,9 @@ int apply_action_change_normal(struct mouse_action *act,
 
     if(S_EXP_CDR(conf)->type != S_EXP_TYPE_CONS ||
        S_EXP_CADR(conf)->type != S_EXP_TYPE_SYMBOL) {
+        log_printf(LOG_LEVEL_WARNING,
+                   L"Invalid action format: normal-mode action: ");
+        log_print_s_exp(LOG_LEVEL_WARNING, conf, 1);
         return 0;
     }
 
@@ -347,6 +360,10 @@ int apply_action_change_normal(struct mouse_action *act,
                         app_conf->normal_conf_num,
                         S_EXP_CADR(conf)->symbol.name);
     if(mode == NULL) {
+        log_printf(LOG_LEVEL_WARNING,
+                   L"Invalid action format: "
+                   L"specified normal-mode not found: ");
+        log_print_s_exp(LOG_LEVEL_WARNING, conf, 1);
         return 0;
     }
 
@@ -366,6 +383,9 @@ int apply_action_change_scroll(struct mouse_action *act,
 
     if(S_EXP_CDR(conf)->type != S_EXP_TYPE_CONS ||
        S_EXP_CADR(conf)->type != S_EXP_TYPE_SYMBOL) {
+        log_printf(LOG_LEVEL_WARNING,
+                   L"Invalid action format: scroll-mode action: ");
+        log_print_s_exp(LOG_LEVEL_WARNING, conf, 1);
         return 0;
     }
 
@@ -373,6 +393,10 @@ int apply_action_change_scroll(struct mouse_action *act,
                         app_conf->scroll_conf_num,
                         S_EXP_CADR(conf)->symbol.name);
     if(mode == NULL) {
+        log_printf(LOG_LEVEL_WARNING,
+                   L"Invalid action format: "
+                   L"specified scroll-mode not found: ");
+        log_print_s_exp(LOG_LEVEL_WARNING, conf, 1);
         return 0;
     }
 
@@ -510,9 +534,18 @@ int apply_comm_mode_conf(struct mouse_conf *conf,
                                   &conf->button[m].comb_u_act[n]);
                     }
 
-                    c = s_exp_massq(mode, S_EXP_TYPE_CONS, name, NULL);
-                    if(c == NULL || S_EXP_CAR(c)->type != S_EXP_TYPE_CONS ||
+                    c = s_exp_assq(mode, name);
+                    if(c == NULL ||
+                       c->type != S_EXP_TYPE_CONS ||
+                       S_EXP_CAR(c)->type != S_EXP_TYPE_CONS ||
                        apply_button_act(act[0], app_conf, S_EXP_CAR(c)) == 0) {
+                        if(c != NULL) {
+                            log_printf(
+                                LOG_LEVEL_WARNING,
+                                L"Invalid action format: %ls: ", name);
+                            log_print_s_exp(LOG_LEVEL_WARNING, c, 1);
+                        }
+
                         if(n == m && set_default_p) {
                             act[0]->code =
                                 (s == 0 ?
@@ -683,7 +716,8 @@ int apply_scroll_operator(struct app_setting *app_conf)
 
         /* load operator */
         if(builtin_scroll_op[i].get_op_proc(&op_conf->proc,
-                                            sizeof(scroll_op_procs_t)) == 0) {
+                                            sizeof(scroll_op_procs_t),
+                                            &ctx.sprocs) == 0) {
             memset(&op_conf->proc, 0, sizeof(scroll_op_procs_t));
             continue;
         }
@@ -814,6 +848,9 @@ int apply_scroll_window(struct app_setting *app_conf)
         e = S_EXP_CAR(p);
 
         if(e->type != S_EXP_TYPE_CONS) {
+            log_printf(LOG_LEVEL_WARNING,
+                       L"Invalid scroll-window format: ");
+            log_print_s_exp(LOG_LEVEL_WARNING, e, 1);
             continue;
         }
 
@@ -821,6 +858,9 @@ int apply_scroll_window(struct app_setting *app_conf)
         if(get_class_title_regexp(S_EXP_CAR(e),
                                   &class_re, &title_re,
                                   &class_or_title) == 0) {
+            log_printf(LOG_LEVEL_WARNING,
+                       L"Invalid class/title regexp format: ");
+            log_print_s_exp(LOG_LEVEL_WARNING, e, 1);
             continue;
         }
 
@@ -828,6 +868,8 @@ int apply_scroll_window(struct app_setting *app_conf)
         if(S_EXP_CDR(e)->type != S_EXP_TYPE_CONS ||
            S_EXP_CADR(e)->type != S_EXP_TYPE_CONS ||
            S_EXP_CAADR(e)->type != S_EXP_TYPE_SYMBOL) {
+            log_printf(LOG_LEVEL_WARNING, L"Invalid operator format: ");
+            log_print_s_exp(LOG_LEVEL_WARNING, e, 1);
             continue;
         }
 
@@ -844,6 +886,8 @@ int apply_scroll_window(struct app_setting *app_conf)
             }
         }
         if(op == NULL) {
+            log_printf(LOG_LEVEL_WARNING, L"operator not found: ");
+            log_print_s_exp(LOG_LEVEL_WARNING, S_EXP_CADR(e), 1);
             continue;
         }
 
@@ -915,7 +959,7 @@ int load_setting(LPWSTR conf_file, int force_apply)
 
     conf.conf_file = conf_file;
 
-    log_printf(LOG_LEVEL_NOTIFY, L"\n");
+    log_printf(LOG_LEVEL_NOTIFY, L"\n" L"Loading configuration...\n");
 
     /* load setting file */
     conf.conf_data = load_conf(conf.conf_file);
@@ -950,6 +994,8 @@ int load_setting(LPWSTR conf_file, int force_apply)
         }
     }
 
+    log_printf(LOG_LEVEL_NOTIFY, L"Load configuration completed\n");
+
     /* replace config */
     {
         struct app_setting prev_conf;
@@ -970,7 +1016,6 @@ int load_setting(LPWSTR conf_file, int force_apply)
 
         free_setting(&prev_conf);
     }
-                
 
     return 1;
 }

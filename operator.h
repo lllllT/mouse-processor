@@ -1,7 +1,7 @@
 /*
  * operator.h  -- operator definition
  *
- * $Id: operator.h,v 1.4 2005/01/21 05:26:09 hos Exp $
+ * $Id: operator.h,v 1.5 2005/01/21 08:54:51 hos Exp $
  *
  */
 
@@ -24,7 +24,10 @@
 
 /* type of operator */
 enum {
-    MP_OP_TYPE_SCROLL
+    MP_OP_TYPE_SUPPORT,         /* support procedures */
+    MP_OP_TYPE_SCROLL,          /* scroll operator */
+
+    MP_OP_TYPE_END
 };
 
 
@@ -45,6 +48,29 @@ struct operator_procs_header {
 typedef struct operator_procs_header op_procs_hdr_t;
 
 
+/* support procedures provided by main module */
+struct support_procs {
+    op_procs_hdr_t hdr;
+
+    /* logging procs */
+    int (MP_OP_API * log_printf)(int level, const wchar_t *fmt, ...);
+    int (MP_OP_API * log_s_exp)(int level, const s_exp_data_t *data,
+                                int add_nl);
+    int (MP_OP_API * log_lasterror)(int level, const wchar_t *msg, int add_nl);
+    int (MP_OP_API * log_hresult)(int level, const wchar_t *msg, HRESULT hr,
+                                  int add_nl);
+};
+typedef struct support_procs support_procs_t;
+
+/* log level */
+enum {
+    LOG_LEVEL_DEBUG = 0,
+    LOG_LEVEL_NOTIFY,
+    LOG_LEVEL_WARNING,
+    LOG_LEVEL_ERROR,
+};
+
+
 /* scroll operator procedure types */
 typedef int (MP_OP_API * get_context_size_proc_t)(const op_arg_t *);
 typedef int (MP_OP_API * init_context_proc_t)(void *, int, const op_arg_t *);
@@ -62,7 +88,8 @@ struct scroll_operator_procs {
 };
 typedef struct scroll_operator_procs scroll_op_procs_t;
 
-typedef int (MP_OP_API * get_operator_proc_t)(scroll_op_procs_t *, int);
+typedef int (MP_OP_API * get_operator_proc_t)(scroll_op_procs_t *, int,
+                                              const support_procs_t *);
 
 
 #endif /* __OPERATOR_H__ */

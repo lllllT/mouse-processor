@@ -1,7 +1,7 @@
 /*
  * main.c  -- main part of mouse-processor
  *
- * $Id: main.c,v 1.27 2005/01/21 04:38:13 hos Exp $
+ * $Id: main.c,v 1.28 2005/01/21 08:54:50 hos Exp $
  *
  */
 
@@ -111,13 +111,20 @@ void error_message_id(const char *msg, DWORD id, BOOL is_hex)
     if(FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER |
                       FORMAT_MESSAGE_FROM_SYSTEM,
                       NULL, id, 0, (LPWSTR)(void *)&buf1, 0, NULL) != 0) {
+        int len = wcslen(buf1);
+        while(buf1[len - 1] == L'\n') {
+            buf1[len - 1] = 0;
+            len -= 1;
+        }
+
         buf2 = (WCHAR *)
-               malloc(sizeof(WCHAR) * (strlen(msg) + 2 + wcslen(buf1) + 1));
+               malloc(sizeof(WCHAR) * (strlen(msg) + wcslen(buf1) + 32));
         if(buf2 == NULL) {
             goto end;
         }
 
-        wsprintfW(buf2, L"%hs: %ls", msg, buf1);
+        wsprintfW(buf2, (is_hex ? L"%hs: %ls (0x%08X)" : L"%hs: %ls (%d)"),
+                  msg, buf1, id);
     } else {
         buf2 = (WCHAR *)malloc(sizeof(WCHAR) * (strlen(msg) + 32));
         if(buf2 == NULL) {
@@ -399,7 +406,7 @@ HWND create_main_window(void)
         ret = RegisterClassEx(&wc);
         if(ret == 0) {
             return NULL;
-        }        
+        }
     }
 
 
@@ -501,6 +508,13 @@ int main(int ac, char **av)
         error_message_le("create_logger() failed");
         return 1;
     }
+
+    ctx.sprocs.hdr.api_ver = MP_OP_API_VERSION;
+    ctx.sprocs.hdr.type = MP_OP_TYPE_SUPPORT;
+    ctx.sprocs.log_printf = log_printf;
+    ctx.sprocs.log_s_exp = log_print_s_exp;
+    ctx.sprocs.log_lasterror = log_print_lasterror;
+    ctx.sprocs.log_hresult = log_print_hresult;
 
     /* command line option */
     {

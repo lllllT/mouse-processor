@@ -1,7 +1,7 @@
 /*
  * scroll.c  -- scroll window
  *
- * $Id: scroll.c,v 1.23 2005/01/21 05:26:10 hos Exp $
+ * $Id: scroll.c,v 1.24 2005/01/21 08:54:52 hos Exp $
  *
  */
 
@@ -97,8 +97,7 @@ LRESULT start_scroll_mode(struct mode_conf *data)
     }
 
     log_printf(LOG_LEVEL_DEBUG, L"match: ");
-    log_print_s_exp(LOG_LEVEL_DEBUG, target_win_conf->regexp);
-    log_printf(LOG_LEVEL_DEBUG, L"\n");
+    log_print_s_exp(LOG_LEVEL_DEBUG, target_win_conf->regexp, 1);
 
     /* start operator */
     {
@@ -116,7 +115,8 @@ LRESULT start_scroll_mode(struct mode_conf *data)
             if(ctx.mode_data.scroll.op_context_size < 0) {
                 log_printf(LOG_LEVEL_DEBUG,
                            L"scroll operator: "
-                           L"start fail (get_context_size)\n");
+                           L"start fail (get_context_size): ");
+                log_print_s_exp(LOG_LEVEL_DEBUG, target_win_conf->args, 1);
                 return 0;
             }
         } else {
@@ -137,7 +137,8 @@ LRESULT start_scroll_mode(struct mode_conf *data)
                    ctx.mode_data.scroll.op_context_size,
                    &arg) == 0) {
                 log_printf(LOG_LEVEL_DEBUG,
-                           L"scroll operator: start fail (init_context)\n");
+                           L"scroll operator: start fail (init_context): ");
+                log_print_s_exp(LOG_LEVEL_DEBUG, target_win_conf->args, 1);
                 return 0;
             }
         }
@@ -146,9 +147,8 @@ LRESULT start_scroll_mode(struct mode_conf *data)
     }
 
     if(wcscmp(ctx.mode_data.scroll.op->name, L"or") != 0) {
-        log_printf(LOG_LEVEL_DEBUG, L"scroll operator: ");
-        log_print_s_exp(LOG_LEVEL_DEBUG, target_win_conf->args);
-        log_printf(LOG_LEVEL_DEBUG, L"\n");
+        log_printf(LOG_LEVEL_DEBUG, L"scroll operator: started: ");
+        log_print_s_exp(LOG_LEVEL_DEBUG, target_win_conf->args, 1);
     }
 
     return 0;

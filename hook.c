@@ -1,7 +1,7 @@
 /*
  * hook.c  -- hook funcs
  *
- * $Id: hook.c,v 1.22 2005/01/18 10:28:25 hos Exp $
+ * $Id: hook.c,v 1.23 2005/01/21 08:54:48 hos Exp $
  *
  */
 
@@ -346,7 +346,7 @@ LRESULT CALLBACK mouse_ll_proc(int code, WPARAM wparam, LPARAM lparam)
                                     ctx.hook_data.combination[i * 2 + 1]],
                                 msll);
 
-                            ctx.hook_data.ignore_btn_mask |= 
+                            ctx.hook_data.ignore_btn_mask |=
                                 MOUSE_BTN_BIT(
                                     btn == ctx.hook_data.combination[i * 3] ?
                                     ctx.hook_data.combination[i * 3 + 1] :

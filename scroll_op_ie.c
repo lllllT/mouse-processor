@@ -1,7 +1,7 @@
 /*
  * scroll_op_ie.c  -- scroll operator for IE component
  *
- * $Id: scroll_op_ie.c,v 1.2 2005/01/21 05:26:11 hos Exp $
+ * $Id: scroll_op_ie.c,v 1.3 2005/01/21 08:54:52 hos Exp $
  *
  */
 
@@ -13,6 +13,9 @@
 #include "automation.h"
 #include <oleacc.h>
 #include <math.h>
+
+
+static const support_procs_t *spr = NULL;
 
 
 struct ie_scroll_dpids {
@@ -39,6 +42,11 @@ HRESULT get_ie_elem_at(IDispatch *doc, int x, int y, IDispatch **ret_elem)
         hres = get_property_dp(inner_doc, L"parentWindow", &win);
         if(FAILED(hres)) {
             IDispatch_Release(inner_doc);
+
+            spr->log_hresult(
+                LOG_LEVEL_NOTIFY,
+                L"ie-scroll: Failed to get document.parentWindow",
+                hres, 1);
             return hres;
         }
 
@@ -65,15 +73,27 @@ HRESULT get_ie_elem_at(IDispatch *doc, int x, int y, IDispatch **ret_elem)
         hres = call_method_s(inner_doc, L"elementFromPoint", args, 2, &var);
         IDispatch_Release(inner_doc);
         if(FAILED(hres)) {
+            spr->log_hresult(
+                LOG_LEVEL_NOTIFY,
+                L"ie-scroll: Failed to get document.elementFromPoint",
+                hres, 1);
             return hres;
         }
 
         if(var.vt != VT_DISPATCH) {
+            spr->log_printf(
+                LOG_LEVEL_NOTIFY,
+                L"ie-scroll: Failed to get document.elementFromPoint: "
+                L"return value is not IDispatch\n");
             return E_FAIL;
         }
 
         elem = var.pdispVal;
         if(elem == NULL) {
+            spr->log_printf(
+                LOG_LEVEL_NOTIFY,
+                L"ie-scroll: Failed to get document.elementFromPoint: "
+                L"return value is NULL\n");
             return E_FAIL;
         }
 
@@ -83,8 +103,16 @@ HRESULT get_ie_elem_at(IDispatch *doc, int x, int y, IDispatch **ret_elem)
             hres = get_property_str(elem, L"tagName", &str);
             if(FAILED(hres)) {
                 IDispatch_Release(elem);
+
+                spr->log_hresult(
+                    LOG_LEVEL_NOTIFY,
+                    L"ie-scroll: Failed to get element.tagName",
+                    hres, 1);
                 return hres;
             }
+            spr->log_printf(LOG_LEVEL_DEBUG,
+                            L"ie-scroll: tagName of target element: %ls\n",
+                            str);
 
             if(str == NULL || wcsstr(str, L"FRAME") == NULL) {
                 SysFreeString(str);
@@ -103,6 +131,12 @@ HRESULT get_ie_elem_at(IDispatch *doc, int x, int y, IDispatch **ret_elem)
         }
         if(FAILED(hres)) {
             *ret_elem = elem;
+
+            spr->log_hresult(
+                LOG_LEVEL_NOTIFY,
+                L"ie-scroll: Failed to get "
+                L"frameElement.contentWindow.document",
+                hres, 1);
             break;
         }
 
@@ -194,14 +228,21 @@ HRESULT get_scrollable_parent(IDispatch *elem, IDispatch **ret_elem)
                  wcscmp(overflow, L"scroll") == 0))) {
                 long cw, ch, sw, sh;
 
-                SysFreeString(overflow);
-                SysFreeString(tagname);
 
                 if(SUCCEEDED(get_property_long(elem, L"clientWidth", &cw)) &&
                    SUCCEEDED(get_property_long(elem, L"clientHeight", &ch)) &&
                    SUCCEEDED(get_property_long(elem, L"scrollWidth", &sw)) &&
                    SUCCEEDED(get_property_long(elem, L"scrollHeight", &sh))) {
                     if(cw != 0 && ch != 0 && (cw < sw || ch < sh)) {
+                        spr->log_printf(
+                            LOG_LEVEL_DEBUG,
+                            L"ie-scroll: tagName of scroll target element: "
+                            L"%ls\n",
+                            tagname);
+
+                        SysFreeString(overflow);
+                        SysFreeString(curoverflow);
+                        SysFreeString(tagname);
                         break;
                     }
                 }
@@ -217,10 +258,17 @@ HRESULT get_scrollable_parent(IDispatch *elem, IDispatch **ret_elem)
             hres = get_property_dp(elem, L"parentElement", &parent);
             IDispatch_Release(elem);
             if(FAILED(hres)) {
+                spr->log_hresult(
+                    LOG_LEVEL_NOTIFY,
+                    L"ie-scroll: Failed to get element.parentElement",
+                    hres, 1);
                 return hres;
             }
 
             if(parent == NULL) {
+                spr->log_printf(
+                    LOG_LEVEL_DEBUG,
+                    L"ie-scroll: scroll target element is not found\n");
                 return E_FAIL;
             }
 
@@ -243,6 +291,10 @@ IDispatch *get_ie_target(HWND hwnd, int x, int y)
 
     getobj_msg = RegisterWindowMessageW(L"WM_HTML_GETOBJECT");
     if(getobj_msg == 0) {
+        spr->log_lasterror(
+            LOG_LEVEL_NOTIFY,
+            L"ie-scroll: Failed to call "
+            L"RegisterWindowMessage(\"WM_HTML_GETOBJECT\")", 1);
         return NULL;
     }
 
@@ -250,12 +302,19 @@ IDispatch *get_ie_target(HWND hwnd, int x, int y)
                               SMTO_ABORTIFHUNG, 1000,
                               (PDWORD_PTR)&res);
     if(lres == 0) {
+        spr->log_lasterror(
+            LOG_LEVEL_NOTIFY,
+            L"ie-scroll: Failed to call SendMessageTimeout()", 1);
         return NULL;
     }
 
     hres = ObjectFromLresult(res, &IID_IDispatch, 0,
                              (void **)(void *)&top_doc);
     if(FAILED(hres)) {
+        spr->log_hresult(
+            LOG_LEVEL_NOTIFY,
+            L"ie-scroll: Failed to call ObjectFromLresult()",
+            hres, 1);
         return NULL;
     }
 
@@ -538,8 +597,11 @@ int MP_OP_API ie_scroll_end_scroll(void *ctxp)
     return 1;
 }
 
-int MP_OP_API ie_scroll_get_operator(scroll_op_procs_t *op, int size)
+int MP_OP_API ie_scroll_get_operator(scroll_op_procs_t *op, int size,
+                                     const support_procs_t *sprocs)
 {
+    spr = sprocs;
+
     if(size < sizeof(scroll_op_procs_t)) {
         return 0;
     }

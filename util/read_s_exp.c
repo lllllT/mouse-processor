@@ -1,7 +1,7 @@
 /*
  * read_s_exp.c  -- read s-expression
  *
- * $Id: read_s_exp.c,v 1.4 2005/01/07 04:51:44 hos Exp $
+ * $Id: read_s_exp.c,v 1.5 2005/01/21 08:54:56 hos Exp $
  *
  */
 
@@ -15,25 +15,25 @@
  *         | <symbol>
  *         | <string>
  *         | <list>
- * 
+ *
  * <boolean> = #t | #f
- * 
+ *
  * <number> = <number 2>
  *          | <number 8>
  *          | <number 10>
  *          | <number 16>
- * 
+ *
  * <number R> = <radix R> <integer R>
- * 
+ *
  * <integer R> = <sign> <digit R>+
- * 
+ *
  * <sign> = <empty> | + | -
- * 
+ *
  * <radix 2> = #b
  * <radix 8> = #o
  * <radix 10> = <empty> | #d
  * <radix 16> = #x
- * 
+ *
  * <digit 2> = 0 | 1
  * <digit 8> = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7
  * <digit 10> = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
@@ -45,27 +45,27 @@
  *            | <digit 10>+ . <digit 10>*
  *
  * <symbol> = <identifier>
- * 
+ *
  * <identifier> = <initial> <subsequent>*
  *              | <peculiar identifier>
- * 
+ *
  * <initial> = <letter> | <special initial>
  * <subsequent> = <initial> | <digit> | <special subsequent>
- * 
+ *
  * <letter> = a | b | c | ... | z
  * <special initial> = ! | $ | % | & | * | / | : | < | = | > | ? | ^ | _ | ~
  * <digit> = <digit 10>
  * <special subsequent> = + | - | . | @
  * <peculiar identifier> = + | - | ...
- * 
+ *
  * <string> = " <string element>* "
- * 
+ *
  * <string element> = <any character other than " or \> | \" | \\
- * 
+ *
  * <list> = ( <datum>* )
  *        | ( <datum>+ . <datum> )
- * 
- * <empty> = 
+ *
+ * <empty> =
  *
  */
 

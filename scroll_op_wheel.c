@@ -1,13 +1,16 @@
 /*
  * scroll_op_wheel.c  -- scroll operator for wheel message
  *
- * $Id: scroll_op_wheel.c,v 1.3 2005/01/21 05:26:13 hos Exp $
+ * $Id: scroll_op_wheel.c,v 1.4 2005/01/21 08:54:55 hos Exp $
  *
  */
 
 #include "operator.h"
 #include "scroll_op_utils.h"
 #include <math.h>
+
+
+static const support_procs_t *spr = NULL;
 
 
 struct wheel_message_context {
@@ -125,8 +128,11 @@ int MP_OP_API wheel_message_end_scroll(void *ctxp)
     return 1;
 }
 
-int MP_OP_API wheel_message_get_operator(scroll_op_procs_t *op, int size)
+int MP_OP_API wheel_message_get_operator(scroll_op_procs_t *op, int size,
+                                         const support_procs_t *sprocs)
 {
+    spr = sprocs;
+
     if(size < sizeof(scroll_op_procs_t)) {
         return 0;
     }

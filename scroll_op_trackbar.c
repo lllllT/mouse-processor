@@ -1,7 +1,7 @@
 /*
  * scroll_op_trackbar.c  -- scroll operator for trackbar control
  *
- * $Id: scroll_op_trackbar.c,v 1.3 2005/01/21 05:26:12 hos Exp $
+ * $Id: scroll_op_trackbar.c,v 1.4 2005/01/21 08:54:54 hos Exp $
  *
  */
 
@@ -10,6 +10,9 @@
 #include "util.h"
 #include <commctrl.h>
 #include <math.h>
+
+
+static const support_procs_t *spr = NULL;
 
 
 typedef int (* trackbar_scroll_proc_t)(HWND, HWND, UINT, double *, int);
@@ -330,8 +333,11 @@ int MP_OP_API trackbar_control_end_scroll(void *ctxp)
     return 1;
 }
 
-int MP_OP_API trackbar_control_get_operator(scroll_op_procs_t *op, int size)
+int MP_OP_API trackbar_control_get_operator(scroll_op_procs_t *op, int size,
+                                            const support_procs_t *sprocs)
 {
+    spr = sprocs;
+
     if(size < sizeof(scroll_op_procs_t)) {
         return 0;
     }

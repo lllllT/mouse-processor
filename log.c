@@ -1,7 +1,7 @@
 /*
  * log.c  -- logging procs
  *
- * $Id: log.c,v 1.13 2005/01/20 08:15:13 hos Exp $
+ * $Id: log.c,v 1.14 2005/01/21 08:54:49 hos Exp $
  *
  */
 
@@ -352,7 +352,8 @@ int show_logger(BOOL show)
     return 1;
 }
 
-int log_printf(int level, const wchar_t *fmt, ...)
+
+int MP_OP_API log_printf(int level, const wchar_t *fmt, ...)
 {
     va_list ap;
     static wchar_t *buf = NULL;
@@ -406,7 +407,7 @@ int log_printf(int level, const wchar_t *fmt, ...)
     return ret;
 }
 
-int log_print_s_exp(int level, const s_exp_data_t *data)
+int MP_OP_API log_print_s_exp(int level, const s_exp_data_t *data, int add_nl)
 {
     int ret;
     unsigned char *str;
@@ -427,9 +428,56 @@ int log_print_s_exp(int level, const s_exp_data_t *data)
         return 0;
     }
 
-    ret = log_append(wstr);
+    ret = log_printf(level, L"%ls%hs", wstr, (add_nl ? "\n" : ""));
 
     free(str);
 
     return ret;
+}
+
+static
+int log_print_errid(int level, const wchar_t *msg, int id,
+                    int add_nl, int is_hex)
+{
+    LPWSTR buf = NULL;
+    int ret;
+
+    if(level < log_level) {
+        return 0;
+    }
+
+    if(FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER |
+                      FORMAT_MESSAGE_FROM_SYSTEM,
+                      NULL, id, 0, (LPWSTR)(void *)&buf, 0, NULL) != 0) {
+        int len = wcslen(buf);
+        while(buf[len - 1] == L'\n') {
+            buf[len - 1] = 0;
+            len -= 1;
+        }
+
+        ret = log_printf(level, L"%ls: %ls", msg, buf);
+
+        LocalFree(buf);
+    } else {
+        ret = log_printf(level, L"%ls", msg);
+    }
+    log_printf(level, (is_hex ? L" (0x%08X%hs)" : L" (%d%hs)"),
+               id, (add_nl ? "\n" : ""));
+
+    return ret;
+}
+
+int MP_OP_API log_print_lasterror(int level, const wchar_t *msg, int add_nl)
+{
+    return log_print_errid(level, msg, GetLastError(), add_nl, 0);
+}
+
+int MP_OP_API log_print_hresult(int level, const wchar_t *msg, HRESULT hr,
+                                int add_nl)
+{
+    if(HRESULT_FACILITY(hr) == FACILITY_WINDOWS) {
+        return log_print_errid(level, msg, HRESULT_CODE(hr), add_nl, 0);
+    } else {
+        return log_print_errid(level, msg, hr, add_nl, 1);
+    }
 }
