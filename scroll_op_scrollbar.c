@@ -1,7 +1,7 @@
 /*
  * scroll_op_scrollbar.c  -- scroll operators for scrollbar
  *
- * $Id: scroll_op_scrollbar.c,v 1.10 2005/01/28 02:58:45 hos Exp $
+ * $Id: scroll_op_scrollbar.c,v 1.11 2005/02/01 04:09:13 hos Exp $
  *
  */
 
@@ -195,6 +195,7 @@ struct window_scrollbar_context {
 
     HWND target;
     SIZE target_size;
+    LONG style;
 
     double x_ratio, y_ratio;
     double dx, dy;
@@ -252,13 +253,11 @@ int MP_OP_API window_scrollbar_init_ctx(void *ctxp, int size,
       case SCROLLBAR_MODE_PERCENTAGE:
       case SCROLLBAR_MODE_BARUNIT:
       {
-          LONG_PTR style;
-
-          style = GetWindowLongPtr(ctx->target, GWL_STYLE);
-          if((style & (WS_HSCROLL | WS_VSCROLL)) == 0) {
+          ctx->style = GetWindowLong(ctx->target, GWL_STYLE);
+          if((ctx->style & (WS_HSCROLL | WS_VSCROLL)) == 0) {
               spr->log_printf(LOG_LEVEL_DEBUG,
                               L"window-scrollbar: window has no scrollbar: "
-                              L"style = 0x%08X\n", style);
+                              L"style = 0x%08X\n", ctx->style);
               return 0;
           }
 
@@ -296,10 +295,15 @@ int MP_OP_API window_scrollbar_scroll(void *ctxp, double dx, double dy)
     ctx->dx += dx * ctx->x_ratio;
     ctx->dy += dy * ctx->y_ratio;
 
-    ctx->scroll_proc(ctx->target, SB_HORZ, ctx->target, WM_HSCROLL,
-                     &ctx->dx, ctx->target_size.cx);
-    ctx->scroll_proc(ctx->target, SB_VERT, ctx->target, WM_VSCROLL,
-                     &ctx->dy, ctx->target_size.cx);
+    if(ctx->style & WS_HSCROLL) {
+        ctx->scroll_proc(ctx->target, SB_HORZ, ctx->target, WM_HSCROLL,
+                         &ctx->dx, ctx->target_size.cx);
+    }
+
+    if(ctx->style & WS_VSCROLL) {
+        ctx->scroll_proc(ctx->target, SB_VERT, ctx->target, WM_VSCROLL,
+                         &ctx->dy, ctx->target_size.cx);
+    }
 
     return 1;
 }
