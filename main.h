@@ -1,7 +1,7 @@
 /*
  * main.h  --
  *
- * $Id: main.h,v 1.29 2005/01/18 10:28:25 hos Exp $
+ * $Id: main.h,v 1.30 2005/01/19 05:51:14 hos Exp $
  *
  */
 
@@ -159,8 +159,6 @@ struct hook_context {
 
 /* scroll mode context */
 struct scroll_mode_context {
-    POINT start_pt;
-
     HWND target;
     LPWSTR class;
     LPWSTR title;
@@ -176,8 +174,9 @@ struct scroll_mode_context {
 /* mode context */
 struct mode_context {
     struct mouse_conf *cur_conf;
-
     int cur_mode;
+
+    POINT start_pt;
 
     union {
         struct scroll_mode_context scroll;
