@@ -1,0 +1,173 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=euc-jp">
+<link rel="stylesheet" type="text/css" href="std.css">
+<link rel="stylesheet" type="text/css" href="manual.css">
+<title>Customize mouse-processor setting file</title>
+</head>
+<body>
+
+<h1>Customize mouse-processor setting file</h1>
+
+<h2>Introduction</h2>
+
+<p>
+このドキュメントでは mouse-processor の設定ファイルの内容 (書式、パラメータ等) について説明します。<br>
+付属の設定ファイル <a href="../default.mprc"><span class="fname">default.mprc</span></a> で一通りの機能を利用できますが、
+設定ファイルをカスタマイズすることで、より自分好みの動作をするよう設定を変更することができます。
+</p>
+
+
+<h2>Setting file</h2>
+
+<p>
+設定ファイルはコマンドライン引数、または所定の場所から検索されます。
+</p>
+
+<ul>
+<li>コマンドライン引数で設定ファイルを指定した場合は他の場所からの検索は行なわれません。</li>
+<li>コマンドライン引数を指定しなかった場合は以下の場所を順に検索し、最初に見付かったファイルを使用します。
+  <ul>
+  <li>環境変数 <span class="env">HOME</span> が設定してある場合、そのディレクトリにある <span class="fname">.mprc</span> ファイル。</li>
+  <li><span class="fname">mp.exe</span> と同じディレクトリにある <span class="fname">default.mprc</span> ファイル。</li>
+  </ul>
+</li>
+</ul>
+
+
+<h2>File format</h2>
+
+<h3>Character Encoding</h3>
+
+<p>
+設定ファイルの文字エンコードは UTF-8 です。
+ASCII 文字以外、例えば日本語等を含める場合には必ず UTF-8 でファイルを保存して下さい。
+</p>
+
+
+<h3>Syntax</h3>
+
+<p>
+設定はS式で表記され、主に連想リストで構成されます。<br>
+S式の詳細については <a href="#appendix:s-exp">Appendix: S-Expression</a> で説明していますが、通常はそれほど意識する必要も無いでしょう。
+</p>
+
+
+<h3>Global setting</h3>
+
+<p>
+<code class="cmd">(global <span class="omit">...</span>)</code> では全体の動作に影響する設定を記述します。
+</p>
+
+<dl class="ref">
+<dt><code class="cmd">(combination-time . <span class="var">threshold-time</span>)</code></dt>
+<dd>
+2ボタン同時押しを認識する最大の時間間隔をミリ秒単位で指定します。<br>
+1つめのボタンを押してから、<code class="cmd"><span class="var">threshold-time</span></code> ミリ秒以内に2つめのボタンを押すと、
+2ボタン同時押しをされたものと認識します。
+<div class="ex">
+例: 時間間隔を 0.5 秒に設定
+<pre>
+(global
+ (combination-time . 500)
+ <span class="omit">...</span>
+ )
+</pre>
+</div>
+</dd>
+</dl>
+
+
+<h2><a name="appendix">Appendix</a></h2>
+
+<h3><a name="appendix:s-exp">S-Expression</a></h3>
+
+<p>
+S式は以下の要素で構成されます。
+</p>
+
+<dl>
+<dt>コメント</dt>
+<dd>
+";" (セミコロン) から、その行の末尾まではコメントとして扱われます。
+</dd>
+
+<dt>整数</dt>
+<dd>
+数値を表わします。
+接頭辞 #o #d #x を付けることで、それぞれ8進数、10進数、16進数で表記できます。
+<div class="ex">
+例: 以下は全て10進数の 26 と同じ値になります。
+<pre>
+26  #o32  #d26  #x1A
+</pre>
+</div>
+</dd>
+
+<dt>浮動小数点数</dt>
+<dd>
+数字に小数点 "." を含めることで有限精度の実数を表記できます。
+</dd>
+
+<dt>シンボル</dt>
+<dd>
+アルファベットや記号で構成され、機能名などに用いられる識別子です。
+</dd>
+
+<dt>文字列</dt>
+<dd>
+ダブルクオーテーション (二重引用符、"")でくくられ、任意の文字を含めることができます。
+ダブルクオーテーションを含める場合は直前に "\" を前置します。"\" 自身を含めたい場合も同様です。
+</dd>
+
+<dt>cons セル</dt>
+<dd>
+car 部と cdr 部の二つで構成され、それぞれに任意の値を入れることができます。
+car と cdr の間を "." で区切り、全体を括弧 () でくくって表記します。
+<div class="ex">
+例: car 部に "car" というシンボル、cdr 部に "cdr" という文字列を入れた cons セルは、以下のように表記します。
+<pre>
+(car . "cdr")
+</pre>
+</div>
+</dd>
+
+<dt>リスト</dt>
+<dd>
+リストは cons セルの連なりで構成されます。<br>
+n個の要素を持つリストは n個の cons セルで構成され、それぞれの car 部は要素を cdr 部は次の cons セルを保持します。最後の cdr 部は空リスト <code>()</code> を保持します。
+<div class="ex">
+例: 4つの要素を持ち、それぞれの要素が整数のリストは以下のように表記します。
+<pre>
+(1 . (2 . (3 . (4 . ()))))
+</pre>
+</div>
+このままでは表記が繁雑となるため、cdr 部が cons セルの場合は、car 部と cdr 部の間のドットと cdr 部をくくる括弧は省略することができます。
+<div class="ex">
+例: 以下は全て同じリストを表わします。
+<pre>
+(1 2 3 4)
+(1 . (2 3 4))
+(1 . (2 . (3 . (4 . ()))))
+</pre>
+</div>
+</dd>
+</dl>
+
+<hr>
+
+<address>
+webmaster@tamanegi.org
+</address>
+
+<!-- $Id: CUSTOMIZE.html,v 1.1 2005/01/25 09:33:51 hos Exp $ -->
+
+<!--
+Local Variables:
+coding: euc-jp
+End:
+-->
+
+</body>
+</html>

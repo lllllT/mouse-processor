@@ -1,0 +1,43 @@
+/* -*- mode: c; coding: euc-jp -*- */
+/*
+ * style of manual
+ *
+ * $Id: manual.css,v 1.1 2005/01/25 09:33:52 hos Exp $
+ *
+ */
+
+code {
+  color: rgb(128, 32, 32);
+  font-size: 90%;
+  font-style: normal;
+  font-family: monospace;
+}
+
+.cmd {
+  font-family: monospace;
+}
+
+.var {
+  font-style: oblique;
+}
+
+.omit {
+  color: rgb(160, 160, 160);
+}
+
+.fname {
+  font: 90% monospace;
+  color: rgb(0, 0, 255);
+}
+
+.env {
+  font: 90% monospace;
+  color: rgb(160, 32, 240);
+}
+
+.ex {
+  margin: 0.2em 0.2em 0.2em 0.3em;
+  padding: 0.3em 0.3em 0.3em 0.5em;
+  background: rgb(240, 255, 240);
+  border: dotted thin rgb(193, 205, 193);
+}
