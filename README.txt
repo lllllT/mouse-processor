@@ -139,7 +139,8 @@ Known Problem
        クラス化して SBM_GETSCROLLINFO メッセージも補足する)。
        ただ、これでも MS Word は動作しない。原因よく分からず。また、
        GetProcAddress() で実行時に関数ポインタを得た場合にも対応できな
-       い。
+       い。UPX 等の packer を使っていて、本来の import table がヘッダ
+       から辿れないものにも対応できない。
 
 
 TODO
@@ -157,4 +158,4 @@ Link
  - mouse-processor <http://www.tamanegi.org/prog/mouse-processor/>
 
 
-$Id: README.txt,v 1.9 2005/02/09 11:05:35 hos Exp $
+$Id: README.txt,v 1.10 2005/02/10 17:27:33 hos Exp $
