@@ -10,6 +10,18 @@
 
 <h1>Customize mouse-processor setting file</h1>
 
+<h2><a name="menu">Menu</a></h2>
+
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#setting-file">Setting file</a></li>
+<li><a href="#file-format">File format</a></li>
+<li><a href="#scroll-op">Scroll operator</a></li>
+<li><a href="#appendix">Appendix</a></li>
+<li><a href="#index">Index</a></li>
+</ul>
+
+
 <h2><a name="introduction">Introduction</a></h2>
 
 <p>
@@ -468,7 +480,7 @@ C:\WINNT\system32\notepad.exe:Notepad:Edit
 ウィンドウクラスとタイトルの両方を指定するには、<code>(and <span class="omit">...</span>)</code> または <code>(or <span class="omit">...</span>)</code> を使います。
 <code>and</code> は両方に一致するウィンドウを、<code>or</code> はどちらかに一致するウィンドウを示します。
 <div class="ex">
-例: メモ帳で "<span class="fname">default.mprc</span>" というファイルを編集しているときのエディットコントロールにのみ一致
+例: メモ帳で <span class="fname">default.mprc</span> というファイルを編集しているときのエディットコントロールにのみ一致
 <pre>
 (and (class "notepad\\.exe:.*:Edit$")
      (title ":default.mprc - メモ帳:"))
@@ -480,7 +492,8 @@ C:\WINNT\system32\notepad.exe:Notepad:Edit
 
 <dt><a name="operator-config"><code>operator-config</code> 設定</a></dt>
 <dd>
-<code>operator-config</code> 設定項目では、<a href="#scroll-op">Scroll operator</a> の動作設定を記述します。
+<code>operator-config</code> 設定項目では、<a href="#scroll-op">Scroll operator</a> の動作設定を記述します。<br>
+詳細については、各 Scroll operator の説明を参照して下さい。
 </dd>
 </dl>
 
@@ -489,13 +502,14 @@ C:\WINNT\system32\notepad.exe:Notepad:Edit
 
 <p>
 Scroll operator は、スクロールモード時にマウスの動きに応じてウィンドウをスクロールさせます。<br>
-どのウィンドウでどの Scroll operator を用いるかは <a href="#scroll-window"><code>scroll-window</code></a> 設定で指定します。
+どのウィンドウでどの Scroll operator を用いるかの対応付けは <a href="#scroll-window"><code>scroll-window</code></a> 設定で指定します。<br>
 スクロール速度や方向などの各 Scroll operator ごとの設定は、<a href="#operator-config"><code>operator-config</code></a> 設定で記述します。
-また、<a href="#scroll-window"><code>scroll-window</code></a> 設定で Scroll operator を指定するときの引数として記述することもできます。
+また、<a href="#scroll-window"><code>scroll-window</code></a> 設定で Scroll operator を指定するときの引数として個別に記述することもできます。
 </p>
 
 <p>
 Scroll operator には以下のものを指定できます。
+</p>
 <div class="refp">
 <dl class="ref">
 <dt><a name="op:window-scrollbar"><code>(window-scrollbar <span class="var">[mode x-ratio y-ratio]</span>)</code></a></dt>
@@ -561,38 +575,152 @@ Windows 標準のスクロールバーを持つウィンドウをスクロールさせます。<br>
  )
 </pre>
 </div>
+<code>drag</code>、<code>percentage</code>、<code>bar-unit</code> の各モードは対象ウィンドウのスタイルに <code>WM_HSCROLL</code> または <code>WM_VSCROLL</code> のうち少なくともいずれかが指定されている必要があります。
+これらのスタイルが指定されていなかった場合はこの実行は失敗します。
 </dd>
 
-<dt><a name="op:neighborhood-scrollbar"><code>neighborhood-scrollbar</code></a></dt>
+<dt><a name="op:neighborhood-scrollbar"><code>(neighborhood-scrollbar <span class="var">[mode x-ratio y-ratio]</span>)</code></a></dt>
 <dd>
-対象ウィンドウのすぐ隣付近にあるスクロールバーコントロールをスクロールさせます。
-<a href="#op:window-scrollbar"><code>window-scrollbar</code></a> とは異なり、対象ウィンドウはスクロールバーを持たず、そのウィンドウの隣 (右側や下側など) にスクロールバーコントロールを個別に持っている場合に使います。<br>
-MS Office 製品や、Acrobat Reader などが該当します。
+対象ウィンドウのすぐ隣付近にあるスクロールバーコントロールをスクロールさせます。<br>
+<a href="#op:window-scrollbar"><code>window-scrollbar</code></a> とは異なり、対象ウィンドウはスクロールバーを持たず、そのウィンドウの隣 (右側や下側など) にスクロールバーコントロールを個別に持っている場合に使います。
+MS Office 製品や、Acrobat Reader などが該当します。<br>
+<code><span class="var">mode</span></code>、<code><span class="var">x-ratio</span></code>、<code><span class="var">y-ratio</span></code> の指定値および設定方法は <a href="#op:window-scrollbar"><code>window-scrollbar</code></a> と同様です。
 </dd>
 
-<dt><a name="op:scrollbar-control"><code>scrollbar-control</code></a></dt>
+<dt><a name="op:scrollbar-control"><code>(scrollbar-control <span class="var">[mode x-ratio y-ratio]</span>)</code></a></dt>
 <dd>
+スクロールバーコントロールを操作します。<br>
+スクロールバー単体を対象とする場合に使います。<br>
+<code><span class="var">mode</span></code> の指定値および設定方法は <a href="#op:window-scrollbar"><code>window-scrollbar</code></a> と同様です。<br>
+<code><span class="var">x-ratio</span></code> と <code><span class="var">y-ratio</span></code> はスクロール速度を指定します。
+スクロール速度は、
+<pre>
+X 方向の動き * <code><span class="var">x-ratio</span></code> + Y 方向の動き * <code><span class="var">y-ratio</span></code>
+</pre>
+に比例します。<br>
+<code>operator-config</code> 設定では、水平スクロールバーは <code>h-bar</code>、垂直スクロールバーは <code>v-bar</code> をキーとして個別に設定を記述します。<br>
+<div class="ex">
+例: 水平スクロールバーの場合はマウスの横の動きでスクロールさせ、垂直スクロールバーの場合はマウスの縦の動きでスクロールさせる
+<pre>
+(scroll-window
+ <span class="omit">...</span>
+ (":ScrollBar$" (scrollbar-control))
+ <span class="omit">...</span>
+ )
+
+(operator-config
+ (scrollbar-control
+  (default-mode . drag)
+  (h-bar
+   (drag 1 0)
+   <span class="omit">...</span>
+   )
+  (v-bar
+   (drag 0 1)
+   <span class="omit">...</span>
+   )
+  )
+ <span class="omit">...</span>
+ )
+</pre>
+</div>
 </dd>
 
-<dt><a name="op:trackbar-control"><code>trackbar-control</code></a></dt>
+<dt><a name="op:trackbar-control"><code>(trackbar-control <span class="var">[mode x-ratio y-ratio]</span>)</code></a></dt>
 <dd>
+トラックバーコントロールを操作します。<br>
+トラックバー単体を対象とする場合に使います。<br>
+<code><span class="var">mode</span></code>、<code><span class="var">x-ratio</span></code>、<code><span class="var">y-ratio</span></code> の指定値および設定方法は <a href="#op:scrollbar-control"><code>scrollbar-control</code></a> と同様です
 </dd>
 
-<dt><a name="op:ie-scroll"><code>ie-scroll</code></a></dt>
+<dt><a name="op:ie-scroll"><code>(ie-scroll <span class="var">[mode x-ratio y-ratio]</span>)</code></a></dt>
 <dd>
+Internet Explorer をスクロールさせます。<br>
+IE コンポーネントを使っているアプリケーション、HTML ヘルプやタブブラウザなども使用できます。<br>
+<code><span class="var">x-ratio</span></code>、<code><span class="var">y-ratio</span></code> の指定値および設定方法は <a href="#op:window-scrollbar"><code>window-scrollbar</code></a> と同様です。<br>
+<code><span class="var">mode</span></code> にはマウスを動かす速度とスクロールの速度をどのように対応づけるかを指定します。
+省略した場合は、<code>operator-config</code> 設定の <code>default-mode</code> の設定を使用します。<br>
+<code><span class="var">mode</span></code> には以下のモードを指定できます。
+  <dl class="subitem">
+  <dt><code>drag</code></dt>
+  <dd>
+  スクロールバーのサムをドラッグしたときとほぼ同じ速度でスクロールします。<br>
+  <a href="#mode-spec:scroll-ratio"><code>scroll-ratio</code></a>、<code><span class="var">x-ratio</span></code>、<code><span class="var">y-ratio</span></code> で設定した値が全て <code>1</code> だった場合に、マウスカーソルが1ピクセル移動するぶんマウスを動かすと、サムを1ピクセル分ドラッグするのと同じだけスクロールします。
+  </dd>
+
+  <dt><code>percentage</code></dt>
+  <dd>
+  スクロールバーの長さに関わらず一定の割合でスクロールします。<br>
+  <a href="#mode-spec:scroll-ratio"><code>scroll-ratio</code></a>、<code><span class="var">x-ratio</span></code>、<code><span class="var">y-ratio</span></code> で設定した値が全て <code>1</code> だった場合に、マウスカーソルが1ピクセル移動するぶんマウスを動かすと、スクロールバー可動範囲の1%分がスクロールします。
+  </dd>
+
+  <dt><code>pixel</code></dt>
+  <dd>
+  スクロール対象をピクセル単位でスクロールします。<br>
+  <a href="#mode-spec:scroll-ratio"><code>scroll-ratio</code></a>、<code><span class="var">x-ratio</span></code>、<code><span class="var">y-ratio</span></code> で設定した値が全て <code>1</code> だった場合に、マウスカーソルが1ピクセル移動するぶんマウスを動かすと、1ピクセル分スクロールします。
+  </dd>
+  </dl>
 </dd>
 
-<dt><a name="op:wheel-message"><code>wheel-message</code></a></dt>
+<dt><a name="op:wheel-message"><code>(wheel-message <span class="var">[x-ratio y-ratio tick]</span>)</code></a></dt>
 <dd>
-</dd>
+マウスホイールを回転させたときと同じメッセージを対象ウィンドウに送信します。<br>
+マウスの動きでホイールの回転を再現したい場合に使います。<br>
+<code><span class="var">x-ratio</span></code> と <code><span class="var">y-ratio</span></code> はホイールの回転速度を指定します。
+回転速度は、
+<pre>
+X 方向の動き * <code><span class="var">x-ratio</span></code> + Y 方向の動き * <code><span class="var">y-ratio</span></code>
+</pre>
+に比例します。
+省略した場合は、<code>operator-config</code> 設定の <code>ratio</code> に設定してある値を使用します。<br>
+<code><span class="var">tick</span></code> は一回のメッセージで送信する回転量です。
+通常は <code>120</code> を指定します。
+アプリケーションが対応していれば <code>120</code> より小さい値を指定できます。
+省略した場合は、<code>operator-config</code> 設定の <code>tick</code> に設定してある値を使用します。
+<div class="ex">
+例: リストビューコントロールの場合はマウスの縦動作でホイール動作
+<pre>
+(scroll-window
+ (":SysListView32$" (wheel-message))
+ <span class="omit">...</span>
+ )
 
-<dt><a name="op:or"><code>or</code></a></dt>
+(operator-config
+ (wheel-message
+  (ratio 0.0 -5.0)
+  (tick . 120))
+ <span class="omit">...</span>
+ )
+</pre>
+</div>
+</dd>
+</dl>
+</div>
+
+<p>
+Scroll operator には他の Scroll operator を引数としてとる Meta scroll operator も指定できます。
+</p>
+<div class="refp">
+<dl class="ref">
+<dt><a name="op:or"><code>(or <span class="var">scroll-operator1 [scroll-operator2 ...]</span>)</code></a></dt>
 <dd>
+指定された Scroll operator を成功するまで順次実行します。<br>
+実行が成功した場合はそれ以降に指定された Scroll operator は実行されません。
+<div class="ex">
+例: 他のどの <code>scroll-window</code> の設定にも合致しなかった場合は <code>window-scrollbar</code>、<code>neighborhood-scrollbar</code>、<code>wheel-message</code> から順次実行可能なものを試す
+<pre>
+(scroll-window
+ <span class="omit">...</span>
+ (".*" (or (window-scrollbar)
+           (neighborhood-scrollbar)
+           (wheel-message)))
+ )
+</pre>
+</div>
 </dd>
 
 </dl>
 </div>
-</p>
 
 
 <h2><a name="appendix">Appendix</a></h2>
@@ -600,7 +728,8 @@ MS Office 製品や、Acrobat Reader などが該当します。
 <h3><a name="appendix:s-exp">S-Expression</a></h3>
 
 <p>
-S式は以下の要素で構成されます。
+mouse-processor で利用するS式は、Scheme (R5RS) のもののサブセットです。<br>
+このS式は以下の要素で構成されます。
 </p>
 
 <dl>
@@ -678,7 +807,152 @@ n個の要素を持つリストは n個の cons セルで構成され、それぞれの car 部は要素を cdr
 </dd>
 </dl>
 
+<p>
+BNF 記法っぽい定義は以下のとおり。
+<pre>
+&lt;datum&gt; = &lt;boolean&gt;
+        | &lt;number&gt;
+        | &lt;flonum&gt;
+        | &lt;symbol&gt;
+        | &lt;string&gt;
+        | &lt;list&gt;
+
+&lt;boolean&gt; = #t | #f
+
+&lt;number&gt; = &lt;number 2&gt;
+         | &lt;number 8&gt;
+         | &lt;number 10&gt;
+         | &lt;number 16&gt;
+
+&lt;number R&gt; = &lt;radix R&gt; &lt;integer R&gt;
+
+&lt;integer R&gt; = &lt;sign&gt; &lt;digit R&gt;+
+
+&lt;sign&gt; = &lt;empty&gt; | + | -
+
+&lt;radix 2&gt; = #b
+&lt;radix 8&gt; = #o
+&lt;radix 10&gt; = &lt;empty&gt; | #d
+&lt;radix 16&gt; = #x
+
+&lt;digit 2&gt; = 0 | 1
+&lt;digit 8&gt; = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7
+&lt;digit 10&gt; = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+&lt;digit 16&gt; = &lt;digit 10&gt; | a | b | c | e | f
+
+&lt;flonum&gt; = &lt;sign&gt; &lt;fraction&gt;
+
+&lt;fraction&gt; = . &lt;digit 10&gt;+
+           | &lt;digit 10&gt;+ . &lt;digit 10&gt;*
+
+&lt;symbol&gt; = &lt;identifier&gt;
+
+&lt;identifier&gt; = &lt;initial&gt; &lt;subsequent&gt;*
+             | &lt;peculiar identifier&gt;
+
+&lt;initial&gt; = &lt;letter&gt; | &lt;special initial&gt;
+&lt;subsequent&gt; = &lt;initial&gt; | &lt;digit&gt; | &lt;special subsequent&gt;
+
+&lt;letter&gt; = a | b | c | ... | z
+&lt;special initial&gt; = ! | $ | % | & | * | / | : | &lt; | = | &gt; | ? | ^ | _ | ~
+&lt;digit&gt; = &lt;digit 10&gt;
+&lt;special subsequent&gt; = + | - | . | @
+&lt;peculiar identifier&gt; = + | - | ...
+
+&lt;string&gt; = " &lt;string element&gt;* "
+
+&lt;string element&gt; = &lt;any character other than " or \&gt; | \" | \\
+
+&lt;list&gt; = ( &lt;datum&gt;* )
+       | ( &lt;datum&gt;+ . &lt;datum&gt; )
+
+&lt;empty&gt; =
+</pre>
+</p>
+
 <h3><a name="appendix:regexp">Regular Expression</a></h3>
+
+<p>
+利用可能な正規表現は <a href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/script56/html/vspropattern.asp">VBScript と同じ</a>です。<br>
+これは egrep や perl 等の一般的な正規表現とほぼ同じです。
+</p>
+
+
+<h2><a name="index">Index</a></h2>
+
+<ul>
+<li><a href="#menu">Menu</a></li>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#setting-file">Setting file</a></li>
+<li><a href="#file-format">File format</a>
+  <ul>
+  <li><a href="#encoding">Character Encoding</a></li>
+  <li><a href="#syntax">Syntax</a></li>
+  <li><a href="#setting">Setting</a>
+    <ul>
+    <li><a href="#global"><code>global</code> 設定</a>
+      <ul>
+      <li><a href="#global:combination-time"><code>combination-time</code></a></li>
+      <li><a href="#global:priority"><code>priority</code></a></li>
+      <li><a href="#global:tray-icon"><code>tray-icon</code></a></li>
+      </ul>
+    </li>
+    <li><a href="#mode"><code>normal-mode</code>、<code>scroll-mode</code> 設定</a>
+      <ul>
+      <li>イベント設定
+        <ul>
+        <li><a href="#evt:button-d"><code>button-d-<span class="var">X</span></code></a></li>
+        <li><a href="#evt:button-u"><code>button-u-<span class="var">X</span></code></a></li>
+        <li><a href="#evt:button-d-cmb"><code>button-d-<span class="var">X+Y</span></code></a></li>
+        <li><a href="#evt:button-u-cmb"><code>button-u-<span class="var">X+Y</span></code></a></li>
+        <li><a href="#evt:wheel"><code>wheel</code></a></li>
+	</ul>
+      </li>
+      <li>スクロールモード設定
+        <ul>
+        <li><a href="#mode-spec:scroll-ratio"><code>scroll-ratio</code></a></li>
+	</ul>
+      </li>
+      <li>動作設定
+        <ul>
+        <li><a href="#act:button-d"><code>butto-d</code></a></li>
+        <li><a href="#act:button-u"><code>butto-u</code></a></li>
+        <li><a href="#act:normal-mode"><code>normal-mode</code></a></li>
+        <li><a href="#act:scroll-mode"><code>scroll-mode</code></a></li>
+        <li><a href="#act:set-scroll-ratio"><code>set-scroll-ratio</code></a></li>
+        <li><a href="#act:mul-scroll-ratio"><code>mul-scroll-ratio</code></a></li>
+        <li><a href="#act:wheel-input"><code>wheel-input</code></a></li>
+        <li><a href="#act:post-wheel-message"><code>post-wheel-message</code></a></li>
+        <li><a href="#act:nothing"><code>nothing</code></a></li>
+	</ul>
+      </li>
+      </ul>
+    </li>
+    <li><a href="#scroll-window"><code>scroll-window</code> 設定</a>
+    <li><a href="#operator-config"><code>operator-config</code> 設定</a></li>
+    </ul>
+  </li>
+  </ul>
+</li>
+<li><a href="#scroll-op">Scroll operator</a>
+  <ul>
+  <li><a href="#op:window-scrollbar"><code>window-scrollbar</code></a></li>
+  <li><a href="#op:neighborhood-scrollbar"><code>neighborhood-scrollbar</code></a></li>
+  <li><a href="#op:scrollbar-control"><code>scrollbar-control</code></a></li>
+  <li><a href="#op:trackbar-control"><code>trackbar-control</code></a></li>
+  <li><a href="#op:ie-scroll"><code>ie-scroll</code></a></li>
+  <li><a href="#op:wheel-message"><code>wheel-message</code></a></li>
+  <li><a href="#op:or"><code>or</code></a></li>
+  </ul>
+</li>
+<li><a href="#appendix">Appendix</a>
+  <ul>
+  <li><a href="#appendix:s-exp">S-Expression</a></li>
+  <li><a href="#appendix:regexp">Regular Expression</a></li>
+  </ul>
+</li>
+<li><a href="#index">Index</a></li>
+</ul>
 
 <hr>
 
@@ -686,7 +960,7 @@ n個の要素を持つリストは n個の cons セルで構成され、それぞれの car 部は要素を cdr
 webmaster@tamanegi.org
 </address>
 
-<!-- $Id: CUSTOMIZE.html,v 1.5 2005/01/28 09:45:14 hos Exp $ -->
+<!-- $Id: CUSTOMIZE.html,v 1.6 2005/01/29 20:29:06 hos Exp $ -->
 
 <!--
 Local Variables:

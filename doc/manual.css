@@ -2,7 +2,7 @@
 /*
  * style of manual
  *
- * $Id: manual.css,v 1.4 2005/01/27 09:32:59 hos Exp $
+ * $Id: manual.css,v 1.5 2005/01/29 20:28:53 hos Exp $
  *
  */
 
@@ -33,7 +33,7 @@ dl.subitem dd {
 }
 
 .refp {
-  margin: 0.2em 2.0em 0.2em 2.5em;
+  margin: 0.2em 2.0em 1.5em 2.5em;
   padding: 0.7em 0.7em 0.7em 0.7em;
   border: dotted thick rgb(193, 205, 193);
 }

@@ -136,11 +136,11 @@ TODO
 
 
 Link
- - TrackScroll <http://members.jcom.home.ne.jp/0718057904/ts.htm>
+ - TrackScroll <http://www.geocities.jp/makoko1974/ts.htm>
  - Wheel Ball <http://homepage1.nifty.com/jesus/>
  - X Wheel <http://www5b.biglobe.ne.jp/~hokko2nd/Windows/#XWheel>
    X Wheel NT <http://www5b.biglobe.ne.jp/~hokko2nd/Windows/#XWheelNT>
  - mouse-processor <http://www.tamanegi.org/prog/mouse-processor/>
 
 
-$Id: README.txt,v 1.5 2005/01/25 06:38:59 hos Exp $
+$Id: README.txt,v 1.6 2005/01/29 20:28:31 hos Exp $
