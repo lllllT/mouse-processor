@@ -1,7 +1,7 @@
 /*
  * scroll_op_scrollbar.c  -- scroll operators for scrollbar
  *
- * $Id: scroll_op_scrollbar.c,v 1.15 2005/02/02 12:04:34 hos Exp $
+ * $Id: scroll_op_scrollbar.c,v 1.16 2005/02/02 15:12:36 hos Exp $
  *
  */
 
@@ -363,9 +363,12 @@ int scrollbar_r_scroll(HWND hwnd, int bar,
         inject_sb_data.gsinfo_data->track_pos = pos;
         inject_sb_data.gsinfo_data->valid = 1;
 
-        SendMessageTimeout(hwnd, inject_sb_data.gsinfo_data->hook_subclass_msg,
-                           0, 0,
-                           SMTO_ABORTIFHUNG, 1000, NULL);
+        if(bar == SB_CTL) {
+            SendMessageTimeout(hwnd,
+                               inject_sb_data.gsinfo_data->hook_subclass_msg,
+                               0, 0,
+                               SMTO_ABORTIFHUNG, 1000, NULL);
+        }
     }
 
     SendMessageTimeout(msg_hwnd, msg,
@@ -378,9 +381,12 @@ int scrollbar_r_scroll(HWND hwnd, int bar,
                        SMTO_ABORTIFHUNG, 1000, NULL);
 
     if(inject_sb_data.gsinfo_data != NULL) {
-        SendMessageTimeout(hwnd, inject_sb_data.gsinfo_data->hook_subclass_msg,
-                           0, 0,
-                           SMTO_ABORTIFHUNG, 1000, NULL);
+        if(bar == SB_CTL) {
+            SendMessageTimeout(hwnd,
+                               inject_sb_data.gsinfo_data->hook_subclass_msg,
+                               0, 0,
+                               SMTO_ABORTIFHUNG, 1000, NULL);
+        }
 
         inject_sb_data.gsinfo_data->valid = 0;
     }

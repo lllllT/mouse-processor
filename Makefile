@@ -1,7 +1,7 @@
 #
 # Makefile
 #
-# $Id: Makefile,v 1.30 2005/02/02 10:03:50 hos Exp $
+# $Id: Makefile,v 1.31 2005/02/02 15:12:36 hos Exp $
 #
 
 DEFINES = 
@@ -34,8 +34,7 @@ SBI_DLL_RSRC =
 SBI_DLL_OBJS = $(SBI_DLL_SRCS:%.c=%.o) $(SBI_DLL_RSRC:%.rc=%.o)
 SBI_DLL_HEADERS = dllinj.h scroll_op_scrollbar.h shmem.h
 SBI_DLL_LDLIBS = -lpsapi -lkernel32
-#SBI_DLL_LDFLAGS = $(LDFLAGS) -shared -nostartfiles -nostdlib -e _DllMain@12
-SBI_DLL_LDFLAGS = $(LDFLAGS) -shared
+SBI_DLL_LDFLAGS = $(LDFLAGS) -shared -nostartfiles -nostdlib -e _DllMain@12
 
 SBH_DLL_NAME = $(TARGET_NAME)sbh.dll
 SBH_DLL_SRCS = sbh_dllmain.c shmem.c
@@ -43,9 +42,7 @@ SBH_DLL_RSRC =
 SBH_DLL_OBJS = $(SBH_DLL_SRCS:%.c=%.o) $(SBH_DLL_RSRC:%.rc=%.o)
 SBH_DLL_HEADERS = scroll_op_scrollbar.h shmem.h
 SBH_DLL_LDLIBS = -lkernel32 -luser32
-#SBH_DLL_LDFLAGS = $(LDFLAGS) -shared -nostartfiles -nostdlib -e _DllMain@12 \
-#                  -Wl,--out-implib,lib$(SBH_DLL_NAME).a
-SBH_DLL_LDFLAGS = $(LDFLAGS) -shared \
+SBH_DLL_LDFLAGS = $(LDFLAGS) -shared -nostartfiles -nostdlib -e _DllMain@12 \
                   -Wl,--out-implib,lib$(SBH_DLL_NAME).a
 
 PACK_BIN_FILES = $(EXE_NAME) $(SBI_DLL_NAME)
