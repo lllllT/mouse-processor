@@ -2,7 +2,7 @@
 /*
  * style of manual
  *
- * $Id: manual.css,v 1.1 2005/01/25 09:33:52 hos Exp $
+ * $Id: manual.css,v 1.2 2005/01/26 09:36:34 hos Exp $
  *
  */
 
@@ -13,8 +13,21 @@ code {
   font-family: monospace;
 }
 
-.cmd {
-  font-family: monospace;
+dl.ref {
+  margin: 0.2em 2.0em 0.2em 2.0em;
+  padding: 0.3em 0.3em 0.3em 0.5em;
+}
+
+dl.ref dt {
+  background: rgb(225, 240, 240);
+  color: rgb(0, 0, 0);
+  font-weight: normal;
+}
+
+.mode-spec {
+  margin: 0.5em 0.0em 2.5em 0.0em;
+  padding: 0.7em 0.7em 0.7em 0.7em;
+  border: dotted thick rgb(193, 205, 193);
 }
 
 .var {
@@ -36,8 +49,12 @@ code {
 }
 
 .ex {
-  margin: 0.2em 0.2em 0.2em 0.3em;
+  margin: 0.5em 0.2em 0.5em 0.3em;
   padding: 0.3em 0.3em 0.3em 0.5em;
   background: rgb(240, 255, 240);
   border: dotted thin rgb(193, 205, 193);
+}
+
+.ex pre {
+  margin: 0.2em 1.0em 0.2em 1.5em;
 }

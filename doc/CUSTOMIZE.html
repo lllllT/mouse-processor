@@ -49,32 +49,361 @@ ASCII ╩╕╗·░╩│░бв╬удид╨╞№╦▄╕ь┼∙дЄ┤▐дсды╛ь╣чд╦д╧╔мд║ UTF-8 д╟е╒ебедеыдЄ╩▌┬╕д╖д╞▓╝д
 <h3>Syntax</h3>
 
 <p>
-└▀─ъд╧S╝░д╟╔╜╡нд╡дьбв╝чд╦╧в┴█еъе╣е╚д╟╣╜└од╡дьд▐д╣бг<br>
+└▀─ъд╧S╝░д╟╔╜╡нд╡дьбв╝чд╦╧в┴█еъе╣е╚д╟╣╜└од╡дьд▐д╣бг
+│╞└▀─ъ╣р╠▄д╧бв╣р╠▄╠╛дЄдвдщдяд╣е╖еєе▄еыдлдщ╗╧д▐дыеъе╣е╚д╚д╩дъд▐д╣бг<br>
 S╝░д╬╛▄║┘д╦д─ддд╞д╧ <a href="#appendix:s-exp">Appendix: S-Expression</a> д╟└т╠└д╖д╞ддд▐д╣дмбв─╠╛яд╧д╜дьд█д╔░╒╝▒д╣ды╔м═╫дт╠╡ддд╟д╖дчджбг
 </p>
 
-
-<h3>Global setting</h3>
-
 <p>
-<code class="cmd">(global <span class="omit">...</span>)</code> д╟д╧┴┤┬╬д╬╞░║юд╦▒╞╢┴д╣ды└▀─ъдЄ╡н╜╥д╖д▐д╣бг
+д│д╬е╔енехесеєе╚д╟д╧░╩▓╝д╬дшджд╩╔╜╡ндЄд╖д▐д╣бг
+(╔╜╝и┤─╢нд╦дшд├д╞д╧╢ш╩╠д╟днд╩дд╛ь╣чдмдвдъд▐д╣)
+<dl class="ref">
+<dt><code><span class="var">some-value</span></code></dt>
+<dd>
+└▀─ъ▓─╟╜д╩╣р╠▄дЄдвдщдяд╖д▐д╣бг<br>
+└▀─ъ╞т═╞д╦д─ддд╞д╧│╞╣р╠▄д╬└т╠└дЄ╗▓╛╚д╖д╞▓╝д╡ддбг
+</dd>
+
+<dt><code>[<span class="var">some-value</span>]</code></dt>
+<dd>
+╛╩╬м▓─╟╜д╩└▀─ъ╣р╠▄дЄдвдщдяд╖д▐д╣бг<br>
+└▀─ъ╞т═╞дкдшд╙╛╩╬м╗■д╬└▀─ъд╦д─ддд╞д╧│╞╣р╠▄д╬└т╠└дЄ╗▓╛╚д╖д╞▓╝д╡ддбг
+</dd>
+
+<dt><code><span class="omit">...</span></code></dt>
+<dd>
+└▀─ъ╣р╠▄бв└▀─ъ╞т═╞дЄ╛╩╬мд╖д╞дддыд│д╚дЄдвдщдяд╖д▐д╣бг<br>
+┬╛д╬└▀─ъдЄ╗╪─ъ▓─╟╜д╟д╣дмбв└т╠└╛х╚╦╗ид╚д╩дыд┐дс╛╩ддд╞ддд▐д╣бг
+</dd>
+
+</dl>
 </p>
 
+
+<h3>Setting</h3>
+
 <dl class="ref">
-<dt><code class="cmd">(combination-time . <span class="var">threshold-time</span>)</code></dt>
+<dt><code>global</code> └▀─ъ</dt>
 <dd>
-2е▄е┐еє╞▒╗■▓бд╖дЄ╟з╝▒д╣ды║╟┬чд╬╗■┤╓┤╓│╓дЄе▀еъ╔├├▒░╠д╟╗╪─ъд╖д▐д╣бг<br>
-1д─дсд╬е▄е┐еєдЄ▓бд╖д╞длдщбв<code class="cmd"><span class="var">threshold-time</span></code> е▀еъ╔├░╩╞тд╦2д─дсд╬е▄е┐еєдЄ▓бд╣д╚бв
-2е▄е┐еє╞▒╗■▓бд╖дЄд╡дьд┐дтд╬д╚╟з╝▒д╖д▐д╣бг
-<div class="ex">
-╬у: ╗■┤╓┤╓│╓дЄ 0.5 ╔├д╦└▀─ъ
+<code>global</code> └▀─ъ╣р╠▄д╟д╧┴┤┬╬д╬╞░║юд╦▒╞╢┴д╣ды░╩▓╝д╬└▀─ъдЄ╡н╜╥д╟днд▐д╣бг
+  <dl>
+
+  <dt><code>(combination-time . <span class="var">threshold-time</span>)</code></dt>
+  <dd>
+  2е▄е┐еє╞▒╗■▓бд╖дЄ╟з╝▒д╣ды║╟┬чд╬╗■┤╓┤╓│╓дЄе▀еъ╔├├▒░╠д╟╗╪─ъд╖д▐д╣бг<br>
+  1д─дсд╬е▄е┐еєдЄ▓бд╖д╞длдщбв<code><span class="var">threshold-time</span></code> е▀еъ╔├░╩╞тд╦2д─дсд╬е▄е┐еєдЄ▓бд╣д╚бв2е▄е┐еє╞▒╗■▓бд╖дЄд╡дьд┐дтд╬д╚╟з╝▒д╖д▐д╣бг<br>
+  д│д╬╗■┤╓дЄ▓сдодыд╚д╜дьд╛дьд╬е▄е┐еєдЄ╕─╩╠д╦▓бд╖д┐дтд╬д╚д╡дьд▐д╣бг
+  д▐д┐бвд│д╬╗■┤╓╞тд╟двд├д╞дт2д─дсд╬е▄е┐еєдЄ▓бд╣┴░д╦е▐еже╣дЄ╞░длд╖д┐дъ┬╛д╬е▄е┐еєдЄ╞░║юд╡д╗дыд╚бв2е▄е┐еє╞▒╗■▓бд╖д╚д╧╟з╝▒д╡дьд▐д╗дєбг
+  2е▄е┐еє╞▒╗■д╦▓бд╖д┐д╚днд╚╬ед╖д┐д╚днд╬╬╛╩¤д╬╞░║юдЄ╗╪─ъд╖д╩длд├д┐д╚дн (<a href="#act:nothing"><code>nothing</code></a> дЄ╗╪─ъд╖д┐д╚дн) дт╞▒══д╦2е▄е┐еє╞▒╗■▓бд╖д╚д╧╟з╝▒д╡дьд▐д╗дєбг
+  <div class="ex">
+  ╬у: ╗■┤╓┤╓│╓дЄ 0.5 ╔├д╦└▀─ъ
 <pre>
 (global
  (combination-time . 500)
  <span class="omit">...</span>
  )
 </pre>
+  </div>
+  </dd>
+
+  <dt><code>(tray-icon <span class="var">icon-file</span> [<span class="var">index</span>])</code></dt>
+  <dd>
+  е┐е╣епе╚еьедд╦╔╜╝ид╣дыеведе│еєдЄ╗╪─ъд╖д▐д╣бг<br>
+  ╩╕╗·╬є <code><span class="var">icon-file</span></code> д╟╗╪─ъд╡дьд┐е╒ебедеыд╬ <code><span class="var">index</span></code> ╚╓╠▄д╬еведе│еєдЄ═°═╤д╖д▐д╣бг
+  ╗╪─ъ▓─╟╜д╩е╒ебедеыд╧бв<span class="fname">.ico</span> е╒ебедеыдф <span class="fname">.exe</span>бв<span class="fname">.dll</span> е╒ебедеыд╩д╔дмдвдъд▐д╣бг<br>
+  <code><span class="var">index</span></code> дЄ╛╩╬мд╣дыд╚ <code>0</code> дЄ╗╪─ъд╖д┐дтд╬д╚д╡дьд▐д╣бг<br>
+  <code><span class="var">icon-file</span></code> д╦ <code>#f</code> дЄ╗╪─ъд╣дыд╚е┐е╣епе╚еьедд╦еведе│еєдЄ╔╜╝ид╖д╩дпд╩дъд▐д╣бг
+  д┐д└д╖бвд│д╬╛ь╣чд╧е╚еьедеведе│еєдлдщд╬есе╦ехб╝┼∙дт═°═╤д╟днд╩дпд╩дъд▐д╣д╬д╟бв╜╜╩м├э░╒д╖д╞▓╝д╡ддбг
+  <div class="ex">
+  ╬у: б╓е▐еже╣б╫е│еєе╚еэб╝еые╤е═еыд╬е▐еже╣еведе│еєдЄ═°═╤
+<pre>
+(global
+ (tray-icon "main.cpl" 0)
+ <span class="omit">...</span>
+ )
+</pre>
+  </div>
+  </dd>
+
+  </dl>
+</dd>
+
+<dt><code>normal-mode</code>бв<code>scroll-mode</code> └▀─ъ</dt>
+<dd>
+<code>normal-mode</code> дкдшд╙ <code>scroll-mode</code> └▀─ъ╣р╠▄д╟д╧бв
+д╜дьд╛дь─╠╛яетб╝е╔д╚е╣епеэб╝еыетб╝е╔д╬╞░║юдЄ╡н╜╥д╖д▐д╣бг<br>
+─╠╛яетб╝е╔д╧е▐еже╣░▄╞░дм▓─╟╜д╩етб╝е╔д╟бв╔с├╩═°═╤д╣дыд╚днд╬е▄е┐еє│фдъ┼Ўд╞д╩д╔дЄ└▀─ъд╖д▐д╣бг
+е╣епеэб╝еыетб╝е╔д╧ежегеєе╔еже╣епеэб╝еы╗■д╬етб╝е╔д╟д╣бг<br>
+│╞етб╝е╔д╧╩г┐Їд╬╞░║ю└▀─ъдЄдтд─д│д╚дмд╟днбвд╜дьд╛дьд╦╠╛┴░ (етб╝е╔╠╛) дЄд─д▒дщдьд▐д╣бг
+│╞╞░║ю└▀─ъд╧бв└ш╞мдметб╝е╔╠╛д╟двдыеъе╣е╚д╚д╖д╞╡н╜╥д╖д▐д╣бг
+<div class="ex">
+╬у: <code>abc</code>бв<code>def</code> д╚дддж╠╛┴░д╬2д─д╬─╠╛яетб╝е╔д╚бв<code>uvw</code>бв<code>xyz</code> д╚дддж╠╛┴░д╬2д─д╬е╣епеэб╝еыетб╝е╔дЄ└▀─ъ
+<pre>
+(normal-mode
+ (abc
+  <span class="omit">...</span>
+  )
+
+ (def
+  <span class="omit">...</span>
+  )
+ )
+
+(scroll-mode
+ (uvw
+  <span class="omit">...</span>
+  )
+
+ (xyz
+  <span class="omit">...</span>
+  )
+ )
+</pre>
 </div>
+
+<div class="mode-spec">
+│╞етб╝е╔└▀─ъд╦д╧░╩▓╝д╬еде┘еєе╚╚п└╕╗■д╬╞░║юдЄ╡н╜╥д╟днд▐д╣бг
+  <dl>
+  <dt><a name="evt:button-d"><code>(button-d-<span class="var">X</span> (<span class="var">action</span> [<span class="var">args</span>]))</code></a></dt>
+  <dt><a name="evt:button-u"><code>(button-u-<span class="var">X</span> (<span class="var">action</span> [<span class="var">args</span>]))</code></a></dt>
+  <dd>
+  д╜дьд╛дьбве▄е┐еєдЄ▓бд╖д┐д╚днд╚╬ед╖д┐д╚днд╬╞░║юдЄ╗╪─ъд╖д▐д╣бг<br>
+  <code><span class="var">X</span></code> д╦д╧1длдщ5д▐д╟д╬е▄е┐еє╚╓╣цдЄ╗╪─ъд╖д▐д╣бг<br>
+  <code><span class="var">action</span></code> д╦д╧бвд╔д╬дшджд╩╞░║юдЄд╣дыдлдЄ╝бд╬ддд║дьдлдлдщ╗╪─ъд╖д▐д╣бг
+    <ul>
+    <li><a href="#act:button-d"><code>button-d</code></a></li>
+    <li><a href="#act:button-u"><code>button-u</code></a></li>
+    <li><a href="#act:normal-mode"><code>normal-mode</code></a></li>
+    <li><a href="#act:scroll-mode"><code>scroll-mode</code></a></li>
+    <li><a href="#act:set-scroll-ratio"><code>set-scroll-ratio</code></a></li>
+    <li><a href="#act:mul-scroll-ratio"><code>mul-scroll-ratio</code></a></li>
+    <li><a href="#act:nothing"><code>nothing</code></a></li>
+    </ul>
+  <code><span class="var">args</span></code> д╦д╧ <code><span class="var">action</span></code> д╪д╬░·┐ЇдЄ╗╪─ъд╟днд▐д╣бг<br>
+  │╞ <code><span class="var">action</span></code> дкдшд╙ <code><span class="var">args</span></code> д╦д─ддд╞д╧бвд╜дьд╛дьд╬└т╠└дЄ╗▓╛╚д╖д╞▓╝д╡ддбг
+  </dd>
+
+  <dt><a name="evt:button-d-cmb"><code>(button-d-<span class="var">X+Y</span> (<span class="var">action</span> [<span class="var">args</span>]))</code></a></dt>
+  <dt><a name="evt:button-u-cmb"><code>(button-u-<span class="var">X+Y</span> (<span class="var">action</span> [<span class="var">args</span>]))</code></a></dt>
+  <dd>
+  д╜дьд╛дьбв2е▄е┐еє╞▒╗■д╦▓бд╖д┐д╚днд╚╬ед╖д┐д╚днд╬╞░║юдЄ╗╪─ъд╖д▐д╣бг<br>
+  <code><span class="var">X</span></code> д╚ <code><span class="var">Y</span></code> д╦д╧1длдщ5д▐д╟д╬е▄е┐еє╚╓╣цд╟2е▄е┐еє╞▒╗■▓бд╖д╬┴╚д▀╣чдяд╗дЄ╗╪─ъд╖д▐д╣бг<br>
+  <code><span class="var">action</span></code> д╦д╧бвд╔д╬дшджд╩╞░║юдЄд╣дыдлдЄ╝бд╬ддд║дьдлдлдщ╗╪─ъд╖д▐д╣бг
+    <ul>
+    <li><a href="#act:button-d"><code>button-d</code></a></li>
+    <li><a href="#act:button-u"><code>button-u</code></a></li>
+    <li><a href="#act:normal-mode"><code>normal-mode</code></a></li>
+    <li><a href="#act:scroll-mode"><code>scroll-mode</code></a></li>
+    <li><a href="#act:set-scroll-ratio"><code>set-scroll-ratio</code></a></li>
+    <li><a href="#act:mul-scroll-ratio"><code>mul-scroll-ratio</code></a></li>
+    <li><a href="#act:nothing"><code>nothing</code></a></li>
+    </ul>
+  <code><span class="var">args</span></code> д╦д╧ <code><span class="var">action</span></code> д╪д╬░·┐ЇдЄ╗╪─ъд╟днд▐д╣бг<br>
+  │╞ <code><span class="var">action</span></code> дкдшд╙ <code><span class="var">args</span></code> д╦д─ддд╞д╧бвд╜дьд╛дьд╬└т╠└дЄ╗▓╛╚д╖д╞▓╝д╡ддбг
+  </dd>
+
+  <dt><a name="evt:wheel"><code>(wheel (<span class="var">action</span> [<span class="var">args</span>]))</code></a></dt>
+  <dd>
+  е▐еже╣е█едб╝еыдЄ╞░длд╖д┐д╚днд╬╞░║юдЄ╗╪─ъд╖д▐д╣бг<br>
+  <code><span class="var">action</span></code> д╦д╧бвд╔д╬дшджд╩╞░║юдЄд╣дыдлдЄ╝бд╬ддд║дьдлдлдщ╗╪─ъд╖д▐д╣бг
+    <ul>
+    <li><a href="#act:wheel-input"><code>wheel-input</code></a></li>
+    <li><a href="#act:post-wheel-message"><code>post-wheel-message</code></a></li>
+    <li><a href="#act:nothing"><code>nothing</code></a></li>
+    </ul>
+  <code><span class="var">args</span></code> д╦д╧ <code><span class="var">action</span></code> д╪д╬░·┐ЇдЄ╗╪─ъд╟днд▐д╣бг<br>
+  │╞ <code><span class="var">action</span></code> дкдшд╙ <code><span class="var">args</span></code> д╦д─ддд╞д╧бвд╜дьд╛дьд╬└т╠└дЄ╗▓╛╚д╖д╞▓╝д╡ддбг
+  </dd>
+  </dl>
+</div>
+
+<div class="mode-spec">
+е╣епеэб╝еыетб╝е╔д╬└▀─ъд╦д╧░╩▓╝д╬└▀─ъдЄ╡н╜╥д╟днд▐д╣бг
+  <dl>
+  <dt><a name="mode-spec:scroll-ratio"><code>(scroll-ratio <span class="var">x-ratio</span> <span class="var">y-ratio</span>)</code></a></dt>
+  <dd>
+  е╣епеэб╝еы┬о┼┘дЄ╗╪─ъд╖д▐д╣бг<code>scroll-mode</code> ╞тд╟д╬д▀═н╕·д╟д╣бг<br>
+  <code><span class="var">x-ratio</span></code> дкдшд╙ <code><span class="var">y-ratio</span></code> д╧бвд╜дьд╛дь X ╩¤╕■ (▓г)бвY ╩¤╕■ (╜─) д╬е╣епеэб╝еы┬о┼┘д╟бв▓┐╟▄д╬┬о┼┘д╟е╣епеэб╝еыд╣дыдлдЄ╗╪─ъд╖д▐д╣бг
+  ╔щд╬┐ЇдЄ╗╪─ъд╣дыд╚е╣епеэб╝еыд╬╕■дндм╡╒д╦д╩дъд▐д╣бг
+  <div class="ex">
+  ╬у: ▓гдЄ╚╛╩мбв╜─дЄ╡╒╕■днд╦2╟▄д╬┬о┼┘д╟е╣епеэб╝еы
+<pre>
+(scroll-mode
+ (half-x-reverse-double-y
+  (scroll-ratio 0.5 -2)
+  <span class="omit">...</span>
+  )
+ )
+</pre>
+  </div>
+  </dd>
+  </dl>
+</div>
+
+<div class="mode-spec">
+│╞╞░║ю└▀─ъд╟ <code><span class="var">action</span></code> д╚д╖д╞╗╪─ъд╟днды└▀─ъд╦д╧░╩▓╝д╬дтд╬дмдвдъд▐д╣бг
+  <dl>
+  <dt><a name="act:button-d"><code>(butto-d <span class="var">N</span>)</code></a></dt>
+  <dt><a name="act:button-u"><code>(butto-u <span class="var">N</span>)</code></a></dt>
+  <dd>
+  д╜дьд╛дьбве▄е┐еєдЄ▓бд╣╞░║юд╚╬ед╣╞░║юдЄ│фдъ┼Ўд╞д▐д╣бг<br>
+  <code><span class="var">N</span></code> д╦д╧1длдщ5д▐д╟д╬е▄е┐еє╚╓╣цдЄ╗╪─ъд╖д▐д╣бг<br>
+  д│д╬╞░║юдЄ╗╪─ъд╟дндыд╬д╧░╩▓╝д╬еде┘еєе╚└▀─ъд╟д╣бг
+    <ul>
+    <li><a href="#evt:button-d"><code>button-d-<span class="var">X</span></code></a></li>
+    <li><a href="#evt:button-u"><code>button-u-<span class="var">X</span></code></a></li>
+    <li><a href="#evt:button-d-cmb"><code>button-d-<span class="var">X+Y</span></code></a></li>
+    <li><a href="#evt:button-u-cmb"><code>button-u-<span class="var">X+Y</span></code></a></li>
+    </ul>
+  <div class="ex">
+  ╬у: е▄е┐еє3дЄепеъе├епд╖д┐д╚днбве▄е┐еє5д╬епеъе├епд╚д╖д╞╞░║юд╣дыдшдж│фдъ┼Ўд╞д▐д╣бг
+<pre>
+(normal-mode
+ (some-name
+  (button-d-3 (button-d 5))
+  (button-u-3 (button-u 5))
+  )
+ )
+</pre>
+  </div>
+  </dd>
+
+  <dt><a name="act:normal-mode"><code>(normal-mode <span class="var">mode-name</span>)</code></a></dt>
+  <dd>
+  ╕╜║▀д╬╞░║юетб╝е╔дЄ─╠╛яетб╝е╔д╦└┌дъ┬╪дид▐д╣бг<br>
+  <code><span class="var">mode-name</span></code> д╦д╧└┌дъ┬╪ди╕хд╬─╠╛яетб╝е╔д╬етб╝е╔╠╛дЄ╗╪─ъд╖д▐д╣бг<br>
+  д│д╬╞░║юдЄ╗╪─ъд╟дндыд╬д╧░╩▓╝д╬еде┘еєе╚└▀─ъд╟д╣бг
+    <ul>
+    <li><a href="#evt:button-d"><code>button-d-<span class="var">X</span></code></a></li>
+    <li><a href="#evt:button-u"><code>button-u-<span class="var">X</span></code></a></li>
+    <li><a href="#evt:button-d-cmb"><code>button-d-<span class="var">X+Y</span></code></a></li>
+    <li><a href="#evt:button-u-cmb"><code>button-u-<span class="var">X+Y</span></code></a></li>
+    </ul>
+  <div class="ex">
+  ╬у: е▄е┐еє3д╬епеъе├епдме▄е┐еє4д╚д╖д╞╞░║юд╣дыетб╝е╔ <code>mode-A</code> д╚бве▄е┐еє3д╬епеъе├епдме▄е┐еє5д╚д╖д╞╞░║юд╣дыетб╝е╔ <code>mode-B</code> д╬2д─д╬─╠╛яетб╝е╔дЄе▄е┐еє1д╚2д╬╞▒╗■▓бд╖д╟└┌дъ┬╪диды
+<pre>
+(normal-mode
+ (mode-A
+  (button-d-1+2 (normal-mode mode-B))
+  (button-d-3 (button-d 4))
+  (button-u-3 (button-u 4))
+  )
+
+ (mode-B
+  (button-d-1+2 (normal-mode mode-A))
+  (button-d-3 (button-d 5))
+  (button-u-3 (button-u 5))
+  )
+ )
+</pre>
+  </div>
+  </dd>
+
+  <dt><a name="act:scroll-mode"><code>(scroll-mode <span class="var">mode-name</span>)</code></a></dt>
+  <dd>
+  ╕╜║▀д╬╞░║юетб╝е╔дЄе╣епеэб╝еыетб╝е╔д╦└┌дъ┬╪дид▐д╣бг<br>
+  <code><span class="var">mode-name</span></code> д╦д╧└┌дъ┬╪ди╕хд╬е╣епеэб╝еыетб╝е╔д╬етб╝е╔╠╛дЄ╗╪─ъд╖д▐д╣бг<br>
+  д│д╬╞░║юдЄ╗╪─ъд╟дндыд╬д╧░╩▓╝д╬еде┘еєе╚└▀─ъд╟д╣бг
+    <ul>
+    <li><a href="#evt:button-d"><code>button-d-<span class="var">X</span></code></a></li>
+    <li><a href="#evt:button-u"><code>button-u-<span class="var">X</span></code></a></li>
+    <li><a href="#evt:button-d-cmb"><code>button-d-<span class="var">X+Y</span></code></a></li>
+    <li><a href="#evt:button-u-cmb"><code>button-u-<span class="var">X+Y</span></code></a></li>
+    </ul>
+  <div class="ex">
+  ╬у: ─╠╛яетб╝е╔ <code>mode-N</code> ╗■д╦е▄е┐еє1д╚2дЄ╞▒╗■▓бд╖д╖д╞ддды┤╓д└д▒е╣епеэб╝еыетб╝е╔ <code>mode-S</code> д╦└┌дъ┬╪дибве▄е┐еєдЄ╬ед╣д╚─╠╛яетб╝е╔д╦╠сды
+<pre>
+(normal-mode
+ (mode-N
+  (button-d-1+2 (scroll-mode mode-S))
+  <span class="omit">...</span>
+  )
+ )
+
+(scroll-mode
+ (mode-S
+  (button-u-1+2 (normal-mode mode-N))
+  <span class="omit">...</span>
+  )
+ )
+</pre>
+  </div>
+  </dd>
+
+  <dt><a name="act:set-scroll-ratio"><code>(set-scroll-ratio <span class="var">x-ratio</span> <span class="var">y-ratio</span>)</code></a></dt>
+  <dd>
+  е╣епеэб╝еы┬о┼┘дЄ└▀─ъд╖д╩дкд╖д▐д╣бг<code>scroll-mode</code> ╞тд╟д╬д▀═н╕·д╟д╣бг<br>
+  <code><span class="var">x-ratio</span></code> д╚ <code><span class="var">y-ratio</span></code> д╬░╒╠гд╧ <a href="#mode-spec:scroll-ratio"><code>scroll-ratio</code></a> д╚╞▒д╕д╟д╣бг<br>
+  д│д╬╞░║юдЄ╗╪─ъд╟дндыд╬д╧░╩▓╝д╬еде┘еєе╚└▀─ъд╟д╣бг
+    <ul>
+    <li><a href="#evt:button-d"><code>button-d-<span class="var">X</span></code></a></li>
+    <li><a href="#evt:button-u"><code>button-u-<span class="var">X</span></code></a></li>
+    <li><a href="#evt:button-d-cmb"><code>button-d-<span class="var">X+Y</span></code></a></li>
+    <li><a href="#evt:button-u-cmb"><code>button-u-<span class="var">X+Y</span></code></a></li>
+    </ul>
+  </dd>
+
+  <dt><a name="act:mul-scroll-ratio"><code>(mul-scroll-ratio <span class="var">x-ratio</span> <span class="var">y-ratio</span>)</code></a></dt>
+  <dd>
+  е╣епеэб╝еы┬о┼┘дЄ╩╤╣╣д╖д▐д╣бг<code>scroll-mode</code> ╞тд╟д╬д▀═н╕·д╟д╣бг<br>
+  <a href="#mode-spec:scroll-ratio"><code>scroll-ratio</code></a>бв<a href="#act:set-scroll-ratio"><code>set-scroll-ratio</code></a> д╟└▀─ъд╖д┐ X ╩¤╕■д╬е╣епеэб╝еы┬о┼┘д╦ <code><span class="var">x-ratio</span></code> дЄ╛шд╕бвY ╩¤╕■д╬е╣епеэб╝еы┬о┼┘д╦ <code><span class="var">y-ratio</span></code> дЄ╛шд╕д▐д╣бг<br>
+  д│д╬╞░║юдЄ╗╪─ъд╟дндыд╬д╧░╩▓╝д╬еде┘еєе╚└▀─ъд╟д╣бг
+    <ul>
+    <li><a href="#evt:button-d"><code>button-d-<span class="var">X</span></code></a></li>
+    <li><a href="#evt:button-u"><code>button-u-<span class="var">X</span></code></a></li>
+    <li><a href="#evt:button-d-cmb"><code>button-d-<span class="var">X+Y</span></code></a></li>
+    <li><a href="#evt:button-u-cmb"><code>button-u-<span class="var">X+Y</span></code></a></li>
+    </ul>
+  <div class="ex">
+  ╬у: е▄е┐еє3дЄ▓бд╣д┐д╙д╦е╣епеэб╝еы╩¤╕■дм╡╒┼╛д╣дые╣епеэб╝еыетб╝е╔
+<pre>
+(scroll-mode
+ (some-name
+  (button-d-3 (mul-scroll-ratio -1 -1))
+  <span class="omit">...</span>
+  )
+ )
+</pre>
+  </div>
+  </dd>
+
+  <dt><a name="act:wheel-input"><code>(wheel-input)</code></a></dt>
+  <dd>
+  ─╠╛яд╬е█едб╝еыдЄ▓є┼╛д╡д╗д┐д╚днд╬╞░║юд╚╞▒д╕д╟д╣бг<br>
+  д│д╬╞░║юдЄ╗╪─ъд╟дндыд╬д╧░╩▓╝д╬еде┘еєе╚└▀─ъд╟д╣бг
+    <ul>
+    <li><a href="#evt:wheel"><code>wheel</code></a></li>
+    </ul>
+  </dd>
+
+  <dt><a name="act:post-wheel-message"><code>(post-wheel-message)</code></a></dt>
+  <dd>
+  е█едб╝еыдЄ▓є┼╛д╡д╗д┐д╚днд╦╚п└╕д╣дыесе├е╗б╝е╕дЄе▐еже╣елб╝е╜еы─╛▓╝д╬ежегеєе╔ежд╦┴ў┐од╖д▐д╣бг<br>
+  ─╠╛ябве█едб╝еыесе├е╗б╝е╕д╧енб╝е╒ейб╝еле╣дмдвдыежегеєе╔ежд╦┴ў┐од╡дьд▐д╣дмбвд╜д╬╞░║юдЄ╩╤╣╣д╡д╗д▐д╣бг
+  д│дьд╦дшдъбвевепе╞еге╓д╟д╩ддежегеєе╔еждф╕хдэд╬╩¤д╦двдыежегеєе╔ежд╪е└едеьепе╚д╦е█едб╝еыесе├е╗б╝е╕дЄ┴ўдьд▐д╣бг<br>
+  д│д╬╞░║юдЄ╗╪─ъд╟дндыд╬д╧░╩▓╝д╬еде┘еєе╚└▀─ъд╟д╣бг
+    <ul>
+    <li><a href="#evt:wheel"><code>wheel</code></a></li>
+    </ul>
+  </dd>
+
+  <dt><a name="act:nothing"><code>(nothing)</code></a></dt>
+  <dd>
+  ▓┐дт╣╘д╩ддд▐д╗дєбг<br>
+  ╞├─ъд╬е▄е┐еєдЄ╠╡╕·д╦д╖д┐ддд╚днд╩д╔д╦╗╪─ъд╖д▐д╣бг<br>
+  д│д╬╞░║юд╧┴┤д╞д╬еде┘еєе╚└▀─ъд╟╗╪─ъд╟днд▐д╣бг
+  </dd>
+  </dl>
+</div>
+
+</dd>
+
+<dt><code>scroll-window</code> └▀─ъ</dt>
+<dd>
+</dd>
+
+<dt><code>operator-config</code> └▀─ъ</dt>
+<dd>
 </dd>
 </dl>
 
@@ -121,6 +450,13 @@ S╝░д╧░╩▓╝д╬═╫┴╟д╟╣╜└од╡дьд▐д╣бг
 е└е╓еыепекб╝е╞б╝е╖ечеєдЄ┤▐дсды╛ь╣чд╧─╛┴░д╦ "\" дЄ┴░├╓д╖д▐д╣бг"\" ╝л┐╚дЄ┤▐дсд┐дд╛ь╣чдт╞▒══д╟д╣бг
 </dd>
 
+<dt>┐┐╡╢├═</dt>
+<dd>
+┐┐дкдшд╙╡╢дЄдвдщдяд╖д▐д╣бг<br>
+╡╢д╧ <code>#f</code>бв┐┐д╧ <code>#f</code> ░╩│░д╚д╩дъд▐д╣бг
+╠└╝и┼кд╦┐┐дЄдвдщдяд╣ <code>#t</code> дтдвдъд▐д╣бг
+</dd>
+
 <dt>cons е╗еы</dt>
 <dd>
 car ╔Їд╚ cdr ╔Їд╬╞єд─д╟╣╜└од╡дьбвд╜дьд╛дьд╦╟д░╒д╬├═дЄ╞■дьдыд│д╚дмд╟днд▐д╣бг
@@ -161,7 +497,7 @@ n╕─д╬═╫┴╟дЄ╗¤д─еъе╣е╚д╧ n╕─д╬ cons е╗еыд╟╣╜└од╡дьбвд╜дьд╛дьд╬ car ╔Їд╧═╫┴╟дЄ cdr
 webmaster@tamanegi.org
 </address>
 
-<!-- $Id: CUSTOMIZE.html,v 1.1 2005/01/25 09:33:51 hos Exp $ -->
+<!-- $Id: CUSTOMIZE.html,v 1.2 2005/01/26 09:36:33 hos Exp $ -->
 
 <!--
 Local Variables:
