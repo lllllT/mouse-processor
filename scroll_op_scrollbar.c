@@ -1,7 +1,7 @@
 /*
  * scroll_op_scrollbar.c  -- scroll operators for scrollbar
  *
- * $Id: scroll_op_scrollbar.c,v 1.2 2005/01/13 18:05:21 hos Exp $
+ * $Id: scroll_op_scrollbar.c,v 1.3 2005/01/14 19:13:59 hos Exp $
  *
  */
 
@@ -497,8 +497,8 @@ int SCROLL_OP_API neighborhood_scrollbar_scroll(void *ctxp,
                          &ctx->dx, ctx->target_size.cx);
     }
     if(ctx->v_bar != NULL) {
-        ctx->scroll_proc(ctx->h_bar, SB_CTL, ctx->v_parent, WM_VSCROLL,
-                         &ctx->dy, ctx->target_size.cx);
+        ctx->scroll_proc(ctx->v_bar, SB_CTL, ctx->v_parent, WM_VSCROLL,
+                         &ctx->dy, ctx->target_size.cy);
     }
 
     return 1;
@@ -644,8 +644,7 @@ int SCROLL_OP_API scrollbar_control_scroll(void *ctxp, double dx, double dy)
     ctx->ds += dx * ctx->x_ratio +
                dy * ctx->y_ratio;
 
-    ctx->scroll_proc(ctx->target,
-                     (ctx->dir == SBS_HORZ ? SB_HORZ : SB_VERT),
+    ctx->scroll_proc(ctx->target, SB_CTL,
                      ctx->parent,
                      (ctx->dir == SBS_HORZ ? WM_HSCROLL : WM_VSCROLL),
                      &ctx->ds, ctx->target_size);

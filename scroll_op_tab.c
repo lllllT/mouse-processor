@@ -1,7 +1,7 @@
 /*
  * scroll_op_tab.c  -- scroll operator for tab control
  *
- * $Id: scroll_op_tab.c,v 1.1 2005/01/13 09:39:59 hos Exp $
+ * $Id: scroll_op_tab.c,v 1.2 2005/01/14 19:13:59 hos Exp $
  *
  */
 
@@ -15,6 +15,9 @@
 
 struct tab_control_context {
     HWND target;
+    int ctrl_id;
+
+    HWND parent;
 
     double x_ratio, y_ratio;
     int tick;
@@ -79,6 +82,18 @@ int SCROLL_OP_API tab_control_init_ctx(void *ctxp, int size,
         ctx->tick = 120;
     }
 
+    /* parent window */
+    ctx->parent = GetParent(ctx->target);
+    if(ctx->parent == NULL) {
+        return 0;
+    }
+
+    /* control ID */
+    ctx->ctrl_id = GetDlgCtrlID(ctx->target);
+    if(ctx->ctrl_id == 0) {
+        return 0;
+    }
+
     /* initial delta */
     ctx->ds = 0;
 
@@ -89,7 +104,8 @@ static
 int SCROLL_OP_API tab_control_scroll(void *ctxp, double dx, double dy)
 {
     struct tab_control_context *ctx;
-    DWORD pos, nitem;
+    long pos, nitem;
+    NMHDR nmh;
     int d;
 
     ctx = (struct tab_control_context *)ctxp;
@@ -114,13 +130,26 @@ int SCROLL_OP_API tab_control_scroll(void *ctxp, double dx, double dy)
     }
 
     pos = (pos < 0 ? d : pos + d);
-    while(pos < 0) {
-        pos += nitem;
+    if(pos < 0) {
+        pos = 0;
+    } else if(pos > nitem) {
+        pos = nitem;
     }
-    pos %= nitem;
+
+    memset(&nmh, 0, sizeof(nmh));
+    nmh.hwndFrom = ctx->target;
+    nmh.idFrom = ctx->ctrl_id;
+    nmh.code = TCN_SELCHANGING;
+    SendMessageTimeout(ctx->parent, WM_NOTIFY, ctx->ctrl_id, (LPARAM)&nmh,
+                       SMTO_ABORTIFHUNG, 500, NULL);
 
     SendMessageTimeout(ctx->target, TCM_SETCURSEL, pos, 0,
                        SMTO_ABORTIFHUNG, 500, NULL);
+
+    nmh.code = TCN_SELCHANGE;
+    SendMessageTimeout(ctx->parent, WM_NOTIFY, ctx->ctrl_id, (LPARAM)&nmh,
+                       SMTO_ABORTIFHUNG, 500, NULL);
+
     ctx->ds -= d * ctx->tick;
 
     return 1;

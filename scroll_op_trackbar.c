@@ -1,10 +1,11 @@
 /*
  * scroll_op_trackbar.c  -- scroll operator for trackbar control
  *
- * $Id: scroll_op_trackbar.c,v 1.1 2005/01/13 09:39:59 hos Exp $
+ * $Id: scroll_op_trackbar.c,v 1.2 2005/01/14 19:13:59 hos Exp $
  *
  */
 
+#include "main.h"
 #include "scroll_op.h"
 #include "scroll_op_utils.h"
 #include "util.h"
@@ -19,7 +20,7 @@ int trackbar_line_scroll(HWND hwnd,
                          HWND msg_hwnd, UINT msg,
                          double *delta, int length)
 {
-    DWORD min, max, line, pos, dd;
+    long min, max, line, pos, dd;
 
     if(SendMessageTimeout(hwnd, TBM_GETRANGEMIN, 0, 0,
                           SMTO_ABORTIFHUNG, 500, &min) == 0 ||
@@ -62,7 +63,7 @@ int trackbar_page_scroll(HWND hwnd,
                          HWND msg_hwnd, UINT msg,
                          double *delta, int length)
 {
-    DWORD min, max, page, pos, dd;
+    long min, max, page, pos, dd;
 
     if(SendMessageTimeout(hwnd, TBM_GETRANGEMIN, 0, 0,
                           SMTO_ABORTIFHUNG, 500, &min) == 0 ||
@@ -106,7 +107,7 @@ int trackbar_r_scroll(HWND hwnd,
                       double *delta, int length,
                       int mode)
 {
-    DWORD min, max, pos, dd;
+    long min, max, pos, dd;
     double rest;
 
     if(SendMessageTimeout(hwnd, TBM_GETRANGEMIN, 0, 0,
