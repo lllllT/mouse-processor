@@ -1,7 +1,7 @@
 /*
  * scroll.c  -- scroll window
  *
- * $Id: scroll.c,v 1.5 2005/01/05 09:30:33 hos Exp $
+ * $Id: scroll.c,v 1.6 2005/01/07 09:21:25 hos Exp $
  *
  */
 
@@ -198,8 +198,8 @@ void scrolling_wheel(int x, int y)
 }
 
 
-/* WM_MOUSEHOOK_SCROLL_MODE */
-LRESULT scroll_mode(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+/* WM_MOUSEHOOK_MODECH */
+LRESULT scroll_modech(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
     struct mode_conf *data;
 
@@ -208,15 +208,17 @@ LRESULT scroll_mode(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
     data = (struct mode_conf *)lparam;
 
-    if(data->mode != 1) {
+    if(data->mode != MODE_CH_SCROLL) {
         return 0;
     }
 
-    ctx.scroll_data.x_ratio = data->scroll.x_ratio;
-    ctx.scroll_data.y_ratio = data->scroll.y_ratio;
+    ctx.scroll_data.x_ratio = data->ratio.x_ratio;
+    ctx.scroll_data.y_ratio = data->ratio.y_ratio;
 
+    /* target window */
     ctx.scroll_data.target = WindowFromPoint(ctx.scroll_data.start_pt);
 
+    /* scroll mode */
     {
         TCHAR class[256];
 
@@ -254,6 +256,7 @@ LRESULT scroll_mode(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
         }
     }
 
+    /* initialize mode data */
     if(ctx.scroll_data.mode != SCROLL_MODE_IE ||
        FAILED(get_ie_elem_size(ctx.scroll_data.ie_target,
                                &ctx.scroll_data.target_size)) ||
@@ -274,12 +277,11 @@ LRESULT scroll_mode(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
     return 0;
 }
 
-/* WM_MOUSEHOOK_SCROLLING */
-LRESULT scrolling(HWND hwnd, UINT msgid, WPARAM wparam, LPARAM lparam)
+
+/* MODE_MSG_SCROLL */
+static
+LRESULT scroll_modemsg_scroll(int x, int y, struct mode_conf *data)
 {
-    int x, y;
-    MSG msg;
-
     typedef void (*mode_proc_t)(int, int);
     mode_proc_t proc;
 
@@ -294,38 +296,92 @@ LRESULT scrolling(HWND hwnd, UINT msgid, WPARAM wparam, LPARAM lparam)
         {0, NULL}
     };
 
+    proc = assq_pair(mode_map, ctx.scroll_data.mode, NULL);
+    if(proc) {
+        proc(x, y);
+    }
+
+    return 0;
+}
+
+/* MODE_MSG_MUL_RATIO */
+static
+LRESULT scroll_modemsg_mulratio(int x, int y, struct mode_conf *data)
+{
+    ctx.scroll_data.x_ratio *= data->ratio.x_ratio;
+    ctx.scroll_data.y_ratio *= data->ratio.y_ratio;
+
+    return 0;
+}
+
+/* MODE_MSG_SET_RATIO */
+static
+LRESULT scroll_modemsg_setratio(int x, int y, struct mode_conf *data)
+{
+    ctx.scroll_data.x_ratio = data->ratio.x_ratio;
+    ctx.scroll_data.y_ratio = data->ratio.y_ratio;
+
+    return 0;
+}
+
+/* WM_MOUSEHOOK_MODEMSG */
+LRESULT scroll_modemsg(HWND hwnd, UINT msgid, WPARAM wparam, LPARAM lparam)
+{
+    int x, y;
+    struct mode_conf *data;
+    MSG msg;
+
+    typedef void (*mode_proc_t)(int, int, struct mode_conf *);
+    mode_proc_t proc;
+
+    static struct uint_ptr_pair mode_map[] = {
+        {MODE_MSG_SCROLL, scroll_modemsg_scroll},
+        {MODE_MSG_MUL_RATIO, scroll_modemsg_mulratio},
+        {MODE_MSG_SET_RATIO, scroll_modemsg_setratio},
+
+        {0, NULL}
+    };
+
     x = LOWORD(wparam);
     y = HIWORD(wparam);
+    data = (struct mode_conf *)lparam;
 
-    ctx.scroll_data.dx += (x - ctx.scroll_data.start_pt.x) *
-                          ctx.scroll_data.x_ratio;
-    ctx.scroll_data.dy += (y - ctx.scroll_data.start_pt.y) *
-                          ctx.scroll_data.y_ratio;
-
-    while(PeekMessage(&msg, hwnd,
-                      WM_MOUSEHOOK_SCROLL_MODE, WM_MOUSEHOOK_SCROLLING,
-                      PM_NOREMOVE)) {
-        if(msg.message != WM_MOUSEHOOK_SCROLLING) {
-            break;
-        }
-
-        x = LOWORD(msg.wParam);
-        y = HIWORD(msg.wParam);
-
+    if(data->mode == MODE_MSG_SCROLL) {
         ctx.scroll_data.dx += (x - ctx.scroll_data.start_pt.x) *
                               ctx.scroll_data.x_ratio;
         ctx.scroll_data.dy += (y - ctx.scroll_data.start_pt.y) *
                               ctx.scroll_data.y_ratio;
 
-        /* discard */
-        PeekMessage(&msg, hwnd,
-                    WM_MOUSEHOOK_SCROLL_MODE, WM_MOUSEHOOK_SCROLLING,
-                    PM_REMOVE);
+        while(PeekMessage(&msg, hwnd,
+                          WM_MOUSEHOOK_MODECH, WM_MOUSEHOOK_MODEMSG,
+                          PM_NOREMOVE)) {
+            if(msg.message != WM_MOUSEHOOK_MODEMSG) {
+                break;
+            }
+
+            x = LOWORD(msg.wParam);
+            y = HIWORD(msg.wParam);
+            data = (struct mode_conf *)msg.lParam;
+
+            if(data->mode != MODE_MSG_SCROLL) {
+                break;
+            }
+
+            ctx.scroll_data.dx += (x - ctx.scroll_data.start_pt.x) *
+                                  ctx.scroll_data.x_ratio;
+            ctx.scroll_data.dy += (y - ctx.scroll_data.start_pt.y) *
+                                  ctx.scroll_data.y_ratio;
+
+            /* discard */
+            PeekMessage(&msg, hwnd,
+                        WM_MOUSEHOOK_MODEMSG, WM_MOUSEHOOK_MODEMSG,
+                        PM_REMOVE);
+        }
     }
 
-    proc = assq_pair(mode_map, ctx.scroll_data.mode, NULL);
+    proc = assq_pair(mode_map, data->mode, NULL);
     if(proc) {
-        proc(x, y);
+        proc(x, y, data);
     }
 
     return 0;

@@ -1,7 +1,7 @@
 /*
  * main.h  --
  *
- * $Id: main.h,v 1.12 2005/01/07 05:50:01 hos Exp $
+ * $Id: main.h,v 1.13 2005/01/07 09:21:25 hos Exp $
  *
  */
 
@@ -17,13 +17,20 @@
 #define MOUSE_BTN_CONF_ENABLE_COMB 0x0001
 
 /* mouse_action.code */
-#define MOUSE_ACT_NONE        0x00
-#define MOUSE_ACT_BUTTON      0x01
-#define MOUSE_ACT_WHEEL       0x02
-#define MOUSE_ACT_WHEELPOST   0x03
-#define MOUSE_ACT_MOVE        0x04
-#define MOUSE_ACT_MODECH      0x10
-#define MOUSE_ACT_SCROLL      0x20
+#define MOUSE_ACT_NONE        0x00 /* for all */
+#define MOUSE_ACT_BUTTON      0x01 /* for button */
+#define MOUSE_ACT_WHEEL       0x02 /* for wheel */
+#define MOUSE_ACT_WHEELPOST   0x03 /* for wheel */
+#define MOUSE_ACT_MOVE        0x04 /* for move */
+#define MOUSE_ACT_MODECH      0x10 /* for button */
+#define MOUSE_ACT_MODEMSG     0x11 /* for button, move */
+
+/* mode_conf.mode */
+#define MODE_CH_NORMAL        0x00
+#define MODE_CH_SCROLL        0x01
+#define MODE_MSG_SCROLL       0x10
+#define MODE_MSG_MUL_RATIO    0x20
+#define MODE_MSG_SET_RATIO    0x21
 
 /* scroll_context.mode */
 #define SCROLL_MODE_NATIVE_HV 0x00
@@ -38,7 +45,7 @@
 
 struct mouse_conf;
 
-/* mode change config */
+/* mode config */
 struct mode_conf {
     int mode;
 
@@ -46,7 +53,7 @@ struct mode_conf {
         struct {
             double x_ratio;
             double y_ratio;
-        } scroll;
+        } ratio;
     };
 };
 
@@ -58,19 +65,14 @@ struct mouse_action {
         int button;
 
         struct {
-            double ratio;
-            int tick;
-        } wheel;
-
-        struct {
             struct mouse_conf *mode;
             struct mode_conf data;
-        } mode;
-    } conf;
+        } mode_change;
 
-    union {
-        double wheel;
-    } data;
+        struct {
+            struct mode_conf data;
+        } mode_msg;
+    } conf;
 };
 
 /* mouse configuration */
@@ -145,16 +147,16 @@ extern struct app_context ctx;
 #define MOTION_MOVE  2
 #define MOTION_WHEEL 3
 
-#define WM_MOUSEHOOK_SCROLL_MODE  (WM_APP + 10)
-#define WM_MOUSEHOOK_SCROLLING    (WM_APP + 11)
+#define WM_MOUSEHOOK_MODECH   (WM_APP + 10)
+#define WM_MOUSEHOOK_MODEMSG  (WM_APP + 11)
 
 
 int set_hook(void);
 int clear_hook(void);
 
 
-LRESULT scroll_mode(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
-LRESULT scrolling(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
+LRESULT scroll_modech(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
+LRESULT scroll_modemsg(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 
 
 HRESULT get_ie_target(HWND hwnd, int x, int y, IDispatch **elem);

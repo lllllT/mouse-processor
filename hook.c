@@ -1,7 +1,7 @@
 /*
  * hook.c  -- hook funcs
  *
- * $Id: hook.c,v 1.13 2005/01/07 05:50:00 hos Exp $
+ * $Id: hook.c,v 1.14 2005/01/07 09:21:24 hos Exp $
  *
  */
 
@@ -16,8 +16,6 @@
 #define MOUSEEVENTF_VIRTUALDESK 0x4000
 
 
-#define COMB_TIMER_ID 1
-
 #define HOOK_THREAD_END (WM_APP + 100)
 
 
@@ -25,8 +23,10 @@ static HHOOK mouse_ll_hook = NULL;
 static DWORD hook_thread_id = 0;
 static HANDLE hook_thread_end_evt = NULL;
 
+static UINT_PTR comb_timer_id = 0;
+
 
-static
+inline static
 int msg_to_motion(WPARAM msg)
 {
     switch(msg) {
@@ -52,7 +52,7 @@ int msg_to_motion(WPARAM msg)
     return -1;
 }
 
-static
+inline static
 int msg_to_button(WPARAM msg, DWORD mouse_data)
 {
     switch(msg) {
@@ -82,7 +82,7 @@ int msg_to_button(WPARAM msg, DWORD mouse_data)
     return -1;
 }
 
-static
+inline static
 void fill_input(INPUT *in, int motion, int data)
 {
     switch(motion) {
@@ -148,85 +148,36 @@ void fill_input(INPUT *in, int motion, int data)
     }
 }
 
-static
+inline static
 void do_action(struct mouse_action *act, MSLLHOOKSTRUCT *msll, int motion)
 {
     switch(act->code) {
       case MOUSE_ACT_BUTTON:
-      {
-          INPUT in;
+          if(motion == MOTION_DOWN || motion == MOTION_UP) {
+              INPUT in;
 
-          memset(&in, 0, sizeof(in));
+              memset(&in, 0, sizeof(in));
 
-          in.type = INPUT_MOUSE;
-          in.mi.time = msll->time;
-          in.mi.dwExtraInfo = msll->dwExtraInfo;
-          fill_input(&in, motion, act->conf.button);
+              in.type = INPUT_MOUSE;
+              in.mi.time = msll->time;
+              in.mi.dwExtraInfo = msll->dwExtraInfo;
+              fill_input(&in, motion, act->conf.button);
 
-          SendInput(1, &in, sizeof(INPUT));
-
-          break;
-      }
-
-      case MOUSE_ACT_WHEEL:
-      {
-          INPUT in;
-          int data, wn, i;
-
-          act->data.wheel +=
-              (short)HIWORD(msll->mouseData) * act->conf.wheel.ratio;
-          wn = act->data.wheel / act->conf.wheel.tick;
-          if(wn == 0) {
-              break;
-          }
-
-          data = act->conf.wheel.tick;
-          if(wn < 0) {
-              wn = -wn;
-              data = -data;
-          }
-
-          memset(&in, 0, sizeof(in));
-
-          in.type = INPUT_MOUSE;
-          in.mi.time = msll->time;
-          in.mi.dwExtraInfo = msll->dwExtraInfo;
-          fill_input(&in, MOTION_WHEEL, data);
-
-          for(i = 0; i < wn; i++) {
               SendInput(1, &in, sizeof(INPUT));
           }
-
-          act->data.wheel -= data * wn;
-
           break;
-      }
+
+      case MOUSE_ACT_WHEEL:
+          break;
 
       case MOUSE_ACT_WHEELPOST:
-      {
-          int wn, data, i;
-          HWND target;
+          if(motion == MOTION_WHEEL) {
+              HWND target;
 
-          act->data.wheel +=
-              (short)HIWORD(msll->mouseData) * act->conf.wheel.ratio;
-
-          target = WindowFromPoint(msll->pt);
-          if(target == NULL) {
-              break;
-          }
-
-          wn = act->data.wheel / act->conf.wheel.tick;
-          if(wn == 0) {
-              break;
-          }
-
-          data = act->conf.wheel.tick;
-          if(wn < 0) {
-              wn = -wn;
-              data = -data;
-          }
-
-          for(i = 0; i < wn; i++) {
+              target = WindowFromPoint(msll->pt);
+              if(target == NULL) {
+                  break;
+              }
 
 #define KEY_STATE(key) (GetAsyncKeyState(VK_ ## key) & 0x8000 ? MK_ ## key : 0)
 
@@ -239,31 +190,35 @@ void do_action(struct mouse_action *act, MSLLHOOKSTRUCT *msll, int motion)
                              KEY_STATE(SHIFT) |
                              KEY_STATE(XBUTTON1) |
                              KEY_STATE(XBUTTON2),
-                             data),
+                             (short)HIWORD(msll->mouseData)),
                   MAKELPARAM(msll->pt.x, msll->pt.y));
 
 #undef KEY_STATE
-
-          act->data.wheel -= data * wn;
-
           }
-
           break;
-      }
 
       case MOUSE_ACT_MOVE:
           break;
 
       case MOUSE_ACT_MODECH:
-          ctx.conf = act->conf.mode.mode;
-          PostMessage(ctx.main_window, WM_MOUSEHOOK_SCROLL_MODE,
-                      MAKEWPARAM(msll->pt.x, msll->pt.y),
-                      (LPARAM)&act->conf.mode.data);
+          if(motion == MOTION_UP) {
+              ctx.conf = act->conf.mode_change.mode;
+              PostMessage(ctx.main_window, WM_MOUSEHOOK_MODECH,
+                          MAKEWPARAM(msll->pt.x, msll->pt.y),
+                          (LPARAM)&act->conf.mode_change.data);
+          }
           break;
 
-      case MOUSE_ACT_SCROLL:
-          PostMessage(ctx.main_window, WM_MOUSEHOOK_SCROLLING,
-                      MAKEWPARAM(msll->pt.x, msll->pt.y), 0);
+      case MOUSE_ACT_MODEMSG:
+          if(motion == MOTION_UP || motion == MOTION_MOVE) {
+              PostMessage(ctx.main_window, WM_MOUSEHOOK_MODEMSG,
+                          MAKEWPARAM(msll->pt.x, msll->pt.y),
+                          (LPARAM)&act->conf.mode_msg.data);
+          }
+          break;
+
+      case MOUSE_ACT_NONE:
+          /* do nothing */
           break;
     }
 }
@@ -307,7 +262,7 @@ LRESULT CALLBACK mouse_ll_proc(int code, WPARAM wparam, LPARAM lparam)
 
         if(ctx.pressed) {
             ctx.pressed = 0;
-            KillTimer(ctx.main_window, COMB_TIMER_ID);
+            KillTimer(NULL, comb_timer_id);
 
             if(motion == MOTION_DOWN) {
                 /* combination press */
@@ -317,17 +272,9 @@ LRESULT CALLBACK mouse_ll_proc(int code, WPARAM wparam, LPARAM lparam)
                         &ctx.conf->button[ctx.pressed_btn].comb_act[btn],
                         msll, MOTION_DOWN);
 
-                    if(ctx.conf->button[ctx.pressed_btn].comb_act[btn].code
-                       == MOUSE_ACT_BUTTON) {
-                        ctx.combination[ctx.combinated * 2] =
-                            ctx.pressed_btn;
-                        ctx.combination[ctx.combinated * 2 + 1] = btn;
-                        ctx.combinated += 1;
-                    } else {
-                        ctx.ignore_btn_mask |=
-                            MOUSE_BTN_BIT(ctx.pressed_btn) |
-                            MOUSE_BTN_BIT(btn);
-                    }
+                    ctx.combination[ctx.combinated * 2] = ctx.pressed_btn;
+                    ctx.combination[ctx.combinated * 2 + 1] = btn;
+                    ctx.combinated += 1;
 
                     return 1;
                 }
@@ -352,8 +299,8 @@ LRESULT CALLBACK mouse_ll_proc(int code, WPARAM wparam, LPARAM lparam)
                     ctx.pressed_btn = btn;
                     memcpy(&ctx.pressed_btn_data, msll,
                            sizeof(MSLLHOOKSTRUCT));
-                    SetTimer(ctx.main_window, COMB_TIMER_ID,
-                             ctx.comb_time, comb_timer);
+                    comb_timer_id = SetTimer(NULL, 0,
+                                             ctx.comb_time, comb_timer);
                     return 1;
                 }
             }
@@ -396,17 +343,23 @@ LRESULT CALLBACK mouse_ll_proc(int code, WPARAM wparam, LPARAM lparam)
         }
 
         if(motion == MOTION_WHEEL) {
+            if(ctx.conf->wheel_act.code == MOUSE_ACT_WHEEL) {
+                goto norm_end;
+            }
+
             do_action(&ctx.conf->wheel_act, msll, MOTION_WHEEL);
 
             return 1;
         }
 
         if(motion == MOTION_MOVE) {
-            if(ctx.conf->move_act.code != MOUSE_ACT_MOVE) {
-                do_action(&ctx.conf->move_act, msll, MOTION_MOVE);
-
-                return 1;
+            if(ctx.conf->move_act.code == MOUSE_ACT_MOVE) {
+                goto norm_end;
             }
+
+            do_action(&ctx.conf->move_act, msll, MOTION_MOVE);
+
+            return 1;
         }
     }
 
@@ -425,6 +378,7 @@ void __cdecl hook_thread(void *arg)
 {
     struct hook_data *data = (struct hook_data *)arg;
     MSG msg;
+    int ret;
 
     /* create thread message queue */
     PeekMessage(&msg, NULL, WM_USER, WM_USER, PM_NOREMOVE);
@@ -442,17 +396,22 @@ void __cdecl hook_thread(void *arg)
     SetEvent(data->start_evt);
 
     while(hook_thread_id > 0) {
-        if(GetMessage(&msg, NULL, 0, 0) < 0) {
+        ret = GetMessage(&msg, NULL, 0, 0);
+        if(ret < 0) {
             break;
         }
 
-        if(msg.message == HOOK_THREAD_END) {
+        if(ret == 0 ||
+           msg.message == HOOK_THREAD_END) {
             UnhookWindowsHookEx(mouse_ll_hook);
             mouse_ll_hook = NULL;
 
             SetEvent(hook_thread_end_evt);
             break;
         }
+
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
     }
 
     hook_thread_id = 0;

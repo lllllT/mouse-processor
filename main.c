@@ -1,7 +1,7 @@
 /*
  * main.c  -- main part of mouse-processor
  *
- * $Id: main.c,v 1.10 2005/01/07 05:50:01 hos Exp $
+ * $Id: main.c,v 1.11 2005/01/07 09:21:25 hos Exp $
  *
  */
 
@@ -274,8 +274,8 @@ LRESULT CALLBACK main_window_proc(HWND hwnd, UINT msg,
         {WM_COMMAND, main_command},
         {WM_TASKTRAY, main_tasktray},
 
-        {WM_MOUSEHOOK_SCROLL_MODE, scroll_mode},
-        {WM_MOUSEHOOK_SCROLLING, scrolling},
+        {WM_MOUSEHOOK_MODECH, scroll_modech},
+        {WM_MOUSEHOOK_MODEMSG, scroll_modemsg},
 
         {0, NULL}
     };
@@ -395,46 +395,61 @@ int main(int ac, char **av)
             ctx.norm_conf.button[i].act.conf.button = i;
 
             ctx.scroll_conf.button[i].act.code = MOUSE_ACT_MODECH;
-            ctx.scroll_conf.button[i].act.conf.mode.mode = &ctx.norm_conf;
-            ctx.scroll_conf.button[i].act.conf.mode.data.mode = 0;
+            ctx.scroll_conf.button[i].act.
+                conf.mode_change.mode = &ctx.norm_conf;
+            ctx.scroll_conf.button[i].act.
+                conf.mode_change.data.mode = MODE_CH_NORMAL;
         }
 
         ctx.norm_conf.wheel_act.code = MOUSE_ACT_WHEELPOST;
-        ctx.norm_conf.wheel_act.conf.wheel.ratio = 1;
-        ctx.norm_conf.wheel_act.conf.wheel.tick = 120;
         ctx.norm_conf.move_act.code = MOUSE_ACT_MOVE;
 
         ctx.scroll_conf.wheel_act.code = MOUSE_ACT_WHEELPOST;
-        ctx.scroll_conf.wheel_act.conf.wheel.ratio = 1;
-        ctx.scroll_conf.wheel_act.conf.wheel.tick = 120;
-        ctx.scroll_conf.move_act.code = MOUSE_ACT_SCROLL;
+        ctx.scroll_conf.move_act.code = MOUSE_ACT_MODEMSG;
+        ctx.scroll_conf.move_act.conf.mode_msg.data.mode = MODE_MSG_SCROLL;
 
         /* dbg */
         ctx.norm_conf.button[0].flags |= MOUSE_BTN_CONF_ENABLE_COMB;
         ctx.norm_conf.button[0].comb_act[1].code = MOUSE_ACT_MODECH;
-        ctx.norm_conf.button[0].comb_act[1].conf.mode.mode = &ctx.scroll_conf;
-        ctx.norm_conf.button[0].comb_act[1].conf.mode.data.mode = 1;
-        ctx.norm_conf.button[0].comb_act[1].conf.mode.data.scroll.x_ratio = 1;
-        ctx.norm_conf.button[0].comb_act[1].conf.mode.data.scroll.y_ratio = 1;
+        ctx.norm_conf.button[0].comb_act[1].
+            conf.mode_change.mode = &ctx.scroll_conf;
+        ctx.norm_conf.button[0].comb_act[1].
+            conf.mode_change.data.mode = MODE_CH_SCROLL;
+        ctx.norm_conf.button[0].comb_act[1].
+            conf.mode_change.data.ratio.x_ratio = 1;
+        ctx.norm_conf.button[0].comb_act[1].
+            conf.mode_change.data.ratio.y_ratio = 1;
         ctx.norm_conf.button[1].flags |= MOUSE_BTN_CONF_ENABLE_COMB;
         ctx.norm_conf.button[1].comb_act[0].code = MOUSE_ACT_MODECH;
-        ctx.norm_conf.button[1].comb_act[0].conf.mode.mode = &ctx.scroll_conf;
-        ctx.norm_conf.button[1].comb_act[0].conf.mode.data.mode = 1;
-        ctx.norm_conf.button[1].comb_act[0].conf.mode.data.scroll.x_ratio = 1;
-        ctx.norm_conf.button[1].comb_act[0].conf.mode.data.scroll.y_ratio = 1;
+        ctx.norm_conf.button[1].comb_act[0].
+            conf.mode_change.mode = &ctx.scroll_conf;
+        ctx.norm_conf.button[1].comb_act[0].
+            conf.mode_change.data.mode = MODE_CH_SCROLL;
+        ctx.norm_conf.button[1].comb_act[0].
+            conf.mode_change.data.ratio.x_ratio = 1;
+        ctx.norm_conf.button[1].comb_act[0].
+            conf.mode_change.data.ratio.y_ratio = 1;
 
         ctx.norm_conf.button[0].flags |= MOUSE_BTN_CONF_ENABLE_COMB;
         ctx.norm_conf.button[0].comb_act[3].code = MOUSE_ACT_MODECH;
-        ctx.norm_conf.button[0].comb_act[3].conf.mode.mode = &ctx.scroll_conf;
-        ctx.norm_conf.button[0].comb_act[3].conf.mode.data.mode = 1;
-        ctx.norm_conf.button[0].comb_act[3].conf.mode.data.scroll.x_ratio = 0;
-        ctx.norm_conf.button[0].comb_act[3].conf.mode.data.scroll.y_ratio = 1;
+        ctx.norm_conf.button[0].comb_act[3].
+            conf.mode_change.mode = &ctx.scroll_conf;
+        ctx.norm_conf.button[0].comb_act[3].
+            conf.mode_change.data.mode = MODE_CH_SCROLL;
+        ctx.norm_conf.button[0].comb_act[3].
+            conf.mode_change.data.ratio.x_ratio = 0;
+        ctx.norm_conf.button[0].comb_act[3].
+            conf.mode_change.data.ratio.y_ratio = 1;
         ctx.norm_conf.button[3].flags |= MOUSE_BTN_CONF_ENABLE_COMB;
         ctx.norm_conf.button[3].comb_act[0].code = MOUSE_ACT_MODECH;
-        ctx.norm_conf.button[3].comb_act[0].conf.mode.mode = &ctx.scroll_conf;
-        ctx.norm_conf.button[3].comb_act[0].conf.mode.data.mode = 1;
-        ctx.norm_conf.button[3].comb_act[0].conf.mode.data.scroll.x_ratio = 0;
-        ctx.norm_conf.button[3].comb_act[0].conf.mode.data.scroll.y_ratio = 1;
+        ctx.norm_conf.button[3].comb_act[0].
+            conf.mode_change.mode = &ctx.scroll_conf;
+        ctx.norm_conf.button[3].comb_act[0].
+            conf.mode_change.data.mode = MODE_CH_SCROLL;
+        ctx.norm_conf.button[3].comb_act[0].
+            conf.mode_change.data.ratio.x_ratio = 0;
+        ctx.norm_conf.button[3].comb_act[0].
+            conf.mode_change.data.ratio.y_ratio = 1;
 
         ctx.norm_conf.button[2].flags |= MOUSE_BTN_CONF_ENABLE_COMB;
         ctx.norm_conf.button[2].comb_act[3].code = MOUSE_ACT_BUTTON;
