@@ -1,7 +1,7 @@
 /*
  * main.h  --
  *
- * $Id: main.h,v 1.13 2005/01/07 09:21:25 hos Exp $
+ * $Id: main.h,v 1.14 2005/01/08 21:47:52 hos Exp $
  *
  */
 
@@ -104,6 +104,22 @@ struct scroll_context {
     double dw;
 };
 
+/* application setting */
+struct app_setting {
+    LPWSTR conf_file;
+    s_exp_data_t *conf_data;
+
+    int comb_time;
+
+    struct mouse_conf *cur_conf;
+
+    int norm_conf_num;
+    struct mouse_conf *norm_conf;
+
+    int scroll_conf_num;
+    struct mouse_conf *scroll_conf;
+};
+
 /* application context */
 struct app_context {
     HINSTANCE instance;
@@ -167,6 +183,8 @@ int scroll_ie_h(IDispatch *elem, int delta, int length);
 int scroll_ie_v(IDispatch *elem, int delta, int length);
 
 s_exp_data_t *load_conf(LPCWSTR conf_file);
+int apply_default_setting(void);
+int apply_setting(s_exp_data_t *conf);
 
 s_exp_data_t *get_conf(int type, ...);
 int get_conf_int(int def_val, ...);

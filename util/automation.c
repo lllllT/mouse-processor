@@ -1,11 +1,13 @@
 /*
  * automation.c  -- COM automation helper
  *
- * $Id: automation.c,v 1.1 2005/01/05 07:46:31 hos Exp $
+ * $Id: automation.c,v 1.2 2005/01/08 21:47:52 hos Exp $
  *
  */
 
 
+#define COBJMACROS 1
+
 #include <objbase.h>
 #include "automation.h"
 

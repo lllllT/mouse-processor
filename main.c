@@ -1,7 +1,7 @@
 /*
  * main.c  -- main part of mouse-processor
  *
- * $Id: main.c,v 1.11 2005/01/07 09:21:25 hos Exp $
+ * $Id: main.c,v 1.12 2005/01/08 21:47:52 hos Exp $
  *
  */
 
@@ -359,6 +359,8 @@ int main(int ac, char **av)
     int ret;
 
     memset(&ctx, 0, sizeof(ctx));
+
+    apply_default_setting();
 
     ctx.conf_data = load_conf(ctx.conf_file);
     if(ctx.conf_data == NULL) {

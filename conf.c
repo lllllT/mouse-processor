@@ -1,7 +1,7 @@
 /*
  * conf.h  -- configuration
  *
- * $Id: conf.c,v 1.3 2005/01/07 04:52:24 hos Exp $
+ * $Id: conf.c,v 1.4 2005/01/08 21:47:51 hos Exp $
  *
  */
 
@@ -221,4 +221,15 @@ wchar_t *get_conf_string(const wchar_t *def_val, ...)
     } else {
         return data->string.str;
     }
+}
+
+
+int apply_default_setting(void)
+{
+    return 0;
+}
+
+int apply_setting(s_exp_data_t *conf)
+{
+    return 0;
 }

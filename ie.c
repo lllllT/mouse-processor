@@ -1,9 +1,11 @@
 /*
  * ie.c  -- ie compornent operation
  *
- * $Id: ie.c,v 1.4 2005/01/05 09:30:32 hos Exp $
+ * $Id: ie.c,v 1.5 2005/01/08 21:47:52 hos Exp $
  *
  */
+
+#define COBJMACROS 1
 
 #include "main.h"
 #include "automation.h"
@@ -21,29 +23,32 @@ HRESULT get_ie_elem_at(IDispatch *doc, int x, int y, IDispatch **ret_elem)
     inner_doc = doc;
     IDispatch_AddRef(inner_doc);
 
-    while(1) {
-        {
-            IDispatch *win;
+    {
+        IDispatch *win;
 
-            hres = get_property_dp(inner_doc, L"parentWindow", &win);
-            if(FAILED(hres)) {
-                IDispatch_Release(inner_doc);
-                return hres;
-            }
-
-            {
-                long sx = 0, sy = 0;
-
-                get_property_long(win, L"screenLeft", &sx);
-                get_property_long(win, L"screenTop", &sy);
-                IDispatch_Release(win);
-
-                args[0].vt = VT_I4;
-                args[0].lVal = y - sy;
-                args[1].vt = VT_I4;
-                args[1].lVal = x - sx;
-            }
+        hres = get_property_dp(inner_doc, L"parentWindow", &win);
+        if(FAILED(hres)) {
+            IDispatch_Release(inner_doc);
+            return hres;
         }
+
+        {
+            long sx = 0, sy = 0;
+
+            get_property_long(win, L"screenLeft", &sx);
+            get_property_long(win, L"screenTop", &sy);
+            IDispatch_Release(win);
+
+            x -= sx;
+            y -= sy;
+        }
+    }
+
+    while(1) {
+        args[0].vt = VT_I4;
+        args[0].lVal = y;
+        args[1].vt = VT_I4;
+        args[1].lVal = x;
 
         hres = call_method_s(inner_doc, L"elementFromPoint", args, 2, &var);
         IDispatch_Release(inner_doc);
@@ -87,6 +92,27 @@ HRESULT get_ie_elem_at(IDispatch *doc, int x, int y, IDispatch **ret_elem)
                 break;
             }
 
+            while(1) {
+                IDispatch *parent = NULL;
+                long ox = 0, oy = 0, cx = 0, cy = 0;
+
+                hres = get_property_dp(elem, L"offsetParent", &parent);
+                if(FAILED(hres) || parent == NULL) {
+                    break;
+                }
+
+                get_property_long(elem, L"offsetLeft", &ox);
+                get_property_long(elem, L"offsetTop", &oy);
+                get_property_long(parent, L"clientLeft", &cx);
+                get_property_long(parent, L"clientTop", &cy);
+
+                x -= ox + cx;
+                y -= oy + cy;
+
+                IDispatch_Release(elem);
+                elem = parent;
+            }
+
             IDispatch_Release(elem);
         }
     }
@@ -127,11 +153,18 @@ HRESULT get_ie_target(HWND hwnd, int x, int y, IDispatch **ret_elem)
     }
 
     while(1) {
-        BSTR overflow = NULL, tagname = NULL;
+        BSTR overflow = NULL, curoverflow = NULL, tagname = NULL;
         static LPOLESTR props[] = {L"style", L"overflow", NULL};
+        static LPOLESTR curprops[] = {L"currentStyle", L"overflow", NULL};
 
         if(SUCCEEDED(get_property_strv(elem, props, &overflow)) &&
+           SUCCEEDED(get_property_strv(elem, curprops, &curoverflow)) &&
            SUCCEEDED(get_property_str(elem, L"tagName", &tagname))) {
+            if(overflow == NULL) {
+                overflow = curoverflow;
+                curoverflow = NULL;
+            }
+
             if((tagname != NULL &&
                 ((wcscmp(tagname, L"BODY") == 0 ||
                   wcscmp(tagname, L"TEXTAREA") == 0) &&
@@ -155,6 +188,7 @@ HRESULT get_ie_target(HWND hwnd, int x, int y, IDispatch **ret_elem)
             }
         }
         SysFreeString(overflow);
+        SysFreeString(curoverflow);
         SysFreeString(tagname);
 
         {
