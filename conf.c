@@ -1,7 +1,7 @@
 /*
  * conf.h  -- configuration
  *
- * $Id: conf.c,v 1.2 2005/01/06 09:20:40 hos Exp $
+ * $Id: conf.c,v 1.3 2005/01/07 04:52:24 hos Exp $
  *
  */
 
@@ -163,13 +163,47 @@ int get_conf_int(int def_val, ...)
     s_exp_data_t *data;
 
     va_start(ap, def_val);
-    data = get_conf_v(S_EXP_TYPE_NUMBER, ap);
+
+    data = get_conf_v(S_EXP_TYPE_INTEGER, ap);
+    if(data == NULL) {
+        data = get_conf_v(S_EXP_TYPE_FLONUM, ap);
+    }
+
     va_end(ap);
 
     if(data == NULL) {
         return def_val;
     } else {
-        return data->number.val;
+        if(data->type == S_EXP_TYPE_INTEGER) {
+            return data->number.val;
+        } else {
+            return (int)data->flonum.val;
+        }
+    }
+}
+
+double get_conf_double(int def_val, ...)
+{
+    va_list ap;
+    s_exp_data_t *data;
+
+    va_start(ap, def_val);
+
+    data = get_conf_v(S_EXP_TYPE_INTEGER, ap);
+    if(data == NULL) {
+        data = get_conf_v(S_EXP_TYPE_FLONUM, ap);
+    }
+
+    va_end(ap);
+
+    if(data == NULL) {
+        return def_val;
+    } else {
+        if(data->type == S_EXP_TYPE_INTEGER) {
+            return (double)data->number.val;
+        } else {
+            return data->flonum.val;
+        }
     }
 }
 

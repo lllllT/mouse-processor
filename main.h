@@ -1,7 +1,7 @@
 /*
  * main.h  --
  *
- * $Id: main.h,v 1.10 2005/01/06 08:49:03 hos Exp $
+ * $Id: main.h,v 1.11 2005/01/07 04:54:06 hos Exp $
  *
  */
 
@@ -169,4 +169,5 @@ s_exp_data_t *load_conf(LPCWSTR conf_file);
 
 s_exp_data_t *get_conf(int type, ...);
 int get_conf_int(int def_val, ...);
+double get_conf_double(int def_val, ...);
 wchar_t *get_conf_string(const wchar_t *def_val, ...);

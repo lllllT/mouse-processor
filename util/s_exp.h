@@ -1,7 +1,7 @@
 /*
  * s_exp.h  -- s-expression
  *
- * $Id: s_exp.h,v 1.2 2005/01/06 08:49:04 hos Exp $
+ * $Id: s_exp.h,v 1.3 2005/01/07 04:51:45 hos Exp $
  *
  */
 
@@ -15,7 +15,9 @@ typedef enum {
     S_EXP_TYPE_NIL,
 
     S_EXP_TYPE_CONS,
-    S_EXP_TYPE_NUMBER,
+    S_EXP_TYPE_INTEGER,
+    S_EXP_TYPE_NUMBER = S_EXP_TYPE_INTEGER,
+    S_EXP_TYPE_FLONUM,
     S_EXP_TYPE_STRING,
     S_EXP_TYPE_SYMBOL,
 
@@ -36,6 +38,10 @@ typedef struct s_exp_data {
         struct {
             int val;
         } number;
+
+        struct {
+            double val;
+        } flonum;
 
         struct {
             wchar_t *str;

@@ -1,7 +1,7 @@
 /*
  * write_s_exp.c  -- write s-expression
  *
- * $Id: write_s_exp.c,v 1.2 2005/01/06 08:49:06 hos Exp $
+ * $Id: write_s_exp.c,v 1.3 2005/01/07 04:51:45 hos Exp $
  *
  */
 
@@ -53,8 +53,12 @@ int write_s_exp(FILE *fp, const s_exp_data_t *data)
           fprintf(fp, ")");
           break;
 
-      case S_EXP_TYPE_NUMBER:
+      case S_EXP_TYPE_INTEGER:
           fprintf(fp, "%d", data->number.val);
+          break;
+
+      case S_EXP_TYPE_FLONUM:
+          fprintf(fp, "%lf", data->flonum.val);
           break;
 
       case S_EXP_TYPE_STRING:

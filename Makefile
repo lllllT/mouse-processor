@@ -1,7 +1,7 @@
 #
 # Makefile
 #
-# $Id: Makefile,v 1.6 2005/01/06 08:49:01 hos Exp $
+# $Id: Makefile,v 1.7 2005/01/07 04:52:15 hos Exp $
 #
 
 DEFINES = -D_WIN32_WINNT=0x0500 -DUNICODE -D_UNICODE -DCOBJMACROS
@@ -9,10 +9,12 @@ INCLUDES = -I./util
 CFLAGS = -Wall -g -mwindows -mno-cygwin $(DEFINES) $(INCLUDES)
 LDFLAGS = -Wall -g -mwindows -mno-cygwin
 
+UTIL_LIBS = util/util.a
+
 EXE_NAME = mp.exe
 EXE_OBJS = main.o hook.o scroll.o ie.o conf.o resource.o
 EXE_HEADERS = main.h resource.h
-EXE_LDLIBS = util/util.a -lole32 -loleaut32 -loleacc -luuid
+EXE_LDLIBS = $(UTIL_LIBS) -lole32 -loleaut32 -loleacc -luuid
 EXE_LDFLAGS = $(LDFLAGS)
 
 SUBDIRS = util
@@ -30,7 +32,7 @@ all: all-rec $(TARGET)
 
 .SUFFIXES: .rc
 
-$(EXE_NAME): $(EXE_OBJS)
+$(EXE_NAME): $(EXE_OBJS) $(UTIL_LIBS)
 	$(CC) $(EXE_LDFLAGS) $(EXE_OBJS) $(EXE_LDLIBS) -o $@
 
 $(EXE_OBJS) : $(EXE_HEADERS)

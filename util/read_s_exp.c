@@ -1,7 +1,7 @@
 /*
  * read_s_exp.c  -- read s-expression
  *
- * $Id: read_s_exp.c,v 1.3 2005/01/06 09:20:59 hos Exp $
+ * $Id: read_s_exp.c,v 1.4 2005/01/07 04:51:44 hos Exp $
  *
  */
 
@@ -11,7 +11,7 @@
  *
  * <datum> = <boolean>
  *         | <number>
- *         | <float>
+ *         | <flonum>
  *         | <symbol>
  *         | <string>
  *         | <list>
@@ -39,7 +39,7 @@
  * <digit 10> = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
  * <digit 16> = <digit 10> | a | b | c | e | f
  *
- * <float> = <sign> <fraction>
+ * <flonum> = <sign> <fraction>
  *
  * <fraction> = . <digit 10>+
  *            | <digit 10>+ . <digit 10>*
@@ -126,7 +126,8 @@ static int char_to_number(int c, int base);
 static s_exp_data_t *read_list(s_exp_read_context_t *ctx);
 static s_exp_data_t *read_string(s_exp_read_context_t *ctx);
 static s_exp_data_t *read_integer(s_exp_read_context_t *ctx, int base);
-static s_exp_data_t *read_symbol(s_exp_read_context_t *ctx);
+static s_exp_data_t *read_integer_or_flonum(s_exp_read_context_t *ctx);
+static s_exp_data_t *read_symbol_or_number(s_exp_read_context_t *ctx);
 static s_exp_data_t *read_word(s_exp_read_context_t *ctx);
 
 static s_exp_data_t *s_exp_read_error(s_exp_read_context_t *ctx,
@@ -138,6 +139,7 @@ static s_exp_data_t *s_exp_append(s_exp_data_t *head, s_exp_data_t **tail,
 static s_exp_data_t *s_exp_empty_string(void);
 static s_exp_data_t *s_exp_append_char_to_string(s_exp_data_t *data, int c);
 static s_exp_data_t *s_exp_integer(long val);
+static s_exp_data_t *s_exp_flonum(double val);
 static s_exp_data_t *s_exp_intern_symbol(const s_exp_data_t *str);
 
 static s_exp_data_t *s_exp_alloc(int type);
@@ -234,7 +236,7 @@ s_exp_data_t *read_s_exp(s_exp_read_context_t *ctx)
       case '0': case '1': case '2': case '3': case '4':
       case '5': case '6': case '7': case '8': case '9':
           pushback_char(ctx, c);
-          return read_integer(ctx, 10);
+          return read_integer_or_flonum(ctx);
 
       case ';':
           skip_line(ctx);
@@ -245,7 +247,7 @@ s_exp_data_t *read_s_exp(s_exp_read_context_t *ctx)
 
       default:
           pushback_char(ctx, c);
-          return read_symbol(ctx);
+          return read_symbol_or_number(ctx);
     }
 }
 
@@ -455,6 +457,83 @@ static s_exp_data_t *read_integer_from_word(s_exp_read_context_t *ctx,
     return s_exp_integer((long)val * sign);
 }
 
+static s_exp_data_t *read_flonum_from_word(s_exp_read_context_t *ctx,
+                                           const s_exp_data_t *data)
+{
+    const wchar_t *s;
+    int l, i;
+    double val, r;
+    long v;
+    int sign, base;
+
+    s = data->string.str;
+    l = data->string.len;
+    i = 0;
+
+    base = 10;
+    val = 0.0;
+    switch(s[i]) {
+      case L'+':
+          sign = +1;
+          i += 1;
+          break;
+
+      case L'-':
+          sign = -1;
+          i += 1;
+          break;
+
+      default:
+          sign = +1;
+          break;
+    }
+
+    for(; i < l; i++) {
+        if(s[i] == L'.') {
+            i++;
+            break;
+        }
+
+        v = char_to_number(s[i], base);
+        if(v < 0) {
+            s_exp_data_t *err;
+            err = s_exp_read_error(ctx, "bad number syntax: \"%S\".", s);
+            return err;
+        }
+
+        val = val * base + v;
+    }
+
+    r = 1.0 / base;
+    for(; i < l; i++) {
+        v = char_to_number(s[i], base);
+        if(v < 0) {
+            s_exp_data_t *err;
+            err = s_exp_read_error(ctx, "bad number syntax: \"%S\".", s);
+            return err;
+        }
+
+        val = val + v * r;
+        r /= base;
+    }
+
+    return s_exp_flonum(val * sign);
+}
+
+static s_exp_data_t *read_integer_or_flonum_from_word(
+    s_exp_read_context_t *ctx, const s_exp_data_t *data)
+{
+    s_exp_data_t *num;
+
+    num = read_integer_from_word(ctx, 10, data);
+    if(S_EXP_ERROR(num)) {
+        free_s_exp(num);
+        num = read_flonum_from_word(ctx, data);
+    }
+
+    return num;
+}
+
 static s_exp_data_t *read_integer(s_exp_read_context_t *ctx, int base)
 {
     s_exp_data_t *data, *num;
@@ -475,7 +554,27 @@ static s_exp_data_t *read_integer(s_exp_read_context_t *ctx, int base)
     return num;
 }
 
-static s_exp_data_t *read_symbol(s_exp_read_context_t *ctx)
+static s_exp_data_t *read_integer_or_flonum(s_exp_read_context_t *ctx)
+{
+    s_exp_data_t *data, *num;
+
+    data = read_word(ctx);
+
+    if(data == NULL) {
+        return s_exp_read_error(ctx, "EOF detected inside number.");
+    }
+
+    if(S_EXP_ERROR(data)) {
+        return data;
+    }
+
+    num = read_integer_or_flonum_from_word(ctx, data);
+
+    free_s_exp(data);
+    return num;
+}
+
+static s_exp_data_t *read_symbol_or_number(s_exp_read_context_t *ctx)
 {
     s_exp_data_t *data, *sym;
     wchar_t *s;
@@ -503,10 +602,10 @@ static s_exp_data_t *read_symbol(s_exp_read_context_t *ctx)
         return sym;
     }
 
-    if(s[0] == L'+' || s[0] == L'-') {
+    if(s[0] == L'+' || s[0] == L'-' || s[0] == L'.') {
         s_exp_data_t *num;
 
-        num = read_integer_from_word(ctx, 10, data);
+        num = read_integer_or_flonum_from_word(ctx, data);
 
         free_s_exp(data);
         return num;
@@ -880,12 +979,26 @@ static s_exp_data_t *s_exp_integer(long val)
 {
     s_exp_data_t *data;
 
-    data = s_exp_alloc(S_EXP_TYPE_NUMBER);
+    data = s_exp_alloc(S_EXP_TYPE_INTEGER);
     if(S_EXP_ERROR(data)) {
         return data;
     }
 
     data->number.val = val;
+
+    return data;
+}
+
+static s_exp_data_t *s_exp_flonum(double val)
+{
+    s_exp_data_t *data;
+
+    data = s_exp_alloc(S_EXP_TYPE_FLONUM);
+    if(S_EXP_ERROR(data)) {
+        return data;
+    }
+
+    data->flonum.val = val;
 
     return data;
 }
