@@ -1,7 +1,7 @@
 /*
  * conf.h  -- configuration
  *
- * $Id: conf.c,v 1.16 2005/01/25 05:05:02 hos Exp $
+ * $Id: conf.c,v 1.17 2005/01/26 04:42:36 hos Exp $
  *
  */
 
@@ -951,13 +951,20 @@ int apply_setting(struct app_setting *app_conf)
                                        NULL);
 
     {
-        s_exp_data_t *t;
+        s_exp_data_t *t, *tt;
 
         t = get_conf_list(app_conf, S_EXP_NIL,
                           L"global", L"tray-icon",
                           NULL);
-        app_conf->tray_icon_file = get_nth_str(t, 0, NULL);
-        app_conf->tray_icon_idx = get_nth_int(t, 1, 0);
+        tt = s_exp_nth(t, 0);
+        if(tt == NULL || tt != S_EXP_FALSE) {
+            app_conf->tray_icon_hide = 0;
+            app_conf->tray_icon_file = get_nth_str(t, 0, NULL);
+            app_conf->tray_icon_idx = get_nth_int(t, 1, 0);
+        } else {
+            app_conf->tray_icon_hide = 1;
+            app_conf->tray_icon_file = NULL;
+        }
     }
 
     /* normal, scroll mode */

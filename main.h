@@ -1,7 +1,7 @@
 /*
  * main.h  --
  *
- * $Id: main.h,v 1.35 2005/01/25 05:05:02 hos Exp $
+ * $Id: main.h,v 1.36 2005/01/26 04:42:37 hos Exp $
  *
  */
 
@@ -132,6 +132,7 @@ struct app_setting {
 
     int comb_time;
 
+    int tray_icon_hide;
     LPWSTR tray_icon_file;
     int tray_icon_idx;
 

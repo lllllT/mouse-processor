@@ -1,7 +1,7 @@
 /*
  * main.c  -- main part of mouse-processor
  *
- * $Id: main.c,v 1.30 2005/01/25 09:02:47 hos Exp $
+ * $Id: main.c,v 1.31 2005/01/26 04:42:37 hos Exp $
  *
  */
 
@@ -324,6 +324,11 @@ LRESULT main_tasktray_ch(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
     int ret;
     HICON icon;
+
+    if(ctx.app_conf.tray_icon_hide) {
+        set_tasktray_icon(hwnd, NIM_DELETE);
+        return 0;
+    }
 
     if(ctx.app_conf.tray_icon_file != NULL) {
         if(ExtractIconExW(ctx.app_conf.tray_icon_file,
