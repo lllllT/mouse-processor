@@ -1,7 +1,7 @@
 /*
  * assq_pair.c  -- utility function assq_pair
  *
- * $Id: assq_pair.c,v 1.1 2005/01/05 07:46:30 hos Exp $
+ * $Id: assq_pair.c,v 1.2 2005/01/05 07:59:35 hos Exp $
  *
  */
 
