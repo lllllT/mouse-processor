@@ -1,12 +1,13 @@
 /*
  * scroll_op.c  -- scroll operators
  *
- * $Id: scroll_op.c,v 1.2 2005/01/12 11:12:57 hos Exp $
+ * $Id: scroll_op.c,v 1.3 2005/01/12 15:54:52 hos Exp $
  *
  */
 
 #include "scroll_op.h"
 #include "util.h"
+#include <tchar.h>
 
 
 static
@@ -328,6 +329,10 @@ int SCROLL_OP_API window_scrollbar_init_ctx(void *ctxp, int size,
     s_exp_data_t *mode_conf;
     wchar_t *mode_name;
 
+    if(size != sizeof(struct window_scrollbar_context)) {
+        return 0;
+    }
+
     ctx = (struct window_scrollbar_context *)ctxp;
 
     /* target window handle */
@@ -344,6 +349,15 @@ int SCROLL_OP_API window_scrollbar_init_ctx(void *ctxp, int size,
 
     ctx->scroll_proc = (scrollbar_scroll_proc_t)
                        assq_pair(scrollbar_scroll_proc_map, ctx->mode, NULL);
+
+    /* x and y ratio */
+    mode_conf = s_exp_massq(arg->conf, S_EXP_TYPE_CONS, mode_name, NULL);
+    if(mode_conf == NULL) {
+        mode_conf = S_EXP_NIL;
+    }
+
+    get_scrollbar_ratio(arg->arg, mode_conf,
+                        &ctx->x_ratio, &ctx->y_ratio, 1.0, 1.0);
 
     /* check window style */
     switch(ctx->mode) {
@@ -362,21 +376,14 @@ int SCROLL_OP_API window_scrollbar_init_ctx(void *ctxp, int size,
       }
     }
 
-    /* x and y ratio */
-    mode_conf = s_exp_massq(arg->conf, S_EXP_TYPE_CONS, mode_name, NULL);
-    if(mode_conf == NULL) {
-        mode_conf = S_EXP_NIL;
-    }
-
-    get_scrollbar_ratio(arg->arg, mode_conf,
-                        &ctx->x_ratio, &ctx->y_ratio, 1.0, 1.0);
-
     /* window size */
     {
         RECT rt;
 
         memset(&rt, 0, sizeof(rt));
-        GetClientRect(ctx->target, &rt);
+        if(GetClientRect(ctx->target, &rt) == 0) {
+            return 0;
+        }
 
         ctx->target_size.cx = rt.right - rt.left + 1;
         ctx->target_size.cy = rt.bottom - rt.top + 1;
@@ -424,6 +431,218 @@ int SCROLL_OP_API window_scrollbar_get_operator(scroll_op_procs_t *op,
     op->init_context = window_scrollbar_init_ctx;
     op->scroll = window_scrollbar_scroll;
     op->end_scroll = window_scrollbar_end_scroll;
+
+    return 1;
+}
+
+
+struct neighborhood_scrollbar_context {
+    int mode;
+    scrollbar_scroll_proc_t scroll_proc;
+
+    HWND target;
+    RECT target_rect;
+
+    HWND h_bar;
+    HWND v_bar;
+    SIZE target_size;
+
+    double x_ratio, y_ratio;
+    double dx, dy;
+};
+
+static
+int SCROLL_OP_API neighborhood_scrollbar_get_ctx_size(
+    const scroll_op_arg_t *arg)
+{
+    return sizeof(struct neighborhood_scrollbar_context);
+}
+
+static
+BOOL CALLBACK enum_neighborhood_scrollbar(HWND hwnd, LPARAM lparam)
+{
+    struct neighborhood_scrollbar_context *ctx;
+    TCHAR class[256];
+    RECT rt;
+    LONG_PTR style;
+
+    ctx = (struct neighborhood_scrollbar_context *)lparam;
+
+    if(GetClassName(hwnd, class, 256) == 0) {
+        return TRUE;
+    }
+
+    if(_tcscmp(class, _T("ScrollBar")) != 0) {
+        return TRUE;
+    }
+
+    if(GetWindowRect(hwnd, &rt) == 0) {
+        return TRUE;
+    }
+
+    style = GetWindowLongPtr(hwnd, GWL_STYLE);
+    if(style == 0) {
+        return TRUE;
+    }
+
+    if((style & WS_VISIBLE) == 0) {
+        return TRUE;
+    }
+
+    if((style & (SBS_HORZ | SBS_VERT | SBS_SIZEGRIP)) == SBS_HORZ) {
+        if((rt.top == ctx->target_rect.bottom ||
+            rt.top == ctx->target_rect.top ||
+            rt.bottom == ctx->target_rect.top ||
+            rt.bottom == ctx->target_rect.bottom) &&
+           (rt.left >= ctx->target_rect.left) &&
+           (rt.right <= ctx->target_rect.right)) {
+            if(ctx->h_bar != NULL) {
+                ctx->h_bar = ctx->v_bar = NULL;
+                return FALSE;
+            }
+
+            ctx->h_bar = hwnd;
+            ctx->target_size.cx = rt.right - rt.left;
+            return TRUE;
+        }
+    }
+
+    if((style & (SBS_HORZ | SBS_VERT | SBS_SIZEGRIP)) == SBS_VERT) {
+        if((rt.left == ctx->target_rect.right ||
+            rt.left == ctx->target_rect.left ||
+            rt.right == ctx->target_rect.left ||
+            rt.right == ctx->target_rect.right) &&
+           (rt.top >= ctx->target_rect.top) &&
+           (rt.bottom <= ctx->target_rect.bottom)) {
+            if(ctx->v_bar != NULL) {
+                ctx->h_bar = ctx->v_bar = NULL;
+                return FALSE;
+            }
+
+            ctx->v_bar = hwnd;
+            ctx->target_size.cy = rt.bottom - rt.top;
+            return TRUE;
+        }
+    }
+
+    return TRUE;
+}
+
+static
+int SCROLL_OP_API neighborhood_scrollbar_init_ctx(void *ctxp, int size,
+                                                  const scroll_op_arg_t *arg)
+{
+    struct neighborhood_scrollbar_context *ctx;
+    s_exp_data_t *mode_conf;
+    wchar_t *mode_name;
+
+    if(size != sizeof(struct neighborhood_scrollbar_context)) {
+        return 0;
+    }
+
+    ctx = (struct neighborhood_scrollbar_context *)ctxp;
+
+    /* target window handle */
+    ctx->target = arg->hwnd;
+
+    /* scroll mode name */
+    mode_name = get_mode_name(arg->arg, arg->conf, L"drag");
+
+    /* scroll mode */
+    ctx->mode = get_scrollbar_mode(mode_name);
+    if(ctx->mode < 0) {
+        return 0;
+    }
+
+    ctx->scroll_proc = (scrollbar_scroll_proc_t)
+                       assq_pair(scrollbar_scroll_proc_map, ctx->mode, NULL);
+
+    /* x and y ratio */
+    mode_conf = s_exp_massq(arg->conf, S_EXP_TYPE_CONS, mode_name, NULL);
+    if(mode_conf == NULL) {
+        mode_conf = S_EXP_NIL;
+    }
+
+    get_scrollbar_ratio(arg->arg, mode_conf,
+                        &ctx->x_ratio, &ctx->y_ratio, 1.0, 1.0);
+
+    /* window rect */
+    if(GetWindowRect(ctx->target, &ctx->target_rect) == 0) {
+        return 0;
+    }
+
+    /* search neighborhood scrollbars */
+    ctx->h_bar = ctx->v_bar = NULL;
+    if(EnumChildWindows(ctx->target, enum_neighborhood_scrollbar,
+                        (LPARAM)ctx) == 0) {
+        return 0;
+    }
+
+    if(ctx->h_bar == NULL && ctx->v_bar == NULL) {
+        HWND parent = GetParent(ctx->target);
+
+        if(parent == NULL) {
+            return 0;
+        }
+
+        ctx->h_bar = ctx->v_bar = NULL;
+        if(EnumChildWindows(parent, enum_neighborhood_scrollbar,
+                            (LPARAM)ctx) == 0) {
+            return 0;
+        }
+
+        if(ctx->h_bar == NULL && ctx->v_bar == NULL) {
+            return 0;
+        }
+    }
+
+    /* initial delta */
+    ctx->dx = 0;
+    ctx->dy = 0;
+
+    return 1;
+}
+
+static
+int SCROLL_OP_API neighborhood_scrollbar_scroll(void *ctxp,
+                                                double dx, double dy)
+{
+    struct neighborhood_scrollbar_context *ctx;
+
+    ctx = (struct neighborhood_scrollbar_context *)ctxp;
+
+    ctx->dx += dx * ctx->x_ratio;
+    ctx->dy += dy * ctx->y_ratio;
+
+    if(ctx->h_bar != NULL) {
+        ctx->scroll_proc(ctx->h_bar, SB_CTL, ctx->target, WM_HSCROLL,
+                         &ctx->dx, ctx->target_size.cx);
+    }
+    if(ctx->v_bar != NULL) {
+        ctx->scroll_proc(ctx->h_bar, SB_CTL, ctx->target, WM_VSCROLL,
+                         &ctx->dy, ctx->target_size.cx);
+    }
+
+    return 1;
+}
+
+static
+int SCROLL_OP_API neighborhood_scrollbar_end_scroll(void *ctxp)
+{
+    return 1;
+}
+
+int SCROLL_OP_API neighborhood_scrollbar_get_operator(scroll_op_procs_t *op,
+                                                      int api_ver)
+{
+    if(api_ver < SCROLL_OP_API_VERSION) {
+        return 0;
+    }
+
+    op->get_context_size = neighborhood_scrollbar_get_ctx_size;
+    op->init_context = neighborhood_scrollbar_init_ctx;
+    op->scroll = neighborhood_scrollbar_scroll;
+    op->end_scroll = neighborhood_scrollbar_end_scroll;
 
     return 1;
 }
