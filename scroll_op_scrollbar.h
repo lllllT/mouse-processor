@@ -1,7 +1,7 @@
 /*
  * scroll_op_scrollbar.h  -- 
  *
- * $Id: scroll_op_scrollbar.h,v 1.3 2005/02/02 10:03:53 hos Exp $
+ * $Id: scroll_op_scrollbar.h,v 1.4 2005/02/03 09:51:14 hos Exp $
  *
  */
 
@@ -14,8 +14,10 @@ struct fake_get_scrollbar_info_data {
     UINT hook_subclass_msg;
 
     int valid;                  /* valid following data only if this is true */
+    UINT msg;
     HWND hwnd;
     int bar;
+    int org_pos;
     int track_pos;
 };
 typedef struct fake_get_scrollbar_info_data fake_gsinfo_data_t;

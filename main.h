@@ -1,15 +1,10 @@
 /*
  * main.h  --
  *
- * $Id: main.h,v 1.37 2005/01/27 05:38:23 hos Exp $
+ * $Id: main.h,v 1.38 2005/02/03 09:51:12 hos Exp $
  *
  */
 
-#define _WIN32_WINNT 0x0500
-#define UNICODE 1
-#define _UNICODE 1
-
-
 #include <windows.h>
 #include <tchar.h>
 #include <oleauto.h>

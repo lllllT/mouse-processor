@@ -1,16 +1,12 @@
 /*
  * operator.h  -- operator definition
  *
- * $Id: operator.h,v 1.5 2005/01/21 08:54:51 hos Exp $
+ * $Id: operator.h,v 1.6 2005/02/03 09:51:13 hos Exp $
  *
  */
 
 #ifndef __OPERATOR_H__
 #define __OPERATOR_H__ 1
-
-#define _WIN32_WINNT 0x0500
-#define UNICODE 1
-#define _UNICODE 1
 
 #include "s_exp.h"
 #include <windows.h>

@@ -1,10 +1,10 @@
 #
 # Makefile
 #
-# $Id: Makefile,v 1.31 2005/02/02 15:12:36 hos Exp $
+# $Id: Makefile,v 1.32 2005/02/03 09:51:12 hos Exp $
 #
 
-DEFINES = 
+DEFINES = -D_WIN32_WINNT=0x0500 -DUNICODE=1 -D_UNICODE=1
 INCLUDES = -I./util
 OPT_CFLAGS = -O3 -fomit-frame-pointer
 CFLAGS = -Wall -g -mwindows -mno-cygwin $(DEFINES) $(INCLUDES) $(OPT_CFLAGS)
@@ -42,7 +42,9 @@ SBH_DLL_RSRC =
 SBH_DLL_OBJS = $(SBH_DLL_SRCS:%.c=%.o) $(SBH_DLL_RSRC:%.rc=%.o)
 SBH_DLL_HEADERS = scroll_op_scrollbar.h shmem.h
 SBH_DLL_LDLIBS = -lkernel32 -luser32
-SBH_DLL_LDFLAGS = $(LDFLAGS) -shared -nostartfiles -nostdlib -e _DllMain@12 \
+#SBH_DLL_LDFLAGS = $(LDFLAGS) -shared -nostartfiles -nostdlib -e _DllMain@12 \
+#                  -Wl,--out-implib,lib$(SBH_DLL_NAME).a
+SBH_DLL_LDFLAGS = $(LDFLAGS) -shared \
                   -Wl,--out-implib,lib$(SBH_DLL_NAME).a
 
 PACK_BIN_FILES = $(EXE_NAME) $(SBI_DLL_NAME)
