@@ -1,7 +1,7 @@
 /*
  * scroll.c  -- scroll window
  *
- * $Id: scroll.c,v 1.15 2005/01/13 18:05:21 hos Exp $
+ * $Id: scroll.c,v 1.16 2005/01/14 14:54:37 hos Exp $
  *
  */
 
@@ -143,6 +143,16 @@ LRESULT start_scroll_mode(struct mode_conf *data)
                                        &ctx.mode_data.scroll.class,
                                        &ctx.mode_data.scroll.title);
 
+    log_printf(LOG_LEVEL_DEBUG,
+               L"\n"
+               L"start scroll mode: %ls\n"
+               L"X ratio: %lf\nY ratio: %lf\n"
+               L"window class: %ls\n"
+               L"window title: %ls\n",
+               ctx.app_conf.cur_conf->mode_name,
+               ctx.mode_data.scroll.x_ratio, ctx.mode_data.scroll.y_ratio,
+               ctx.mode_data.scroll.class, ctx.mode_data.scroll.title);
+
     /* search target window configuration */
     {
         BSTR class_re, title_re;
@@ -186,9 +196,14 @@ LRESULT start_scroll_mode(struct mode_conf *data)
         SysFreeString(title);
 
         if(target_win_conf == NULL) {
+            log_printf(LOG_LEVEL_DEBUG, L"window configuration not match\n");
             return 0;
         }
     }
+
+    log_printf(LOG_LEVEL_DEBUG, L"match: ");
+    log_print_s_exp(LOG_LEVEL_DEBUG, target_win_conf->regexp);
+    log_printf(LOG_LEVEL_DEBUG, L"\n");
 
     /* start operator */
     {
@@ -204,6 +219,9 @@ LRESULT start_scroll_mode(struct mode_conf *data)
             ctx.mode_data.scroll.op_context_size =
                 target_win_conf->op->proc.get_context_size(&arg);
             if(ctx.mode_data.scroll.op_context_size < 0) {
+                log_printf(LOG_LEVEL_DEBUG,
+                           L"scroll operator: "
+                           L"start fail (get_context_size)\n");
                 return 0;
             }
         } else {
@@ -223,11 +241,19 @@ LRESULT start_scroll_mode(struct mode_conf *data)
                    ctx.mode_data.scroll.op_context,
                    ctx.mode_data.scroll.op_context_size,
                    &arg) == 0) {
+                log_printf(LOG_LEVEL_DEBUG,
+                           L"scroll operator: start fail (init_context)\n");
                 return 0;
             }
         }
 
         ctx.mode_data.scroll.op = target_win_conf->op;
+    }
+
+    if(wcscmp(ctx.mode_data.scroll.op->name, L"or") != 0) {
+        log_printf(LOG_LEVEL_DEBUG,
+                   L"scroll operator: %ls\n",
+                   ctx.mode_data.scroll.op->name);
     }
 
     return 0;
@@ -238,6 +264,13 @@ LRESULT shift_scroll_mode(struct mode_conf *data)
 {
     ctx.mode_data.scroll.x_ratio = ctx.app_conf.cur_conf->scroll_mode.x_ratio;
     ctx.mode_data.scroll.y_ratio = ctx.app_conf.cur_conf->scroll_mode.y_ratio;
+
+    log_printf(LOG_LEVEL_DEBUG,
+               L"\n"
+               L"shift scroll mode: %ls\n"
+               L"X ratio: %lf\nY ratio: %lf\n",
+               ctx.app_conf.cur_conf->mode_name,
+               ctx.mode_data.scroll.x_ratio, ctx.mode_data.scroll.y_ratio);
 
     return 0;
 }
@@ -261,6 +294,8 @@ LRESULT end_scroll_mode(struct mode_conf *data)
         free(ctx.mode_data.scroll.op_context);
 
     ctx.mode_data.scroll.op_context = NULL;
+
+    log_printf(LOG_LEVEL_DEBUG, L"\n" L"end scroll mode\n");
 
     return 0;
 }

@@ -1,7 +1,7 @@
 /*
  * main.c  -- main part of mouse-processor
  *
- * $Id: main.c,v 1.17 2005/01/14 09:32:37 hos Exp $
+ * $Id: main.c,v 1.18 2005/01/14 14:54:37 hos Exp $
  *
  */
 
@@ -171,6 +171,16 @@ LRESULT tray_rbutton_up(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
     return 0;
 }
 
+/* tray: WM_LBUTTONDBLCLK */
+static
+LRESULT tray_lbutton_dblclick(HWND hwnd, UINT msg,
+                              WPARAM wparam, LPARAM lparam)
+{
+    show_logger(TRUE);
+
+    return 0;
+}
+
 /* WM_CREATE */
 static
 LRESULT main_create(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
@@ -240,6 +250,7 @@ LRESULT main_tasktray(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
     static struct uint_ptr_pair msg_map[] = {
         {WM_RBUTTONUP, tray_rbutton_up},
+        {WM_LBUTTONDBLCLK, tray_lbutton_dblclick},
 
         {0, NULL}
     };
@@ -354,6 +365,13 @@ int message_loop(void)
 
         if(ret == 0) {
             return msg.wParam;
+        }
+
+        if(ctx.log_window != NULL) {
+            ret = IsDialogMessage(ctx.log_window, &msg);
+            if(ret != 0) {
+                continue;
+            }
         }
 
         TranslateMessage(&msg);

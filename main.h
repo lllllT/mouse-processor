@@ -1,7 +1,7 @@
 /*
  * main.h  --
  *
- * $Id: main.h,v 1.24 2005/01/14 09:32:38 hos Exp $
+ * $Id: main.h,v 1.25 2005/01/14 14:54:37 hos Exp $
  *
  */
 
@@ -113,9 +113,10 @@ struct scroll_operator_conf {
 
 /* window configuration */
 struct scroll_window_conf {
-    BSTR class_regexp;
-    BSTR title_regexp;
+    LPWSTR class_regexp;
+    LPWSTR title_regexp;
     int class_or_title;
+    s_exp_data_t *regexp;
 
     struct scroll_operator_conf *op;
     s_exp_data_t *args;
@@ -184,6 +185,7 @@ struct mode_context {
 struct app_context {
     HINSTANCE instance;
     HWND main_window;
+    HWND log_window;
 
     struct app_setting app_conf;
 
@@ -248,7 +250,9 @@ enum {
 int create_logger(void);
 int destroy_logger(void);
 int show_logger(BOOL show);
+
 int log_printf(int level, const wchar_t *fmt, ...);
+int log_print_s_exp(int level, const s_exp_data_t *data);
 
 
 int is_regexp_match(BSTR re_str, BSTR test_str);

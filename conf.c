@@ -1,7 +1,7 @@
 /*
  * conf.h  -- configuration
  *
- * $Id: conf.c,v 1.8 2005/01/13 18:05:21 hos Exp $
+ * $Id: conf.c,v 1.9 2005/01/14 14:54:36 hos Exp $
  *
  */
 
@@ -768,6 +768,7 @@ int apply_scroll_window(void)
         ctx.app_conf.window_conf[i].class_or_title = class_or_title;
         ctx.app_conf.window_conf[i].op = op;
         ctx.app_conf.window_conf[i].args = op_arg;
+        ctx.app_conf.window_conf[i].regexp = e;
 
         i += 1;
     }
