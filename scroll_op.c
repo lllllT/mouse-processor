@@ -1,7 +1,7 @@
 /*
  * scroll_op.c  -- scroll operators
  *
- * $Id: scroll_op.c,v 1.7 2005/01/14 14:54:37 hos Exp $
+ * $Id: scroll_op.c,v 1.8 2005/01/15 15:02:13 hos Exp $
  *
  */
 
@@ -253,7 +253,6 @@ struct scroll_operator_def builtin_scroll_op[] = {
     {L"scrollbar-control", scrollbar_control_get_operator},
     {L"trackbar-control", trackbar_control_get_operator},
     {L"ie-scroll", ie_scroll_get_operator},
-    {L"tab-control", tab_control_get_operator},
     {L"wheel-message", wheel_message_get_operator},
 
     {L"or", or_get_operator},

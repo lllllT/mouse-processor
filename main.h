@@ -1,7 +1,7 @@
 /*
  * main.h  --
  *
- * $Id: main.h,v 1.25 2005/01/14 14:54:37 hos Exp $
+ * $Id: main.h,v 1.26 2005/01/15 15:02:13 hos Exp $
  *
  */
 
@@ -228,8 +228,6 @@ int SCROLL_OP_API trackbar_control_get_operator(scroll_op_procs_t *op,
                                                 int api_ver);
 int SCROLL_OP_API ie_scroll_get_operator(scroll_op_procs_t *op,
                                          int api_ver);
-int SCROLL_OP_API tab_control_get_operator(scroll_op_procs_t *op,
-                                           int api_ver);
 int SCROLL_OP_API wheel_message_get_operator(scroll_op_procs_t *op,
                                              int api_ver);
 
