@@ -1,7 +1,7 @@
 /*
  * main.h  --
  *
- * $Id: main.h,v 1.6 2004/12/31 18:55:51 hos Exp $
+ * $Id: main.h,v 1.7 2004/12/31 21:33:00 hos Exp $
  *
  */
 
@@ -23,7 +23,7 @@
 #define SCROLL_MODE_NATIVE_HV 0x00
 #define SCROLL_MODE_NATIVE_V  0x01
 #define SCROLL_MODE_NATIVE_H  0x02
-#define SCROLL_MODE_LISTVIEW  0x10
+#define SCROLL_MODE_LINESCRL  0x10
 #define SCROLL_MODE_IE        0x20
 #define SCROLL_MODE_WHEEL     0x30
 
@@ -60,7 +60,6 @@ struct scroll_context {
     SIZE target_size;
 
     int dx, dy;
-    int h_pos, v_pos;
 };
 
 /* application context */
