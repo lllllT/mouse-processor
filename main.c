@@ -1,7 +1,7 @@
 /*
  * main.c  -- main part of mouse-processor
  *
- * $Id: main.c,v 1.16 2005/01/13 17:13:20 hos Exp $
+ * $Id: main.c,v 1.17 2005/01/14 09:32:37 hos Exp $
  *
  */
 
@@ -132,6 +132,15 @@ LRESULT menu_pause(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
     return 0;
 }
 
+/* menu item: log */
+static
+LRESULT menu_log(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+{
+    show_logger(TRUE);
+
+    return 0;
+}
+
 /* menu item: exit */
 static
 LRESULT menu_exit(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
@@ -252,6 +261,7 @@ LRESULT main_command(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
     static struct uint_ptr_pair msg_map[] = {
         {MAKEWPARAM(ID_MENU_PAUSE, 0), menu_pause},
         {MAKEWPARAM(ID_MENU_EXIT, 0), menu_exit},
+        {MAKEWPARAM(ID_MENU_LOG, 0), menu_log},
 
         {0, NULL}
     };
@@ -360,6 +370,13 @@ int main(int ac, char **av)
 
     memset(&ctx, 0, sizeof(ctx));
 
+    /* logger */
+    ret = create_logger();
+    if(ret == 0) {
+        error_message(L"create_logger() failed");
+        return 1;
+    }
+
     /* command line option */
     {
         LPWSTR *avw;
@@ -432,11 +449,17 @@ int main(int ac, char **av)
         }
     }
 
+    /* start message */
+    log_printf(LOG_LEVEL_NOTIFY, L"mouse-processor started\n");
+
     /* main message loop */
     ret = message_loop();
 
     /* uninitialize COM */
     CoUninitialize();
+
+    /* end logger */
+    destroy_logger();
 
     return ret;
 }

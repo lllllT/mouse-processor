@@ -1,7 +1,7 @@
 /*
  * main.h  --
  *
- * $Id: main.h,v 1.23 2005/01/13 17:13:20 hos Exp $
+ * $Id: main.h,v 1.24 2005/01/14 09:32:38 hos Exp $
  *
  */
 
@@ -236,6 +236,19 @@ struct scroll_operator_def {
     get_operator_proc_t get_op_proc;
 };
 extern struct scroll_operator_def builtin_scroll_op[];
+
+
+enum {
+    LOG_LEVEL_DEBUG = 0,
+    LOG_LEVEL_NOTIFY,
+    LOG_LEVEL_WARNING,
+    LOG_LEVEL_ERROR,
+};
+
+int create_logger(void);
+int destroy_logger(void);
+int show_logger(BOOL show);
+int log_printf(int level, const wchar_t *fmt, ...);
 
 
 int is_regexp_match(BSTR re_str, BSTR test_str);
