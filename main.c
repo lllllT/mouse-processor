@@ -1,7 +1,7 @@
 /*
  * main.c  -- main part of mouse-processor
  *
- * $Id: main.c,v 1.31 2005/01/26 04:42:37 hos Exp $
+ * $Id: main.c,v 1.32 2005/02/09 09:22:19 hos Exp $
  *
  */
 
@@ -373,6 +373,52 @@ LRESULT main_tasktray(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
     }
 }
 
+/* WM_MOUSEHOOK_WHEELPOST */
+static
+LRESULT wheel_post(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+{
+    HWND target;
+    MSG m;
+    int delta;
+    WPARAM wp;
+    LPARAM lp;
+
+    delta = (int)wparam;
+    lp = lparam;
+
+    while(PeekMessage(&m, hwnd, msg, msg, PM_NOREMOVE)) {
+        delta += (int)m.wParam;
+        lp = m.lParam;
+
+        /* discard */
+        PeekMessage(&m, hwnd, msg, msg, PM_REMOVE);
+    }
+
+    {
+        POINT pt;
+
+        pt.x = LOWORD(lparam);
+        pt.y = HIWORD(lparam);
+        target = get_window_for_mouse_input(pt);
+        if(target == NULL) {
+            return 0;
+        }
+    }
+
+    wp = MAKEWPARAM((GetKeyState(VK_CONTROL)  & 0x8000 ? MK_CONTROL  : 0) |
+                    (GetKeyState(VK_LBUTTON)  & 0x8000 ? MK_LBUTTON  : 0) |
+                    (GetKeyState(VK_MBUTTON)  & 0x8000 ? MK_MBUTTON  : 0) |
+                    (GetKeyState(VK_RBUTTON)  & 0x8000 ? MK_RBUTTON  : 0) |
+                    (GetKeyState(VK_SHIFT)    & 0x8000 ? MK_SHIFT    : 0) |
+                    (GetKeyState(VK_XBUTTON1) & 0x8000 ? MK_XBUTTON1 : 0) |
+                    (GetKeyState(VK_XBUTTON2) & 0x8000 ? MK_XBUTTON2 : 0),
+                    delta);
+
+    PostMessage(target, WM_MOUSEWHEEL, wp, lp);
+
+    return 0;
+}
+
 /* WM_COMMAND */
 static
 LRESULT main_command(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
@@ -407,6 +453,8 @@ LRESULT CALLBACK main_window_proc(HWND hwnd, UINT msg,
 
         {WM_MOUSEHOOK_MODECH, scroll_modech},
         {WM_MOUSEHOOK_MODEMSG, scroll_modemsg},
+
+        {WM_MOUSEHOOK_WHEELPOST, wheel_post},
 
         {0, NULL}
     };

@@ -1,7 +1,7 @@
 /*
  * hook.c  -- hook funcs
  *
- * $Id: hook.c,v 1.25 2005/01/26 08:34:48 hos Exp $
+ * $Id: hook.c,v 1.26 2005/02/09 09:22:19 hos Exp $
  *
  */
 
@@ -186,32 +186,9 @@ void do_action(struct mouse_action *act, MSLLHOOKSTRUCT *msll)
           break;
 
       case MOUSE_ACT_WHEELPOST:
-      {
-          HWND target;
-
-          target = get_window_for_mouse_input(msll->pt);
-          if(target == NULL) {
-              break;
-          }
-
-#define KEY_STATE(key) (GetAsyncKeyState(VK_ ## key) & 0x8000 ? MK_ ## key : 0)
-
-          PostMessage(
-              target, WM_MOUSEWHEEL,
-              MAKEWPARAM(KEY_STATE(CONTROL) |
-                         KEY_STATE(LBUTTON) |
-                         KEY_STATE(MBUTTON) |
-                         KEY_STATE(RBUTTON) |
-                         KEY_STATE(SHIFT) |
-                         KEY_STATE(XBUTTON1) |
-                         KEY_STATE(XBUTTON2),
-                         (short)HIWORD(msll->mouseData)),
-              MAKELPARAM(msll->pt.x, msll->pt.y));
-
-#undef KEY_STATE
-
-          break;
-      }
+          PostMessage(ctx.main_window, WM_MOUSEHOOK_WHEELPOST,
+                      (WPARAM)HIWORD(msll->mouseData),
+                      MAKELPARAM(msll->pt.x, msll->pt.y));
 
       case MOUSE_ACT_MOVE:
           break;

@@ -1,7 +1,7 @@
 /*
  * main.h  --
  *
- * $Id: main.h,v 1.39 2005/02/04 17:08:38 hos Exp $
+ * $Id: main.h,v 1.40 2005/02/09 09:22:20 hos Exp $
  *
  */
 
@@ -203,10 +203,11 @@ struct app_context {
 extern struct app_context ctx;
 
 
-#define WM_TASKTRAY           (WM_APP + 1)
-#define WM_TASKTRAY_CH        (WM_APP + 2)
-#define WM_MOUSEHOOK_MODECH   (WM_APP + 10)
-#define WM_MOUSEHOOK_MODEMSG  (WM_APP + 11)
+#define WM_TASKTRAY            (WM_APP + 1)
+#define WM_TASKTRAY_CH         (WM_APP + 2)
+#define WM_MOUSEHOOK_MODECH    (WM_APP + 10)
+#define WM_MOUSEHOOK_MODEMSG   (WM_APP + 11)
+#define WM_MOUSEHOOK_WHEELPOST (WM_APP + 20)
 
 #define MOTION_DOWN  0
 #define MOTION_UP    1

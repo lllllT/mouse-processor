@@ -72,6 +72,7 @@
  )
 
 (scroll-window
+ ("WINWORD\\.EXE:.*:_WwB:" (wheel-message))
  (":OperaWindowClass$" (window-scrollbar line-scroll))
  ((title ":AVTreeViewClass:AVTreeNodeSimpleView$")
   (apply-parent (neighborhood-scrollbar)))
