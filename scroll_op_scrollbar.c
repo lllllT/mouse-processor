@@ -1,7 +1,7 @@
 /*
  * scroll_op_scrollbar.c  -- scroll operators for scrollbar
  *
- * $Id: scroll_op_scrollbar.c,v 1.4 2005/01/17 09:05:53 hos Exp $
+ * $Id: scroll_op_scrollbar.c,v 1.5 2005/01/18 06:30:52 hos Exp $
  *
  */
 
@@ -27,7 +27,7 @@ int scrollbar_line_scroll(HWND hwnd, int bar,
     WPARAM wp;
     LPARAM lp;
 
-    d = (*delta < 0 ? -(*delta) : *delta);
+    d = trunc(*delta < 0 ? -(*delta) : *delta);
     wp = MAKEWPARAM((*delta < 0 ? SB_LINELEFT : SB_LINERIGHT), 0);
     lp = (bar == SB_CTL ? (LPARAM)hwnd : 0);
 
@@ -49,7 +49,7 @@ int scrollbar_page_scroll(HWND hwnd, int bar,
     WPARAM wp;
     LPARAM lp;
 
-    d = (*delta < 0 ? -(*delta) : *delta);
+    d = trunc(*delta < 0 ? -(*delta) : *delta);
     wp = MAKEWPARAM((*delta < 0 ? SB_PAGELEFT : SB_PAGERIGHT), 0);
     lp = (bar == SB_CTL ? (LPARAM)hwnd : 0);
 
