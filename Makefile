@@ -1,7 +1,7 @@
 #
 # Makefile
 #
-# $Id: Makefile,v 1.26 2005/02/01 11:28:21 hos Exp $
+# $Id: Makefile,v 1.27 2005/02/01 17:03:48 hos Exp $
 #
 
 DEFINES = 
@@ -27,24 +27,27 @@ EXE_HEADERS = main.h operator.h resource.h \
 EXE_LDLIBS = $(UTIL_LIBS) -lpsapi -lole32 -loleaut32 -loleacc -luuid
 EXE_LDFLAGS = $(LDFLAGS)
 
-DLL_NAME = $(TARGET_NAME)sup.dll
-DLL_SRCS = dllmain.c dllinj.c shmem.c
-DLL_RSRC = 
-DLL_OBJS = $(DLL_SRCS:%.c=%.o) $(DLL_RSRC:%.rc=%.o)
-DLL_HEADERS = dllinj.h scroll_op_scrollbar.h shmem.h
-DLL_LDLIBS = -lpsapi -lkernel32
-DLL_LDFLAGS = $(LDFLAGS) -mdll -nostartfiles -nostdlib -e _DllMain@12
+SB_DLL_NAME = $(TARGET_NAME)sb.dll
+SB_DLL_SRCS = sb_dllmain.c dllinj.c shmem.c
+SB_DLL_RSRC = 
+SB_DLL_OBJS = $(SB_DLL_SRCS:%.c=%.o) $(SB_DLL_RSRC:%.rc=%.o)
+SB_DLL_HEADERS = dllinj.h scroll_op_scrollbar.h shmem.h
+SB_DLL_LDLIBS = -lpsapi -lkernel32
+SB_DLL_LDFLAGS = $(LDFLAGS) -mdll -nostartfiles -nostdlib -e _DllMain@12
 
-PACK_BIN_FILES = $(EXE_NAME)
+PACK_BIN_FILES = $(EXE_NAME) $(SB_DLL_NAME)
 PACK_BIN_ADD_FILES = README.txt VERSION default.mprc
-PACK_SRC_FILES = $(EXE_SRCS) $(EXE_RSRC) $(EXE_HEADERS) icon.ico Makefile
+PACK_SRC_FILES = $(EXE_SRCS) $(EXE_RSRC) $(EXE_HEADERS) icon.ico \
+                 $(SB_DLL_SRCS) $(SB_DLL_RSRC) $(SB_DLL_HEADERS) \
+                 Makefile
 
 SUBDIRS = util doc
-TARGET = $(DLL_NAME) $(EXE_NAME)
+TARGET = $(SB_DLL_NAME) $(EXE_NAME)
 VERSION = `cat VERSION`
 
 RC = rc
 WINDRES = windres
+DLLTOOL = dlltool
 ZIP = zip
 GTAR = tar
 INSTALL = install
@@ -64,12 +67,19 @@ all: all-rec $(TARGET)
 $(EXE_NAME): $(EXE_OBJS) $(UTIL_LIBS)
 	$(CC) $(EXE_LDFLAGS) $(EXE_OBJS) $(EXE_LDLIBS) -o $@
 
-$(DLL_NAME): $(DLL_OBJS)
-	$(CC) $(DLL_LDFLAGS) $(DLL_OBJS) $(DLL_LDLIBS) -o $@
+$(SB_DLL_NAME): $(SB_DLL_OBJS)
+	$(CC) $(SB_DLL_LDFLAGS) $(SB_DLL_OBJS) $(SB_DLL_LDLIBS) \
+	      -Wl,--base-file,base.tmp -o 1st.tmp
+	-$(RM) 1st.tmp
+	$(DLLTOOL) --dllname $@ --base-file base.tmp --output-exp exp.tmp
+	-$(RM) base.tmp
+	$(CC) $(SB_DLL_LDFLAGS) $(SB_DLL_OBJS) $(SB_DLL_LDLIBS) \
+	      -Wl,exp.tmp -o $@
+	-$(RM) exp.tmp
 
 $(EXE_OBJS) : $(EXE_HEADERS)
 
-$(DLL_OBJS) : $(DLL_HEADERS)
+$(SB_DLL_OBJS) : $(SB_DLL_HEADERS)
 
 .rc.res:
 	$(RC) /fo$@ $<
@@ -113,4 +123,4 @@ pack-clean:
 	-$(RM) -r $(TARGET_NAME)-$(VERSION) $(TARGET_NAME)_src-$(VERSION)
 
 clean: clean-rec pack-clean
-	-$(RM) $(EXE_NAME) *.o *.res *~
+	-$(RM) $(EXE_NAME) *.o *.res *.tmp *~
