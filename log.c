@@ -1,7 +1,7 @@
 /*
  * log.c  -- logging procs
  *
- * $Id: log.c,v 1.6 2005/01/17 07:41:50 hos Exp $
+ * $Id: log.c,v 1.7 2005/01/17 09:05:53 hos Exp $
  *
  */
 
@@ -365,7 +365,7 @@ int start_logger(void)
 int create_logger(void)
 {
     if(CreateDialog(ctx.instance, MAKEINTRESOURCE(ID_DLG_LOG),
-                    ctx.main_window, log_dlg_proc) == NULL) {
+                    NULL, log_dlg_proc) == NULL) {
         return 0;
     }
 

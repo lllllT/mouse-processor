@@ -1,7 +1,7 @@
 /*
  * scroll_op_scrollbar.c  -- scroll operators for scrollbar
  *
- * $Id: scroll_op_scrollbar.c,v 1.3 2005/01/14 19:13:59 hos Exp $
+ * $Id: scroll_op_scrollbar.c,v 1.4 2005/01/17 09:05:53 hos Exp $
  *
  */
 
@@ -11,6 +11,9 @@
 #include <tchar.h>
 #include <commctrl.h>
 #include <math.h>
+
+
+#define SCROLLBAR_STYLE_MASK (SBS_HORZ | SBS_VERT | SBS_SIZEBOX | SBS_SIZEGRIP)
 
 
 typedef int (* scrollbar_scroll_proc_t)(HWND, int, HWND, UINT, double *, int);
@@ -307,6 +310,9 @@ int SCROLL_OP_API window_scrollbar_get_operator(scroll_op_procs_t *op,
 }
 
 
+static int nb_x_margin = 0, nb_y_margin = 0;
+static int nb_x_sbw = 0, nb_y_sbh = 0;
+
 struct neighborhood_scrollbar_context {
     int mode;
     scrollbar_scroll_proc_t scroll_proc;
@@ -330,6 +336,18 @@ int SCROLL_OP_API neighborhood_scrollbar_get_ctx_size(
     const scroll_op_arg_t *arg)
 {
     return sizeof(struct neighborhood_scrollbar_context);
+}
+
+inline static
+int is_in_margin(int v1, int v2, int m)
+{
+    return ((v1 >= v2 - m) && (v1 <= v2 + m));
+}
+
+inline static
+int is_in_range(int v1, int v2, int min, int max, int m)
+{
+    return ((v1 >= min - m) && (v2 <= max + m));
 }
 
 static
@@ -363,13 +381,14 @@ BOOL CALLBACK enum_neighborhood_scrollbar(HWND hwnd, LPARAM lparam)
         return TRUE;
     }
 
-    if((style & (SBS_HORZ | SBS_VERT | SBS_SIZEGRIP)) == SBS_HORZ) {
-        if((rt.top == ctx->target_rect.bottom ||
-            rt.top == ctx->target_rect.top ||
-            rt.bottom == ctx->target_rect.top ||
-            rt.bottom == ctx->target_rect.bottom) &&
-           (rt.left >= ctx->target_rect.left) &&
-           (rt.right <= ctx->target_rect.right)) {
+    if((style & SCROLLBAR_STYLE_MASK) == SBS_HORZ) {
+        if((is_in_margin(rt.top, ctx->target_rect.bottom, nb_y_margin) ||
+            is_in_margin(rt.top, ctx->target_rect.top, nb_y_margin) ||
+            is_in_margin(rt.bottom, ctx->target_rect.top, nb_y_margin) ||
+            is_in_margin(rt.bottom, ctx->target_rect.bottom, nb_y_margin)) &&
+           is_in_range(rt.left, rt.right,
+                       ctx->target_rect.left, ctx->target_rect.right,
+                       nb_x_margin + nb_x_sbw)) {
             ctx->h_parent = GetParent(hwnd);
             if(ctx->h_parent == NULL) {
                 return TRUE;
@@ -386,13 +405,14 @@ BOOL CALLBACK enum_neighborhood_scrollbar(HWND hwnd, LPARAM lparam)
         }
     }
 
-    if((style & (SBS_HORZ | SBS_VERT | SBS_SIZEGRIP)) == SBS_VERT) {
-        if((rt.left == ctx->target_rect.right ||
-            rt.left == ctx->target_rect.left ||
-            rt.right == ctx->target_rect.left ||
-            rt.right == ctx->target_rect.right) &&
-           (rt.top >= ctx->target_rect.top) &&
-           (rt.bottom <= ctx->target_rect.bottom)) {
+    if((style & SCROLLBAR_STYLE_MASK) == SBS_VERT) {
+        if((is_in_margin(rt.left, ctx->target_rect.right, nb_x_margin) ||
+            is_in_margin(rt.left, ctx->target_rect.left, nb_x_margin) ||
+            is_in_margin(rt.right, ctx->target_rect.left, nb_x_margin) ||
+            is_in_margin(rt.right, ctx->target_rect.right, nb_x_margin)) &&
+           is_in_range(rt.top, rt.bottom,
+                       ctx->target_rect.top, ctx->target_rect.bottom,
+                       nb_y_margin + nb_y_sbh)) {
             ctx->v_parent = GetParent(hwnd);
             if(ctx->v_parent == NULL) {
                 return TRUE;
@@ -454,6 +474,12 @@ int SCROLL_OP_API neighborhood_scrollbar_init_ctx(void *ctxp, int size,
     if(GetWindowRect(ctx->target, &ctx->target_rect) == 0) {
         return 0;
     }
+
+    /* enum margin */
+    nb_x_margin = GetSystemMetrics(SM_CXSIZEFRAME) + 1;
+    nb_y_margin = GetSystemMetrics(SM_CYSIZEFRAME) + 1;
+    nb_x_sbw = GetSystemMetrics(SM_CXVSCROLL);
+    nb_y_sbh = GetSystemMetrics(SM_CYHSCROLL);
 
     /* search neighborhood scrollbars */
     ctx->h_bar = ctx->v_bar = NULL;
@@ -580,15 +606,15 @@ int SCROLL_OP_API scrollbar_control_init_ctx(void *ctxp, int size,
 
         /* check window style */
         style = GetWindowLongPtr(ctx->target, GWL_STYLE);
-        if((style & (SBS_HORZ | SBS_VERT | SBS_SIZEGRIP)) != SBS_HORZ &&
-           (style & (SBS_HORZ | SBS_VERT | SBS_SIZEGRIP)) != SBS_VERT) {
+        if((style & SCROLLBAR_STYLE_MASK) != SBS_HORZ &&
+           (style & SCROLLBAR_STYLE_MASK) != SBS_VERT) {
             return 0;
         }
 
-        if((style & (SBS_HORZ | SBS_VERT | SBS_SIZEGRIP)) == SBS_HORZ) {
+        if((style & SCROLLBAR_STYLE_MASK) == SBS_HORZ) {
             ctx->dir = SBS_HORZ;
         }
-        if((style & (SBS_HORZ | SBS_VERT | SBS_SIZEGRIP)) == SBS_VERT) {
+        if((style & SCROLLBAR_STYLE_MASK) == SBS_VERT) {
             ctx->dir = SBS_VERT;
         }
     }
