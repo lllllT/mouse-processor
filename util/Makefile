@@ -1,7 +1,7 @@
 #
 # util/Makefile
 #
-# $Id: Makefile,v 1.10 2005/01/21 16:17:00 hos Exp $
+# $Id: Makefile,v 1.11 2005/01/21 16:24:46 hos Exp $
 #
 
 DEFINES = 
@@ -21,6 +21,8 @@ OBJS = $(SRCS:%.c=%.o)
 HEADERS = util.h automation.h s_exp.h
 LIB_NAME = util.a
 
+PACK_SRC_FILES = $(SRCS) $(HEADERS) $(RSRC) Makefile
+
 TARGET = $(LIB_NAME)
 
 INSTALL = install
@@ -38,7 +40,7 @@ pack-bin:
 
 pack-src:
 	$(INSTALL) -m 755 -d $(TARGET_DIR)
-	$(INSTALL) -m 644 $(SRCS) $(HEADERS) $(RSRC) $(TARGET_DIR)
+	$(INSTALL) -m 644 $(PACK_SRC_FILES) $(TARGET_DIR)
 
 clean:
 	-$(RM) $(TARGET) $(OBJS) *.o

@@ -1,7 +1,7 @@
 #
 # Makefile
 #
-# $Id: Makefile,v 1.21 2005/01/21 16:16:59 hos Exp $
+# $Id: Makefile,v 1.22 2005/01/21 16:24:45 hos Exp $
 #
 
 DEFINES = 
@@ -28,7 +28,7 @@ EXE_LDFLAGS = $(LDFLAGS)
 
 PACK_BIN_FILES = $(EXE_NAME)
 PACK_BIN_ADD_FILES = README.txt VERSION default.mprc
-PACK_SRC_FILES = $(EXE_SRCS) $(EXE_RSRC) $(EXE_HEADERS)
+PACK_SRC_FILES = $(EXE_SRCS) $(EXE_RSRC) $(EXE_HEADERS) icon.ico Makefile
 
 SUBDIRS = util
 TARGET = $(EXE_NAME)
