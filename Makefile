@@ -1,7 +1,7 @@
 #
 # Makefile
 #
-# $Id: Makefile,v 1.24 2005/01/31 16:58:10 hos Exp $
+# $Id: Makefile,v 1.25 2005/02/01 07:26:56 hos Exp $
 #
 
 DEFINES = 
@@ -27,7 +27,7 @@ EXE_LDLIBS = $(UTIL_LIBS) -lpsapi -lole32 -loleaut32 -loleacc -luuid
 EXE_LDFLAGS = $(LDFLAGS)
 
 DLL_NAME = $(TARGET_NAME)sup.dll
-DLL_SRCS = dllinj.c
+DLL_SRCS = dllmain.c
 DLL_RSRC = 
 DLL_OBJS = $(DLL_SRCS:%.c=%.o) $(DLL_RSRC:%.rc=%.o)
 DLL_HEADERS = 
