@@ -1,7 +1,7 @@
 /*
  * scroll.c  -- scroll window
  *
- * $Id: scroll.c,v 1.7 2005/01/09 13:56:59 hos Exp $
+ * $Id: scroll.c,v 1.8 2005/01/09 14:21:46 hos Exp $
  *
  */
 
@@ -9,13 +9,14 @@
 #include "util.h"
 #include <commctrl.h>
 
+#include <stdio.h>
 
 static
-int get_scroll_pos(HWND hwnd, int bar, int delta, int length, int *ret_pos)
+int get_scroll_pos(HWND hwnd, int bar, double *delta, int length, int *ret_pos)
 {
     SCROLLINFO si;
     int min, max, pos;
-    double spd;
+    double spd, d;
 
     memset(&si, 0, sizeof(si));
     si.cbSize = sizeof(si);
@@ -37,31 +38,32 @@ int get_scroll_pos(HWND hwnd, int bar, int delta, int length, int *ret_pos)
         pos = si.nPos;
     }
 
-    delta *= spd;
-    if(delta == 0) {
+    d = *delta * spd;
+    if((int)d == 0) {
         *ret_pos = pos;
         return 0;
     }
 
-    pos += delta;
+    pos += d;
     if(pos < min) {
         pos = min;
     } else if(pos > max) {
         pos = max;
     }
 
+    *delta -= (int)d / spd;
     *ret_pos = pos;
     return 1;
 }
 
 
 static
-int scroll_window(HWND hwnd, int bar, int delta, int length)
+int scroll_window(HWND hwnd, int bar, double *delta, int length)
 {
     int pos;
     SCROLLINFO si;
 
-    if(delta == 0) {
+    if(*delta == 0) {
         return 0;
     }
 
@@ -105,19 +107,15 @@ void scroll_line(HWND hwnd, int bar, int delta)
 static
 void scrolling_native_h(int x, int y)
 {
-    if(scroll_window(ctx.scroll_data.target, SB_HORZ,
-                     ctx.scroll_data.dx, ctx.scroll_data.target_size.cx)) {
-        ctx.scroll_data.dx -= (int)ctx.scroll_data.dx;
-    }
+    scroll_window(ctx.scroll_data.target, SB_HORZ,
+                  &ctx.scroll_data.dx, ctx.scroll_data.target_size.cx);
 }
 
 static
 void scrolling_native_v(int x, int y)
 {
-    if(scroll_window(ctx.scroll_data.target, SB_VERT,
-                     ctx.scroll_data.dy, ctx.scroll_data.target_size.cy)) {
-        ctx.scroll_data.dy -= (int)ctx.scroll_data.dy;
-    }
+    scroll_window(ctx.scroll_data.target, SB_VERT,
+                  &ctx.scroll_data.dy, ctx.scroll_data.target_size.cy);
 }
 
 static
