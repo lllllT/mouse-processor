@@ -1,7 +1,7 @@
 /*
  * main.c  -- main part of mouse-processor
  *
- * $Id: main.c,v 1.13 2005/01/09 13:56:59 hos Exp $
+ * $Id: main.c,v 1.14 2005/01/09 21:35:30 hos Exp $
  *
  */
 
@@ -29,6 +29,27 @@ static int taskbar_created_message = 0;
 static HMENU popup_menu = NULL;
 
 static int pause = 0;
+
+
+HWND get_target_window_from_point(POINT spt)
+{
+    HWND w, ww;
+    POINT pt;
+
+    ww = WindowFromPoint(spt);
+    for(w = ww; w != NULL; ww = w, w = GetParent(w)) ;
+
+    pt = spt;
+    ScreenToClient(ww, &pt);
+    for(w = RealChildWindowFromPoint(ww, pt); w != ww && w != NULL;
+        ww = w, w = RealChildWindowFromPoint(w, pt)) {
+        pt = spt;
+        ScreenToClient(w, &pt);
+    }
+    if(w == NULL) w = ww;
+
+    return w;
+}
 
 
 /* tasktray icon */

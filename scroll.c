@@ -1,7 +1,7 @@
 /*
  * scroll.c  -- scroll window
  *
- * $Id: scroll.c,v 1.9 2005/01/09 14:48:05 hos Exp $
+ * $Id: scroll.c,v 1.10 2005/01/09 21:35:30 hos Exp $
  *
  */
 
@@ -9,7 +9,6 @@
 #include "util.h"
 #include <commctrl.h>
 
-#include <stdio.h>
 
 static
 int get_scroll_pos(HWND hwnd, int bar, double *delta, int length, int *ret_pos)
@@ -210,7 +209,8 @@ LRESULT scroll_modech(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
     ctx.scroll_data.y_ratio = ctx.app_conf.cur_conf->scroll_mode.y_ratio;
 
     /* target window */
-    ctx.scroll_data.target = WindowFromPoint(ctx.scroll_data.start_pt);
+    ctx.scroll_data.target =
+        get_target_window_from_point(ctx.scroll_data.start_pt);
 
     /* scroll mode */
     {

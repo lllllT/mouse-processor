@@ -1,7 +1,7 @@
 /*
  * main.h  --
  *
- * $Id: main.h,v 1.16 2005/01/09 14:48:05 hos Exp $
+ * $Id: main.h,v 1.17 2005/01/09 21:35:30 hos Exp $
  *
  */
 
@@ -172,6 +172,9 @@ extern struct app_context ctx;
 
 int set_hook(void);
 int clear_hook(void);
+
+
+HWND get_target_window_from_point(POINT spt);
 
 
 LRESULT scroll_modech(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
