@@ -1,7 +1,7 @@
 /*
  * conf.h  -- configuration
  *
- * $Id: conf.c,v 1.13 2005/01/21 08:54:48 hos Exp $
+ * $Id: conf.c,v 1.14 2005/01/21 09:19:29 hos Exp $
  *
  */
 
@@ -737,7 +737,7 @@ int apply_scroll_operator(struct app_setting *app_conf)
 
         /* fill configuration */
         op_conf->conf = get_conf_list(app_conf, S_EXP_NIL,
-                                      L"scroll-operator",
+                                      L"operator-config",
                                       app_conf->scroll_operator_conf[i].name,
                                       NULL);
     }

@@ -79,7 +79,7 @@
 	   (wheel-message)))
  )
 
-(scroll-operator
+(operator-config
  (window-scrollbar
   (default-mode . drag)
   (line-scroll 1.0 1.0)
