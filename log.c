@@ -1,7 +1,7 @@
 /*
  * log.c  -- logging procs
  *
- * $Id: log.c,v 1.9 2005/01/18 09:36:40 hos Exp $
+ * $Id: log.c,v 1.10 2005/01/18 10:43:50 hos Exp $
  *
  */
 
@@ -113,15 +113,19 @@ INT_PTR log_dlg_init(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
         {0, NULL}
     };
 
+    /* handle of log window */
     ctx.log_window = hwnd;
 
+    /* handle of child controls */
     for(i = 0; item_map[i].ptr != NULL; i++) {
         *((HWND *)item_map[i].ptr) =
             GetDlgItem(ctx.log_window, item_map[i].key);
     }
 
+    /* set limit of edit control */
     SendMessageW(log_edit, EM_SETLIMITTEXT, EDIT_TEXT_MAX, 0);
 
+    /* set font of edit control */
     {
         TCHAR name[64], size[64], charset[64];
 
@@ -145,7 +149,21 @@ INT_PTR log_dlg_init(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
         }
     }
 
+    /* set position of controls */
     log_dlg_arrannge();
+
+    /* set icon of dialog */
+    {
+        HICON icon;
+
+        icon = LoadImage(ctx.instance, MAKEINTRESOURCE(ID_ICON_TRAY),
+                         IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR);
+        SendMessage(ctx.log_window, WM_SETICON, ICON_SMALL, (LPARAM)icon);
+
+        icon = LoadImage(ctx.instance, MAKEINTRESOURCE(ID_ICON_TRAY),
+                         IMAGE_ICON, 32, 32, LR_DEFAULTCOLOR);
+        SendMessage(ctx.log_window, WM_SETICON, ICON_BIG, (LPARAM)icon);
+    }
 
     return TRUE;
 }
