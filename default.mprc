@@ -4,6 +4,9 @@
  ;; threshold time to detect button combination [msec]
  (combination-time . 300)
 
+ ;; process priority
+ ;(priority . normal)
+
  ;; tasktray icon
  ;(tray-icon "main.cpl" 0)		; mouse icon
  )
@@ -73,10 +76,10 @@
 				   (window-scrollbar line-scroll)))
  ("WINWORD\\.EXE:.*:_WwB:" (wheel-message))
  (":OperaWindowClass$" (window-scrollbar line-scroll))
+ (":SysListView32$" (window-scrollbar line-scroll))
 
  (":ScrollBar$" (scrollbar-control))
  (":msctls_trackbar32$" (trackbar-control))
- (":SysListView32$" (window-scrollbar line-scroll))
 
  (".*" (or (window-scrollbar)
 	   (neighborhood-scrollbar)
