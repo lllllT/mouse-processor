@@ -1,7 +1,7 @@
 /*
  * scroll_op_scrollbar.c  -- scroll operators for scrollbar
  *
- * $Id: scroll_op_scrollbar.c,v 1.18 2005/02/03 15:55:55 hos Exp $
+ * $Id: scroll_op_scrollbar.c,v 1.19 2005/02/04 13:40:28 hos Exp $
  *
  */
 
@@ -45,7 +45,7 @@ static
 void install_scrollbar_support_hook_to(HWND hwnd)
 {
     HINSTANCE mod;
-    DWORD tid;
+    DWORD tid, pid;
     HHOOK hook;
     int n;
 
@@ -55,8 +55,9 @@ void install_scrollbar_support_hook_to(HWND hwnd)
         n = 1;
     }
 
-    tid = GetWindowThreadProcessId(hwnd, NULL);
-    if(n == 1 && inject_sb_data.tid[0] == tid) {
+    tid = GetWindowThreadProcessId(hwnd, &pid);
+    if((n == 1 && inject_sb_data.tid[0] == tid) ||
+       (pid == GetCurrentProcessId())) {
         return;
     }
 
@@ -100,7 +101,8 @@ void inject_scrollbar_support_proc_to(HWND hwnd)
     }
 
     GetWindowThreadProcessId(hwnd, &pid);
-    if(n == 1 && inject_sb_data.pid[0] == pid) {
+    if((n == 1 && inject_sb_data.pid[0] == pid) ||
+       (pid == GetCurrentProcessId())) {
         goto end;
     }
 
@@ -363,6 +365,13 @@ int scrollbar_r_scroll(HWND hwnd, int bar,
         inject_sb_data.gsinfo_data->org_pos = org_pos;
         inject_sb_data.gsinfo_data->track_pos = pos;
         inject_sb_data.gsinfo_data->valid = 1;
+
+        if(bar == SB_CTL) {
+            SendMessageTimeout(hwnd,
+                               inject_sb_data.gsinfo_data->hook_subclass_msg,
+                               0, 0,
+                               SMTO_ABORTIFHUNG, 1000, NULL);
+        }
     }
 
     SendMessageTimeout(msg_hwnd, msg,
@@ -375,6 +384,13 @@ int scrollbar_r_scroll(HWND hwnd, int bar,
                        SMTO_ABORTIFHUNG, 1000, NULL);
 
     if(inject_sb_data.gsinfo_data != NULL) {
+        if(bar == SB_CTL) {
+            SendMessageTimeout(hwnd,
+                               inject_sb_data.gsinfo_data->hook_subclass_msg,
+                               0, 0,
+                               SMTO_ABORTIFHUNG, 1000, NULL);
+        }
+
         inject_sb_data.gsinfo_data->valid = 0;
     }
 
