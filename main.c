@@ -1,7 +1,7 @@
 /*
  * main.c  -- main part of mouse-processor
  *
- * $Id: main.c,v 1.18 2005/01/14 14:54:37 hos Exp $
+ * $Id: main.c,v 1.19 2005/01/17 06:14:29 hos Exp $
  *
  */
 
@@ -74,7 +74,11 @@ int set_pause_menu_item(int state)
 static
 void error_message(LPWSTR msg)
 {
-    MessageBoxW(NULL, msg, window_title_name, MB_OK | MB_ICONERROR);
+    if(ctx.log_window != NULL) {
+        log_printf(LOG_LEVEL_ERROR, L"Error: %ls\n", msg);
+    } else {
+        MessageBoxW(NULL, msg, window_title_name, MB_OK | MB_ICONERROR);
+    }
 }
 
 static
@@ -105,6 +109,14 @@ LRESULT default_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
     return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 
+/* menu item: reload */
+static
+LRESULT menu_reload(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+{
+    load_setting(ctx.app_conf.conf_file, FALSE);
+
+    return 0;
+}
 
 /* menu item: pause */
 static
@@ -201,6 +213,12 @@ LRESULT main_create(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
             error_message_le("GetSubMenu() failed");
             return -1;
         }
+
+        ret = SetMenuDefaultItem(popup_menu, ID_MENU_LOG, FALSE);
+        if(ret == 0) {
+            error_message_le("SetMenuDefaultItem() failed");
+            return -1;
+        }
     }
 
     ret = set_tasktray_icon(hwnd, NIM_ADD);
@@ -273,6 +291,7 @@ LRESULT main_command(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
         {MAKEWPARAM(ID_MENU_PAUSE, 0), menu_pause},
         {MAKEWPARAM(ID_MENU_EXIT, 0), menu_exit},
         {MAKEWPARAM(ID_MENU_LOG, 0), menu_log},
+        {MAKEWPARAM(ID_MENU_RELOAD, 0), menu_reload},
 
         {0, NULL}
     };
@@ -388,47 +407,6 @@ int main(int ac, char **av)
 
     memset(&ctx, 0, sizeof(ctx));
 
-    /* logger */
-    ret = create_logger();
-    if(ret == 0) {
-        error_message(L"create_logger() failed");
-        return 1;
-    }
-
-    /* command line option */
-    {
-        LPWSTR *avw;
-        int acw;
-
-        avw = CommandLineToArgvW(GetCommandLineW(), &acw);
-        if(avw != NULL && acw >= 2) {
-            ctx.app_conf.conf_file = avw[1];
-        }
-    }
-
-    /* load setting file */
-    ctx.app_conf.conf_data = load_conf(ctx.app_conf.conf_file);
-    if(ctx.app_conf.conf_data == NULL) {
-        ctx.app_conf.conf_data = S_EXP_NIL;
-    }
-
-    if(S_EXP_ERROR(ctx.app_conf.conf_data)) {
-        LPWSTR msg;
-
-        msg = wcs_dup_from_u8s(ctx.app_conf.conf_data->error.descript, NULL);
-        error_message(msg);
-        free(msg);
-
-        return 1;
-    }
-
-    /* apply setting for config */
-    ret = apply_setting();
-    if(ret == 0) {
-        error_message(L"failed to load setting file.");
-        return 1;
-    }
-
     /* instance handle of this module */
     {
         HMODULE module;
@@ -449,13 +427,6 @@ int main(int ac, char **av)
         return 1;
     }
 
-    /* create main message window */
-    ctx.main_window = create_main_window();
-    if(ctx.main_window == NULL) {
-        error_message_le("create_main_window() failed");
-        return 1;
-    }
-
     /* initialize COM */
     {
         HRESULT hres;
@@ -467,8 +438,38 @@ int main(int ac, char **av)
         }
     }
 
+    /* create main message window */
+    ctx.main_window = create_main_window();
+    if(ctx.main_window == NULL) {
+        error_message_le("create_main_window() failed");
+        return 1;
+    }
+
+    /* logger */
+    ret = create_logger();
+    if(ret == 0) {
+        error_message(L"create_logger() failed");
+        return 1;
+    }
+
+    /* command line option */
+    {
+        LPWSTR *avw, file;
+        int acw;
+
+        avw = CommandLineToArgvW(GetCommandLineW(), &acw);
+        if(avw != NULL && acw >= 2) {
+            file = avw[1];
+        } else {
+            file = NULL;
+        }
+
+        /* load setting file */
+        load_setting(file, TRUE);
+    }
+
     /* start message */
-    log_printf(LOG_LEVEL_NOTIFY, L"mouse-processor started\n");
+    log_printf(LOG_LEVEL_NOTIFY, L"\nmouse-processor started\n");
 
     /* main message loop */
     ret = message_loop();

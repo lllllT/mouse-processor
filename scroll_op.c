@@ -1,7 +1,7 @@
 /*
  * scroll_op.c  -- scroll operators
  *
- * $Id: scroll_op.c,v 1.8 2005/01/15 15:02:13 hos Exp $
+ * $Id: scroll_op.c,v 1.9 2005/01/17 06:14:32 hos Exp $
  *
  */
 
@@ -183,9 +183,9 @@ int SCROLL_OP_API or_init_ctx(void *ctxp, int size,
         op_ctx->op = op;
 
         if(wcscmp(op_ctx->op->name, L"or") != 0) {
-            log_printf(LOG_LEVEL_DEBUG,
-                       L"scroll operator: %ls\n",
-                       op_ctx->op->name);
+            log_printf(LOG_LEVEL_DEBUG, L"scroll operator: ");
+            log_print_s_exp(LOG_LEVEL_DEBUG, S_EXP_CAR(p));
+            log_printf(LOG_LEVEL_DEBUG, L"\n");
         }
 
         return 1;

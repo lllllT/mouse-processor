@@ -1,7 +1,7 @@
 /*
  * conf.h  -- configuration
  *
- * $Id: conf.c,v 1.9 2005/01/14 14:54:36 hos Exp $
+ * $Id: conf.c,v 1.10 2005/01/17 06:14:28 hos Exp $
  *
  */
 
@@ -9,6 +9,8 @@
 #include "util.h"
 #include <stdio.h>
 #include <stdarg.h>
+#include <string.h>
+#include <errno.h>
 
 
 #define HOME_ENV L"HOME"
@@ -83,22 +85,29 @@ s_exp_data_t *load_file_conf(LPCWSTR path)
     s_exp_read_context_t *rc = NULL;
     s_exp_data_t *data = NULL;
 
+    log_printf(LOG_LEVEL_NOTIFY, L"Reading config file: %ls ... ", path);
+
     u8s_path = u8s_dup_from_wcs(path);
     if(u8s_path == NULL) {
+        log_printf(LOG_LEVEL_NOTIFY, L"failed (%hs)\n", strerror(errno));
         goto end;
     }
 
     fp = _wfopen(path, L"r");
     if(fp == NULL) {
+        log_printf(LOG_LEVEL_NOTIFY, L"failed (%hs)\n", strerror(errno));
         goto end;
     }
 
     rc = open_s_exp_read_context_f(fp, u8s_path);
     if(rc == NULL) {
+        log_printf(LOG_LEVEL_NOTIFY, L"failed (%hs)\n", strerror(errno));
         goto end;
     }
 
     data = read_all_s_exp(rc);
+
+    log_printf(LOG_LEVEL_NOTIFY, L"done\n");
 
   end:
     if(u8s_path != NULL) free(u8s_path);
@@ -108,6 +117,7 @@ s_exp_data_t *load_file_conf(LPCWSTR path)
     return data;
 }
 
+static
 s_exp_data_t *load_conf(LPCWSTR conf_file)
 {
     LPWSTR path;
@@ -140,22 +150,22 @@ s_exp_data_t *load_conf(LPCWSTR conf_file)
 
 
 static
-s_exp_data_t *get_conf_v(int type, va_list ap)
+s_exp_data_t *get_conf_v(struct app_setting *conf, int type, va_list ap)
 {
-    return s_exp_massq_v(ctx.app_conf.conf_data, type, ap);
+    return s_exp_massq_v(conf->conf_data, type, ap);
 }
 
 static
-int get_conf_int(int def_val, ...)
+int get_conf_int(struct app_setting *conf, int def_val, ...)
 {
     va_list ap;
     s_exp_data_t *data;
 
     va_start(ap, def_val);
 
-    data = get_conf_v(S_EXP_TYPE_INTEGER, ap);
+    data = get_conf_v(conf, S_EXP_TYPE_INTEGER, ap);
     if(data == NULL) {
-        data = get_conf_v(S_EXP_TYPE_FLONUM, ap);
+        data = get_conf_v(conf, S_EXP_TYPE_FLONUM, ap);
     }
 
     va_end(ap);
@@ -172,13 +182,14 @@ int get_conf_int(int def_val, ...)
 }
 
 static
-s_exp_data_t *get_conf_list(const s_exp_data_t *def_val, ...)
+s_exp_data_t *get_conf_list(struct app_setting *conf,
+                            const s_exp_data_t *def_val, ...)
 {
     va_list ap;
     s_exp_data_t *data;
 
     va_start(ap, def_val);
-    data = get_conf_v(S_EXP_TYPE_CONS, ap);
+    data = get_conf_v(conf, S_EXP_TYPE_CONS, ap);
     va_end(ap);
 
     if(data == NULL) {
@@ -217,6 +228,9 @@ int apply_mode_name(struct mouse_conf *conf, const s_exp_data_t *mode)
     S_EXP_FOR_EACH(mode, p) {
         if(S_EXP_CAR(p)->type != S_EXP_TYPE_CONS ||
            S_EXP_CAAR(p)->type != S_EXP_TYPE_SYMBOL) {
+            log_printf(LOG_LEVEL_ERROR, L"Invalid mode format: ");
+            log_print_s_exp(LOG_LEVEL_ERROR, S_EXP_CAR(p));
+            log_printf(LOG_LEVEL_ERROR, L"\n");
             return 0;
         }
 
@@ -244,14 +258,16 @@ struct mouse_conf *get_mode_ptr(const struct mouse_conf *conf, int nconf,
 }
 
 
-typedef int (*act_proc_t)(struct mouse_action *, const s_exp_data_t *);
+typedef int (*act_proc_t)(struct mouse_action *,
+                          const struct app_setting *, const s_exp_data_t *);
 struct action_conf_map {
     wchar_t *name;
     act_proc_t proc;
 };
 
 static
-int apply_act(struct mouse_action *act, const s_exp_data_t *conf,
+int apply_act(struct mouse_action *act,
+              const struct app_setting *app_conf, const s_exp_data_t *conf,
               struct action_conf_map *map)
 {
     int i;
@@ -262,7 +278,7 @@ int apply_act(struct mouse_action *act, const s_exp_data_t *conf,
 
     for(i = 0; map[i].name != NULL; i++) {
         if(wcscmp(S_EXP_CAR(conf)->symbol.name, map[i].name) == 0) {
-            return map[i].proc(act, conf);
+            return map[i].proc(act, app_conf, conf);
         }
     }
 
@@ -270,7 +286,9 @@ int apply_act(struct mouse_action *act, const s_exp_data_t *conf,
 }
 
 static
-int apply_action_none(struct mouse_action *act, const s_exp_data_t *conf)
+int apply_action_none(struct mouse_action *act,
+                      const struct app_setting *app_conf,
+                      const s_exp_data_t *conf)
 {
     act->code = MOUSE_ACT_NONE;
 
@@ -278,7 +296,9 @@ int apply_action_none(struct mouse_action *act, const s_exp_data_t *conf)
 }
 
 static
-int apply_action_button(struct mouse_action *act, const s_exp_data_t *conf)
+int apply_action_button(struct mouse_action *act,
+                        const struct app_setting *app_conf,
+                        const s_exp_data_t *conf)
 {
     if(S_EXP_CDR(conf)->type != S_EXP_TYPE_CONS ||
        S_EXP_CADR(conf)->type != S_EXP_TYPE_INTEGER ||
@@ -295,6 +315,7 @@ int apply_action_button(struct mouse_action *act, const s_exp_data_t *conf)
 
 static
 int apply_action_change_normal(struct mouse_action *act,
+                               const struct app_setting *app_conf,
                                const s_exp_data_t *conf)
 {
     struct mouse_conf *mode;
@@ -304,8 +325,8 @@ int apply_action_change_normal(struct mouse_action *act,
         return 0;
     }
 
-    mode = get_mode_ptr(ctx.app_conf.normal_conf,
-                        ctx.app_conf.normal_conf_num,
+    mode = get_mode_ptr(app_conf->normal_conf,
+                        app_conf->normal_conf_num,
                         S_EXP_CADR(conf)->symbol.name);
     if(mode == NULL) {
         return 0;
@@ -320,6 +341,7 @@ int apply_action_change_normal(struct mouse_action *act,
 
 static
 int apply_action_change_scroll(struct mouse_action *act,
+                               const struct app_setting *app_conf,
                                const s_exp_data_t *conf)
 {
     struct mouse_conf *mode;
@@ -329,8 +351,8 @@ int apply_action_change_scroll(struct mouse_action *act,
         return 0;
     }
 
-    mode = get_mode_ptr(ctx.app_conf.scroll_conf,
-                        ctx.app_conf.scroll_conf_num,
+    mode = get_mode_ptr(app_conf->scroll_conf,
+                        app_conf->scroll_conf_num,
                         S_EXP_CADR(conf)->symbol.name);
     if(mode == NULL) {
         return 0;
@@ -344,7 +366,9 @@ int apply_action_change_scroll(struct mouse_action *act,
 }
 
 static
-int apply_action_set_ratio(struct mouse_action *act, const s_exp_data_t *conf)
+int apply_action_set_ratio(struct mouse_action *act,
+                           const struct app_setting *app_conf,
+                           const s_exp_data_t *conf)
 {
     double xr, yr;
 
@@ -360,7 +384,9 @@ int apply_action_set_ratio(struct mouse_action *act, const s_exp_data_t *conf)
 }
 
 static
-int apply_action_mul_ratio(struct mouse_action *act, const s_exp_data_t *conf)
+int apply_action_mul_ratio(struct mouse_action *act,
+                           const struct app_setting *app_conf,
+                           const s_exp_data_t *conf)
 {
     double xr, yr;
 
@@ -377,6 +403,7 @@ int apply_action_mul_ratio(struct mouse_action *act, const s_exp_data_t *conf)
 
 static
 int apply_action_wheel_input(struct mouse_action *act,
+                             const struct app_setting *app_conf,
                              const s_exp_data_t *conf)
 {
     act->code = MOUSE_ACT_WHEEL;
@@ -386,6 +413,7 @@ int apply_action_wheel_input(struct mouse_action *act,
 
 static
 int apply_action_wheel_message(struct mouse_action *act,
+                               const struct app_setting *app_conf,
                                const s_exp_data_t *conf)
 {
     act->code = MOUSE_ACT_WHEELPOST;
@@ -394,7 +422,9 @@ int apply_action_wheel_message(struct mouse_action *act,
 }
 
 static
-int apply_button_act(struct mouse_action *act, const s_exp_data_t *conf)
+int apply_button_act(struct mouse_action *act,
+                     const struct app_setting *app_conf,
+                     const s_exp_data_t *conf)
 {
     static struct action_conf_map map[] = {
         {L"none", apply_action_none},
@@ -407,11 +437,13 @@ int apply_button_act(struct mouse_action *act, const s_exp_data_t *conf)
         {NULL, NULL}
     };
 
-    return apply_act(act, conf, map);
+    return apply_act(act, app_conf, conf, map);
 }
 
 static
-int apply_wheel_act(struct mouse_action *act, const s_exp_data_t *conf)
+int apply_wheel_act(struct mouse_action *act,
+                    const struct app_setting *app_conf,
+                    const s_exp_data_t *conf)
 {
     static struct action_conf_map map[] = {
         {L"none", apply_action_none},
@@ -421,11 +453,13 @@ int apply_wheel_act(struct mouse_action *act, const s_exp_data_t *conf)
         {NULL, NULL}
     };
 
-    return apply_act(act, conf, map);
+    return apply_act(act, app_conf, conf, map);
 }
 
 static
-int apply_comm_mode_conf(struct mouse_conf *conf, const s_exp_data_t *mode)
+int apply_comm_mode_conf(struct mouse_conf *conf,
+                         const struct app_setting *app_conf,
+                         const s_exp_data_t *mode)
 {
     const s_exp_data_t *c;
 
@@ -454,7 +488,7 @@ int apply_comm_mode_conf(struct mouse_conf *conf, const s_exp_data_t *mode)
 
                 c = s_exp_massq(mode, S_EXP_TYPE_CONS, name, NULL);
                 if(c == NULL || S_EXP_CAR(c)->type != S_EXP_TYPE_CONS ||
-                   apply_button_act(act[0], S_EXP_CAR(c)) == 0) {
+                   apply_button_act(act[0], app_conf, S_EXP_CAR(c)) == 0) {
                     if(n == m) {
                         act[0]->code = MOUSE_ACT_BUTTON;
                         act[0]->conf.button = n;
@@ -475,57 +509,58 @@ int apply_comm_mode_conf(struct mouse_conf *conf, const s_exp_data_t *mode)
 
     c = s_exp_massq(mode, S_EXP_TYPE_CONS, L"wheel", NULL);
     if(c != NULL && S_EXP_CAR(c)->type == S_EXP_TYPE_CONS) {
-        apply_wheel_act(&conf->wheel_act, S_EXP_CAR(c));
+        apply_wheel_act(&conf->wheel_act, app_conf, S_EXP_CAR(c));
     }
 
     return 1;
 }
 
 static
-int apply_mode_conf(void)
+int apply_mode_conf(struct app_setting *app_conf)
 {
     s_exp_data_t *normal_mode, *scroll_mode;
 
-    normal_mode = get_conf_list(S_EXP_NIL, L"normal-mode", NULL);
-    scroll_mode = get_conf_list(S_EXP_NIL, L"scroll-mode", NULL);
+    normal_mode = get_conf_list(app_conf, S_EXP_NIL, L"normal-mode", NULL);
+    scroll_mode = get_conf_list(app_conf, S_EXP_NIL, L"scroll-mode", NULL);
 
-    ctx.app_conf.normal_conf_num = s_exp_length(normal_mode);
-    ctx.app_conf.scroll_conf_num = s_exp_length(scroll_mode);
+    app_conf->normal_conf_num = s_exp_length(normal_mode);
+    app_conf->scroll_conf_num = s_exp_length(scroll_mode);
 
-    if(ctx.app_conf.normal_conf_num == 0) {
-        ctx.app_conf.normal_conf_num = 1;
+    if(app_conf->normal_conf_num == 0) {
+        app_conf->normal_conf_num = 1;
     }
 
-    ctx.app_conf.normal_conf =
+    app_conf->normal_conf =
         (struct mouse_conf *)malloc(sizeof(struct mouse_conf) *
-                                    ctx.app_conf.normal_conf_num);
-    ctx.app_conf.scroll_conf =
+                                    app_conf->normal_conf_num);
+    app_conf->scroll_conf =
         (struct mouse_conf *)malloc(sizeof(struct mouse_conf) *
-                                    ctx.app_conf.scroll_conf_num);
-    if(ctx.app_conf.normal_conf == NULL ||
-       ctx.app_conf.scroll_conf == NULL) {
+                                    app_conf->scroll_conf_num);
+    if(app_conf->normal_conf == NULL ||
+       app_conf->scroll_conf == NULL) {
         goto fail_end;
     }
 
-    memset(ctx.app_conf.normal_conf, 0,
-           sizeof(struct mouse_conf) * ctx.app_conf.normal_conf_num);
-    memset(ctx.app_conf.scroll_conf, 0,
-           sizeof(struct mouse_conf) * ctx.app_conf.scroll_conf_num);
+    memset(app_conf->normal_conf, 0,
+           sizeof(struct mouse_conf) * app_conf->normal_conf_num);
+    memset(app_conf->scroll_conf, 0,
+           sizeof(struct mouse_conf) * app_conf->scroll_conf_num);
 
     if(normal_mode != S_EXP_NIL) {
         int i;
         s_exp_data_t *p;
 
-        if(apply_mode_name(ctx.app_conf.normal_conf, normal_mode) == 0 ||
-           apply_mode_name(ctx.app_conf.scroll_conf, scroll_mode) == 0) {
+        if(apply_mode_name(app_conf->normal_conf, normal_mode) == 0 ||
+           apply_mode_name(app_conf->scroll_conf, scroll_mode) == 0) {
             goto fail_end;
         }
 
         i = 0;
         S_EXP_FOR_EACH(normal_mode, p) {
-            apply_comm_mode_conf(&ctx.app_conf.normal_conf[i], S_EXP_CDAR(p));
+            apply_comm_mode_conf(&app_conf->normal_conf[i],
+                                 app_conf, S_EXP_CDAR(p));
 
-            ctx.app_conf.normal_conf[i].move_act.code = MOUSE_ACT_MOVE;
+            app_conf->normal_conf[i].move_act.code = MOUSE_ACT_MOVE;
 
             i += 1;
         }
@@ -534,10 +569,11 @@ int apply_mode_conf(void)
         S_EXP_FOR_EACH(scroll_mode, p) {
             s_exp_data_t *sr;
 
-            apply_comm_mode_conf(&ctx.app_conf.scroll_conf[i], S_EXP_CDAR(p));
+            apply_comm_mode_conf(&app_conf->scroll_conf[i],
+                                 app_conf, S_EXP_CDAR(p));
 
-            ctx.app_conf.scroll_conf[i].move_act.code = MOUSE_ACT_MODEMSG;
-            ctx.app_conf.scroll_conf[i].move_act.conf.mode_msg.data.mode =
+            app_conf->scroll_conf[i].move_act.code = MOUSE_ACT_MODEMSG;
+            app_conf->scroll_conf[i].move_act.conf.mode_msg.data.mode =
                 MODE_MSG_SCROLL;
 
             sr = s_exp_massq(S_EXP_CDAR(p), S_EXP_TYPE_CONS,
@@ -545,9 +581,9 @@ int apply_mode_conf(void)
             if(sr == NULL) {
                 sr = S_EXP_NIL;
             }
-            ctx.app_conf.scroll_conf[i].scroll_mode.x_ratio =
+            app_conf->scroll_conf[i].scroll_mode.x_ratio =
                 get_nth_double(sr, 0, 1.0);
-            ctx.app_conf.scroll_conf[i].scroll_mode.y_ratio =
+            app_conf->scroll_conf[i].scroll_mode.y_ratio =
                 get_nth_double(sr, 1, 1.0);
 
             i += 1;
@@ -556,7 +592,7 @@ int apply_mode_conf(void)
         int i;
         struct mouse_conf *conf;
 
-        conf = &ctx.app_conf.normal_conf[0];
+        conf = &app_conf->normal_conf[0];
 
         conf->mode_name = L"default";
 
@@ -572,15 +608,18 @@ int apply_mode_conf(void)
     return 1;
 
   fail_end:
-    if(ctx.app_conf.normal_conf != NULL) free(ctx.app_conf.normal_conf);
-    if(ctx.app_conf.scroll_conf != NULL) free(ctx.app_conf.scroll_conf);
+    if(app_conf->normal_conf != NULL) free(app_conf->normal_conf);
+    if(app_conf->scroll_conf != NULL) free(app_conf->scroll_conf);
+
+    app_conf->normal_conf = NULL;
+    app_conf->scroll_conf = NULL;
 
     return 0;
 }
 
 
 static
-int apply_scroll_operator(void)
+int apply_scroll_operator(struct app_setting *app_conf)
 {
     int i, n_builtin_sop;
 
@@ -589,36 +628,36 @@ int apply_scroll_operator(void)
     n_builtin_sop = i;
 
     /* allocate */
-    ctx.app_conf.scroll_operator_num = n_builtin_sop;
-    ctx.app_conf.scroll_operator_conf =
+    app_conf->scroll_operator_num = n_builtin_sop;
+    app_conf->scroll_operator_conf =
         (struct scroll_operator_conf *)
         malloc(sizeof(struct scroll_operator_conf) *
-               ctx.app_conf.scroll_operator_num);
-    if(ctx.app_conf.scroll_operator_conf == NULL) {
+               app_conf->scroll_operator_num);
+    if(app_conf->scroll_operator_conf == NULL) {
         return 0;
     }
 
-    memset(ctx.app_conf.scroll_operator_conf, 0,
+    memset(app_conf->scroll_operator_conf, 0,
            sizeof(struct scroll_operator_conf) *
-           ctx.app_conf.scroll_operator_num);
+           app_conf->scroll_operator_num);
 
     /* setup builtin scroll operators */
     for(i = 0; i < n_builtin_sop; i++) {
-        ctx.app_conf.scroll_operator_conf[i].name = builtin_scroll_op[i].name;
+        app_conf->scroll_operator_conf[i].name = builtin_scroll_op[i].name;
 
         if(builtin_scroll_op[i].get_op_proc(
-               &ctx.app_conf.scroll_operator_conf[i].proc,
+               &app_conf->scroll_operator_conf[i].proc,
                SCROLL_OP_API_VERSION) == 0) {
             return 0;
         }
     }
 
     /* fill configuration for each operators */
-    for(i = 0; i < ctx.app_conf.scroll_operator_num; i++) {
-        ctx.app_conf.scroll_operator_conf[i].conf =
-            get_conf_list(S_EXP_NIL,
+    for(i = 0; i < app_conf->scroll_operator_num; i++) {
+        app_conf->scroll_operator_conf[i].conf =
+            get_conf_list(app_conf, S_EXP_NIL,
                           L"scroll-operator",
-                          ctx.app_conf.scroll_operator_conf[i].name,
+                          app_conf->scroll_operator_conf[i].name,
                           NULL);
     }
 
@@ -700,21 +739,20 @@ int get_class_title_regexp(const s_exp_data_t *e,
 }
 
 static
-int apply_scroll_window(void)
+int apply_scroll_window(struct app_setting *app_conf)
 {
     s_exp_data_t *list, *p;
     int i, j;
 
     /* number of scroll window configuration */
-    list = get_conf_list(S_EXP_NIL, L"scroll-window", NULL);
+    list = get_conf_list(app_conf, S_EXP_NIL, L"scroll-window", NULL);
 
     /* allocate */
-    ctx.app_conf.window_conf_num = s_exp_length(list);
-    ctx.app_conf.window_conf =
+    app_conf->window_conf_num = s_exp_length(list);
+    app_conf->window_conf =
         (struct scroll_window_conf *)
-        malloc(sizeof(struct scroll_window_conf) *
-               ctx.app_conf.window_conf_num);
-    if(ctx.app_conf.window_conf == NULL) {
+        malloc(sizeof(struct scroll_window_conf) * app_conf->window_conf_num);
+    if(app_conf->window_conf == NULL) {
         return 0;
     }
 
@@ -747,14 +785,14 @@ int apply_scroll_window(void)
         }
 
         op_name = S_EXP_CAADR(e)->symbol.name;
-        op_arg = S_EXP_CDADR(e);
+        op_arg = S_EXP_CADR(e);
 
         /* operator */
         op = NULL;
-        for(j = 0; j < ctx.app_conf.scroll_operator_num; j++) {
+        for(j = 0; j < app_conf->scroll_operator_num; j++) {
             if(wcscmp(op_name,
-                      ctx.app_conf.scroll_operator_conf[j].name) == 0) {
-                op = &ctx.app_conf.scroll_operator_conf[j];
+                      app_conf->scroll_operator_conf[j].name) == 0) {
+                op = &app_conf->scroll_operator_conf[j];
                 break;
             }
         }
@@ -763,50 +801,129 @@ int apply_scroll_window(void)
         }
 
         /* fill */
-        ctx.app_conf.window_conf[i].class_regexp = class_re;
-        ctx.app_conf.window_conf[i].title_regexp = title_re;
-        ctx.app_conf.window_conf[i].class_or_title = class_or_title;
-        ctx.app_conf.window_conf[i].op = op;
-        ctx.app_conf.window_conf[i].args = op_arg;
-        ctx.app_conf.window_conf[i].regexp = e;
+        app_conf->window_conf[i].class_regexp = class_re;
+        app_conf->window_conf[i].title_regexp = title_re;
+        app_conf->window_conf[i].class_or_title = class_or_title;
+        app_conf->window_conf[i].op = op;
+        app_conf->window_conf[i].args = op_arg;
+        app_conf->window_conf[i].regexp = e;
 
         i += 1;
     }
 
-    ctx.app_conf.window_conf_num = i;
+    app_conf->window_conf_num = i;
 
     return 1;
 }
 
 
-int apply_setting(void)
+static
+int apply_setting(struct app_setting *app_conf)
 {
     int ret;
 
     /* global setting */
-    ctx.app_conf.comb_time = get_conf_int(300,
-                                          L"global", L"combination-time",
-                                          NULL);
+    app_conf->comb_time = get_conf_int(app_conf, 300,
+                                       L"global", L"combination-time",
+                                       NULL);
 
     /* normal, scroll mode */
-    ret = apply_mode_conf();
+    ret = apply_mode_conf(app_conf);
     if(ret == 0) {
         return 0;
     }
 
-    ctx.app_conf.cur_conf = &ctx.app_conf.normal_conf[0];
-
     /* scroll operator */
-    ret = apply_scroll_operator();
+    ret = apply_scroll_operator(app_conf);
     if(ret == 0) {
         return 0;
     }
 
     /* scroll window */
-    ret = apply_scroll_window();
+    ret = apply_scroll_window(app_conf);
     if(ret == 0) {
         return 0;
     }
+
+    return 1;
+}
+
+
+static
+void free_setting(struct app_setting *app_conf)
+{
+    free_s_exp(app_conf->conf_data);
+    free(app_conf->normal_conf);
+    free(app_conf->scroll_conf);
+    free(app_conf->window_conf);
+    free(app_conf->scroll_operator_conf);
+}
+
+
+int load_setting(LPWSTR conf_file, int force_apply)
+{
+    struct app_setting conf;
+
+    memset(&conf, 0, sizeof(conf));
+
+    conf.conf_file = conf_file;
+
+    log_printf(LOG_LEVEL_NOTIFY, L"\n");
+
+    /* load setting file */
+    conf.conf_data = load_conf(conf.conf_file);
+    if(conf.conf_data == NULL) {
+        log_printf(LOG_LEVEL_WARNING, L"Config file not found\n");
+        conf.conf_data = S_EXP_NIL;
+    }
+
+    if(S_EXP_ERROR(conf.conf_data)) {
+        LPWSTR msg;
+
+        msg = wcs_dup_from_u8s(conf.conf_data->error.descript, NULL);
+        log_printf(LOG_LEVEL_ERROR, L"Failed to load: %ls\n", msg);
+        free(msg);
+
+        free_s_exp(conf.conf_data);
+
+        if(! force_apply) {
+            return 0;
+        }
+
+        conf.conf_data = S_EXP_NIL;
+    }
+
+    /* apply setting for config */
+    if(apply_setting(&conf) == 0) {
+        log_printf(LOG_LEVEL_ERROR, L"Failed to load config file\n");
+
+        if(! force_apply) {
+            free_setting(&conf);
+            return 0;
+        }
+    }
+
+    /* replace config */
+    {
+        struct app_setting prev_conf;
+        struct mode_conf data;
+        POINT pt;
+
+        GetCursorPos(&pt);
+
+        memset(&data, 0, sizeof(data));
+        data.mode = MODE_CH_NORMAL;
+
+        memcpy(&prev_conf, &ctx.app_conf, sizeof(struct app_setting));
+        memcpy(&ctx.app_conf, &conf, sizeof(struct app_setting));
+
+        ctx.mode_data.cur_conf = &ctx.app_conf.normal_conf[0];
+        SendMessage(ctx.main_window, WM_MOUSEHOOK_MODECH,
+                    MAKEWPARAM(pt.x, pt.y), (LPARAM)&data);
+
+        free_setting(&prev_conf);
+    }
+                
 
     return 1;
 }

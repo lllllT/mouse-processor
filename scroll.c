@@ -1,7 +1,7 @@
 /*
  * scroll.c  -- scroll window
  *
- * $Id: scroll.c,v 1.17 2005/01/14 18:05:49 hos Exp $
+ * $Id: scroll.c,v 1.18 2005/01/17 06:14:31 hos Exp $
  *
  */
 
@@ -131,8 +131,8 @@ LRESULT start_scroll_mode(struct mode_conf *data)
     struct scroll_window_conf *target_win_conf;
 
     /* x and y ratio */
-    ctx.mode_data.scroll.x_ratio = ctx.app_conf.cur_conf->scroll_mode.x_ratio;
-    ctx.mode_data.scroll.y_ratio = ctx.app_conf.cur_conf->scroll_mode.y_ratio;
+    ctx.mode_data.scroll.x_ratio = ctx.mode_data.cur_conf->scroll_mode.x_ratio;
+    ctx.mode_data.scroll.y_ratio = ctx.mode_data.cur_conf->scroll_mode.y_ratio;
 
     /* target window */
     ctx.mode_data.scroll.target =
@@ -151,7 +151,7 @@ LRESULT start_scroll_mode(struct mode_conf *data)
                L"scroll ratio: %8.3lf, %8.3lf\n"
                L"window class: %ls\n"
                L"window title: %ls\n",
-               ctx.app_conf.cur_conf->mode_name,
+               ctx.mode_data.cur_conf->mode_name,
                ctx.mode_data.scroll.x_ratio, ctx.mode_data.scroll.y_ratio,
                ctx.mode_data.scroll.class, ctx.mode_data.scroll.title);
 
@@ -213,7 +213,7 @@ LRESULT start_scroll_mode(struct mode_conf *data)
 
         memset(&arg, 0, sizeof(arg));
         arg.conf = target_win_conf->op->conf;
-        arg.arg = target_win_conf->args;
+        arg.arg = S_EXP_CDR(target_win_conf->args);
         arg.hwnd = ctx.mode_data.scroll.target;
         arg.pos = ctx.mode_data.scroll.start_pt;
 
@@ -253,9 +253,9 @@ LRESULT start_scroll_mode(struct mode_conf *data)
     }
 
     if(wcscmp(ctx.mode_data.scroll.op->name, L"or") != 0) {
-        log_printf(LOG_LEVEL_DEBUG,
-                   L"scroll operator: %ls\n",
-                   ctx.mode_data.scroll.op->name);
+        log_printf(LOG_LEVEL_DEBUG, L"scroll operator: ");
+        log_print_s_exp(LOG_LEVEL_DEBUG, target_win_conf->args);
+        log_printf(LOG_LEVEL_DEBUG, L"\n");
     }
 
     return 0;
@@ -264,14 +264,14 @@ LRESULT start_scroll_mode(struct mode_conf *data)
 static
 LRESULT shift_scroll_mode(struct mode_conf *data)
 {
-    ctx.mode_data.scroll.x_ratio = ctx.app_conf.cur_conf->scroll_mode.x_ratio;
-    ctx.mode_data.scroll.y_ratio = ctx.app_conf.cur_conf->scroll_mode.y_ratio;
+    ctx.mode_data.scroll.x_ratio = ctx.mode_data.cur_conf->scroll_mode.x_ratio;
+    ctx.mode_data.scroll.y_ratio = ctx.mode_data.cur_conf->scroll_mode.y_ratio;
 
     log_printf(LOG_LEVEL_DEBUG,
                L"\n"
                L"shift scroll mode: %ls\n"
                L"scroll ratio: %8.3lf, %8.3lf\n",
-               ctx.app_conf.cur_conf->mode_name,
+               ctx.mode_data.cur_conf->mode_name,
                ctx.mode_data.scroll.x_ratio, ctx.mode_data.scroll.y_ratio);
 
     return 0;
@@ -280,22 +280,21 @@ LRESULT shift_scroll_mode(struct mode_conf *data)
 static
 LRESULT end_scroll_mode(struct mode_conf *data)
 {
-    if(ctx.mode_data.scroll.class != NULL) free(ctx.mode_data.scroll.class);
-    if(ctx.mode_data.scroll.title != NULL) free(ctx.mode_data.scroll.title);
-
-    ctx.mode_data.scroll.class = NULL;
-    ctx.mode_data.scroll.title = NULL;
-
     if(ctx.mode_data.scroll.op != NULL &&
        ctx.mode_data.scroll.op->proc.end_scroll != NULL) {
         ctx.mode_data.scroll.op->proc.end_scroll(
             ctx.mode_data.scroll.op_context);
     }
+    ctx.mode_data.scroll.op = NULL;
 
     if(ctx.mode_data.scroll.op_context != NULL)
         free(ctx.mode_data.scroll.op_context);
-
     ctx.mode_data.scroll.op_context = NULL;
+
+    if(ctx.mode_data.scroll.class != NULL) free(ctx.mode_data.scroll.class);
+    if(ctx.mode_data.scroll.title != NULL) free(ctx.mode_data.scroll.title);
+    ctx.mode_data.scroll.class = NULL;
+    ctx.mode_data.scroll.title = NULL;
 
     log_printf(LOG_LEVEL_DEBUG, L"\n" L"end scroll mode\n");
 

@@ -1,7 +1,7 @@
 /*
  * header for resource
  *
- * $Id: resource.h,v 1.2 2005/01/14 09:32:38 hos Exp $
+ * $Id: resource.h,v 1.3 2005/01/17 06:14:30 hos Exp $
  *
  */
 
@@ -9,6 +9,7 @@
 #define ID_MENU_PAUSE 101
 #define ID_MENU_EXIT 102
 #define ID_MENU_LOG 103
+#define ID_MENU_RELOAD 104
 
 #define ID_ICON_TRAY 200
 

@@ -1,7 +1,7 @@
 /*
  * main.h  --
  *
- * $Id: main.h,v 1.26 2005/01/15 15:02:13 hos Exp $
+ * $Id: main.h,v 1.27 2005/01/17 06:14:30 hos Exp $
  *
  */
 
@@ -129,8 +129,6 @@ struct app_setting {
 
     int comb_time;
 
-    struct mouse_conf *cur_conf;
-
     int normal_conf_num;
     struct mouse_conf *normal_conf;
 
@@ -174,6 +172,8 @@ struct scroll_mode_context {
 
 /* mode context */
 struct mode_context {
+    struct mouse_conf *cur_conf;
+
     int cur_mode;
 
     union {
@@ -214,8 +214,7 @@ LRESULT scroll_modech(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 LRESULT scroll_modemsg(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 
 
-s_exp_data_t *load_conf(LPCWSTR conf_file);
-int apply_setting(void);
+int load_setting(LPWSTR conf_file, int force_apply);
 
 
 int SCROLL_OP_API window_scrollbar_get_operator(scroll_op_procs_t *op,
