@@ -1,7 +1,7 @@
 /*
  * main.c  -- main part of mouse-processor
  *
- * $Id: main.c,v 1.4 2004/12/30 14:32:43 hos Exp $
+ * $Id: main.c,v 1.5 2004/12/31 18:55:51 hos Exp $
  *
  */
 
@@ -272,6 +272,10 @@ LRESULT CALLBACK main_window_proc(HWND hwnd, UINT msg,
         {WM_COMMAND, main_command},
         {WM_TASKTRAY, main_tasktray},
 
+        {WM_MOUSEHOOK_SCROLL_BEGIN, scroll_begin},
+        {WM_MOUSEHOOK_SCROLLING, scrolling},
+        {WM_MOUSEHOOK_SCROLL_END, scroll_end},
+
         {0, NULL}
     };
     msg_proc_t proc;
@@ -358,25 +362,35 @@ int main(int ac, char **av)
 
         memset(&ctx, 0, sizeof(ctx));
 
+        ctx.norm_conf.comb_time = 200;
+
         ctx.conf = &ctx.norm_conf;
 
         for(i = 0; i < MOUSE_BTN_MAX; i++) {
             ctx.norm_conf.button[i].act.code = MOUSE_ACT_BUTTON;
             ctx.norm_conf.button[i].act.data = i;
+
+            ctx.scroll_conf.button[i].act.code = MOUSE_ACT_MODECH;
         }
 
+        ctx.norm_conf.wheel_act.code = MOUSE_ACT_WHEEL;
+        ctx.norm_conf.wheel_act.data = 1;
+        ctx.norm_conf.move_act.code = MOUSE_ACT_MOVE;
+
+        ctx.scroll_conf.wheel_act.code = MOUSE_ACT_WHEEL;
+        ctx.scroll_conf.wheel_act.data = 1;
+        ctx.scroll_conf.move_act.code = MOUSE_ACT_SCROLL;
+
         /* dbg */
-        ctx.norm_conf.comb_time = 200;
-        ctx.norm_conf.button[0].flags = MOUSE_BTN_CONF_ENABLE_COMB;
-        ctx.norm_conf.button[0].comb_act[1].code = MOUSE_ACT_BUTTON;
-        ctx.norm_conf.button[0].comb_act[1].data = 2;
-        ctx.norm_conf.button[1].flags = MOUSE_BTN_CONF_ENABLE_COMB;
-        ctx.norm_conf.button[1].comb_act[0].code = MOUSE_ACT_BUTTON;
-        ctx.norm_conf.button[1].comb_act[0].data = 2;
-        ctx.norm_conf.button[2].flags = MOUSE_BTN_CONF_ENABLE_COMB;
+        ctx.norm_conf.button[0].flags |= MOUSE_BTN_CONF_ENABLE_COMB;
+        ctx.norm_conf.button[0].comb_act[1].code = MOUSE_ACT_MODECH;
+        ctx.norm_conf.button[1].flags |= MOUSE_BTN_CONF_ENABLE_COMB;
+        ctx.norm_conf.button[1].comb_act[0].code = MOUSE_ACT_MODECH;
+
+        ctx.norm_conf.button[2].flags |= MOUSE_BTN_CONF_ENABLE_COMB;
         ctx.norm_conf.button[2].comb_act[3].code = MOUSE_ACT_BUTTON;
         ctx.norm_conf.button[2].comb_act[3].data = 4;
-        ctx.norm_conf.button[3].flags = MOUSE_BTN_CONF_ENABLE_COMB;
+        ctx.norm_conf.button[3].flags |= MOUSE_BTN_CONF_ENABLE_COMB;
         ctx.norm_conf.button[3].comb_act[2].code = MOUSE_ACT_BUTTON;
         ctx.norm_conf.button[3].comb_act[2].data = 4;
     }
