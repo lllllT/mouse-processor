@@ -1,7 +1,7 @@
 /*
  * hook.c  -- hook funcs
  *
- * $Id: hook.c,v 1.3 2004/12/28 01:48:43 hos Exp $
+ * $Id: hook.c,v 1.4 2004/12/28 03:44:44 hos Exp $
  *
  */
 
@@ -14,6 +14,9 @@
 #define XBUTTON2 0x0002
 #define MOUSEEVENTF_XDOWN 0x0080
 #define MOUSEEVENTF_XUP 0x0100
+
+
+#define COMB_TIMER_ID 1
 
 
 static HHOOK mouse_ll_hook = NULL;
@@ -143,10 +146,14 @@ void fill_input(INPUT *in, int motion, int data)
 }
 
 
-static inline
-void post_to_main(int motion, int data)
+static
+void CALLBACK comb_timer(HWND hwnd, UINT msg, UINT_PTR id, DWORD time)
 {
-    PostMessage(ctx.main_window, WM_MOUSEHOOK_MOTION, motion, data);
+    KillTimer(hwnd, id);
+
+    if(! ctx.pressed) {
+        return;
+    }
 }
 
 
@@ -173,41 +180,65 @@ LRESULT CALLBACK mouse_ll_proc(int code, WPARAM wparam, LPARAM lparam)
 
         if(btn >= 0) {
             if(! ctx.pressed) {
-                if(ctx.conf.button[btn].flags & MOUSE_BTN_CONF_ENABLE_COMB) {
-                    if(motion == MOTION_DOWN) {
+                if(motion == MOTION_DOWN) {
+                    /* try combination */
+                    if(ctx.conf.button[btn].flags &
+                       MOUSE_BTN_CONF_ENABLE_COMB) {
                         ctx.pressed = 1;
-                        memcpy(&ctx.pressed_btn, msll, sizeof(MSLLHOOKSTRUCT));
-                        post_to_main(motion, btn);
-                        return 1;
-                    } else {
-                        INPUT in[2];
-                        int send_btn;
-
-                        send_btn = (ctx.conf.button[btn].flags &
-                                    MOUSE_BTN_CONF_REPLACE ?
-                                    ctx.conf.button[btn].replace : btn);
-
-                        memset(&in, 0, sizeof(in));
-
-                        in[0].type = INPUT_MOUSE;
-                        in[0].mi.dx = ctx.pressed_btn.pt.x;
-                        in[0].mi.dy = ctx.pressed_btn.pt.y;
-                        in[0].mi.time = ctx.pressed_btn.time;
-                        in[0].mi.dwExtraInfo = ctx.pressed_btn.dwExtraInfo;
-                        fill_input(&in[0], MOTION_DOWN, send_btn);
-
-                        in[1].type = INPUT_MOUSE;
-                        in[1].mi.dx = msll->pt.x;
-                        in[1].mi.dy = msll->pt.y;
-                        in[1].mi.time = msll->time;
-                        in[1].mi.dwExtraInfo = msll->dwExtraInfo;
-                        fill_input(&in[1], MOTION_UP, send_btn);
-
-                        SendInput(2, in, sizeof(INPUT));
-                        ctx.pressed = 0;
+                        ctx.pressed_btn = btn;
+                        memcpy(&ctx.pressed_btn_data, msll,
+                               sizeof(MSLLHOOKSTRUCT));
+                        SetTimer(ctx.main_window, COMB_TIMER_ID,
+                                 ctx.conf.comb_time, comb_timer);
                         return 1;
                     }
                 }
+
+                if(motion == MOTION_UP) {
+                    if(ctx.combinated) {
+                        int i;
+
+                        for(i = 0; i < ctx.combinated; i++) {
+                            if(btn == ctx.combination[i * 3] ||
+                               btn == ctx.combination[i * 3 + 1]) {
+                                INPUT in;
+
+                                if(ctx.combination[i * 3] == -1 ||
+                                   ctx.combination[i * 3 + 1] == -1) {
+                                    memmove(&ctx.combination[i * 3],
+                                            &ctx.combination[(i + 1) * 3],
+                                            sizeof(ctx.combination[0]) *
+                                            (ctx.combinated - i - 1));
+                                    ctx.combinated -= 1;
+                                    return 1;
+                                }
+
+                                memset(&in, 0, sizeof(in));
+
+                                in.type = INPUT_MOUSE;
+                                in.mi.dx = msll->pt.x;
+                                in.mi.dy = msll->pt.y;
+                                in.mi.time = msll->time;
+                                in.mi.dwExtraInfo = msll->dwExtraInfo;
+                                fill_input(&in, MOTION_UP,
+                                           ctx.combination[i * 3 + 2]);
+
+                                SendInput(1, &in, sizeof(INPUT));
+
+                                if(btn == ctx.combination[i * 3]) {
+                                    ctx.combination[i * 3] = -1;
+                                }
+                                if(btn == ctx.combination[i * 3 + 1]) {
+                                    ctx.combination[i * 3 + 1] = -1;
+                                }
+
+                                return 1;
+                            }
+                        }
+                    }
+                }
+
+                /* button replace */
                 if(ctx.conf.button[btn].flags & MOUSE_BTN_CONF_REPLACE) {
                     INPUT in;
 
@@ -221,11 +252,75 @@ LRESULT CALLBACK mouse_ll_proc(int code, WPARAM wparam, LPARAM lparam)
                     fill_input(&in, motion, ctx.conf.button[btn].replace);
 
                     SendInput(1, &in, sizeof(INPUT));
-                    ctx.pressed = 0;
                     return 1;
                 }
 
                 goto norm_end;
+            } else {
+                ctx.pressed = 0;
+                KillTimer(ctx.main_window, COMB_TIMER_ID);
+
+                if(motion == MOTION_DOWN) {
+                    /* combination */
+                    if(ctx.conf.button[ctx.pressed_btn].combination[btn] &
+                       MOUSE_BTN_COMB_BTN) {
+                        INPUT in;
+                        int comb_btn;
+
+                        comb_btn =
+                            ctx.conf.button[ctx.pressed_btn].combination[btn] &
+                            MOUSE_BTN_COMB_VALUE_MASK;
+
+                        memset(&in, 0, sizeof(in));
+
+                        in.type = INPUT_MOUSE;
+                        in.mi.dx = msll->pt.x;
+                        in.mi.dy = msll->pt.y;
+                        in.mi.time = msll->time;
+                        in.mi.dwExtraInfo = msll->dwExtraInfo;
+                        fill_input(&in, MOTION_DOWN, comb_btn);
+
+                        SendInput(1, &in, sizeof(INPUT));
+
+                        ctx.combination[ctx.combinated * 3] = ctx.pressed_btn;
+                        ctx.combination[ctx.combinated * 3 + 1] = btn;
+                        ctx.combination[ctx.combinated * 3 + 2] = comb_btn;
+                        ctx.combinated += 1;
+                        return 1;
+                    }
+                }
+
+                {
+                    INPUT in[2];
+                    int btn0, btn1;
+
+                    btn0 = (ctx.conf.button[ctx.pressed_btn].flags &
+                            MOUSE_BTN_CONF_REPLACE ?
+                            ctx.conf.button[ctx.pressed_btn].replace :
+                            ctx.pressed_btn);
+                    btn1 = (ctx.conf.button[btn].flags &
+                            MOUSE_BTN_CONF_REPLACE ?
+                            ctx.conf.button[btn].replace : btn);
+
+                    memset(&in, 0, sizeof(in));
+
+                    in[0].type = INPUT_MOUSE;
+                    in[0].mi.dx = ctx.pressed_btn_data.pt.x;
+                    in[0].mi.dy = ctx.pressed_btn_data.pt.y;
+                    in[0].mi.time = ctx.pressed_btn_data.time;
+                    in[0].mi.dwExtraInfo = ctx.pressed_btn_data.dwExtraInfo;
+                    fill_input(&in[0], MOTION_DOWN, btn0);
+
+                    in[1].type = INPUT_MOUSE;
+                    in[1].mi.dx = msll->pt.x;
+                    in[1].mi.dy = msll->pt.y;
+                    in[1].mi.time = msll->time;
+                    in[1].mi.dwExtraInfo = msll->dwExtraInfo;
+                    fill_input(&in[1], motion, btn1);
+
+                    SendInput(2, in, sizeof(INPUT));
+                    return 1;
+                }
             }
         }
 

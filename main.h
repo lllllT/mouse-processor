@@ -1,7 +1,7 @@
 /*
  * main.h  --
  *
- * $Id: main.h,v 1.2 2004/12/27 09:22:14 hos Exp $
+ * $Id: main.h,v 1.3 2004/12/28 03:44:44 hos Exp $
  *
  */
 
@@ -11,13 +11,18 @@
 #define MOUSE_BTN_CONF_ENABLE_COMB 0x0001
 #define MOUSE_BTN_CONF_REPLACE     0x0002
 
+#define MOUSE_BTN_COMB_BTN        0x00010000
+#define MOUSE_BTN_COMB_VALUE_MASK 0x0000ffff
+
 struct mouse_conf {
     struct {
         unsigned int flags;
 
-        unsigned char combination[MOUSE_BTN_MAX];
+        unsigned int combination[MOUSE_BTN_MAX];
         int replace;
     } button[MOUSE_BTN_MAX];
+
+    int comb_time;
 };
 
 struct app_context {
@@ -26,7 +31,11 @@ struct app_context {
 
     struct mouse_conf conf;
     int pressed;
-    MSLLHOOKSTRUCT pressed_btn;
+    int pressed_btn;
+    MSLLHOOKSTRUCT pressed_btn_data;
+
+    int combinated;
+    int combination[MOUSE_BTN_MAX * 3];
 };
 
 extern struct app_context ctx;
