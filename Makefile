@@ -1,7 +1,7 @@
 #
 # Makefile
 #
-# $Id: Makefile,v 1.34 2005/02/04 17:08:38 hos Exp $
+# $Id: Makefile,v 1.35 2005/02/04 18:49:41 hos Exp $
 #
 
 DEFINES = -D_WIN32_WINNT=0x0500 -DUNICODE=1 -D_UNICODE=1
@@ -44,10 +44,11 @@ SBH_DLL_HEADERS = scroll_op_scrollbar.h shmem.h
 SBH_DLL_LDLIBS = 
 SBH_DLL_LDFLAGS = $(LDFLAGS) -e _DllMain@12 --output-lib lib$(SBH_DLL_NAME).a
 
-PACK_BIN_FILES = $(EXE_NAME) $(SBI_DLL_NAME)
+PACK_BIN_FILES = $(EXE_NAME) $(SBI_DLL_NAME) $(SBH_DLL_NAME)
 PACK_BIN_ADD_FILES = README.txt VERSION default.mprc
 PACK_SRC_FILES = $(EXE_SRCS) $(EXE_RSRC) $(EXE_HEADERS) icon.ico \
                  $(SBI_DLL_SRCS) $(SBI_DLL_RSRC) $(SBI_DLL_HEADERS) \
+                 $(SBH_DLL_SRCS) $(SBH_DLL_RSRC) $(SBH_DLL_HEADERS) \
                  Makefile
 
 SUBDIRS = util doc
@@ -122,7 +123,9 @@ pack-src:
 	for d in $(SUBDIRS); do \
 	  $(MAKE) -C $$d pack-src TARGET_DIR="$$TARGET_DIR/$$d" ; \
 	done
-	$(INSTALL) -m 644 $(PACK_SRC_FILES) $(TARGET_NAME)_src-$(VERSION)
+	for f in $(PACK_SRC_FILES) ; do \
+	  $(INSTALL) -m 644 "$$f" $(TARGET_NAME)_src-$(VERSION) ; \
+	done
 	$(GTAR) -zcf $(TARGET_NAME)_src-$(VERSION).tar.gz \
 	             $(TARGET_NAME)_src-$(VERSION)
 	-$(RM) -r $(TARGET_NAME)_src-$(VERSION)
