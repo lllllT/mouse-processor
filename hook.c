@@ -1,12 +1,9 @@
 /*
  * hook.c  -- hook funcs
  *
- * $Id: hook.c,v 1.9 2004/12/31 18:57:12 hos Exp $
+ * $Id: hook.c,v 1.10 2005/01/04 09:36:12 hos Exp $
  *
  */
-
-#include <windows.h>
-#include <stdio.h>
 
 #include "main.h"
 
@@ -159,7 +156,7 @@ void do_action(struct mouse_action *act, MSLLHOOKSTRUCT *msll, int motion)
           in.type = INPUT_MOUSE;
           in.mi.time = msll->time;
           in.mi.dwExtraInfo = msll->dwExtraInfo;
-          fill_input(&in, motion, act->data);
+          fill_input(&in, motion, act->conf.button);
 
           SendInput(1, &in, sizeof(INPUT));
 
@@ -169,16 +166,72 @@ void do_action(struct mouse_action *act, MSLLHOOKSTRUCT *msll, int motion)
       case MOUSE_ACT_WHEEL:
       {
           INPUT in;
+          int data;
+
+          act->data.wheel +=
+              (short)HIWORD(msll->mouseData) * act->conf.wheel.ratio;
+          if((int)act->data.wheel / act->conf.wheel.tick == 0) {
+              break;
+          }
+
+          data = (int)act->data.wheel;
+          act->data.wheel -= data;
 
           memset(&in, 0, sizeof(in));
 
           in.type = INPUT_MOUSE;
           in.mi.time = msll->time;
           in.mi.dwExtraInfo = msll->dwExtraInfo;
-          fill_input(&in, MOTION_WHEEL,
-                     (short)HIWORD(msll->mouseData) * act->data);
+          fill_input(&in, MOTION_WHEEL, data);
 
           SendInput(1, &in, sizeof(INPUT));
+
+          break;
+      }
+
+      case MOUSE_ACT_WHEELPOST:
+      {
+          int wn, data, i;
+          HWND target;
+
+          act->data.wheel +=
+              (short)HIWORD(msll->mouseData) * act->conf.wheel.ratio;
+
+          target = WindowFromPoint(msll->pt);
+          if(target == NULL) {
+              break;
+          }
+
+          wn = act->data.wheel / act->conf.wheel.tick;
+          if(wn == 0) {
+              break;
+          }
+
+          data = act->conf.wheel.tick;
+          if(wn < 0) {
+              wn = -wn;
+              data = -data;
+          }
+
+          for(i = 0; i < wn; i++) {
+
+#define KEY_STATE(key) (GetAsyncKeyState(VK_ ## key) & 0x8000 ? MK_ ## key : 0)
+
+              PostMessage(
+                  target, WM_MOUSEWHEEL,
+                  MAKEWPARAM(KEY_STATE(CONTROL) |
+                             KEY_STATE(LBUTTON) |
+                             KEY_STATE(MBUTTON) |
+                             KEY_STATE(RBUTTON) |
+                             KEY_STATE(SHIFT) |
+                             KEY_STATE(XBUTTON1) |
+                             KEY_STATE(XBUTTON2),
+                             data),
+                  MAKELPARAM(msll->pt.x, msll->pt.y));
+
+#undef KEY_STATE
+
+          }
 
           break;
       }
@@ -187,20 +240,15 @@ void do_action(struct mouse_action *act, MSLLHOOKSTRUCT *msll, int motion)
           break;
 
       case MOUSE_ACT_MODECH:
-          if(ctx.conf == &ctx.norm_conf) {
-              ctx.conf = &ctx.scroll_conf;
-              PostMessage(ctx.main_window, WM_MOUSEHOOK_SCROLL_BEGIN,
-                          msll->pt.x, msll->pt.y);
-          } else {
-              ctx.conf = &ctx.norm_conf;
-              PostMessage(ctx.main_window, WM_MOUSEHOOK_SCROLL_END,
-                          msll->pt.x, msll->pt.y);
-          }
+          ctx.conf = act->conf.mode.mode;
+          PostMessage(ctx.main_window, WM_MOUSEHOOK_SCROLL_MODE,
+                      MAKEWPARAM(msll->pt.x, msll->pt.y),
+                      (LPARAM)&act->conf.mode.data);
           break;
 
       case MOUSE_ACT_SCROLL:
           PostMessage(ctx.main_window, WM_MOUSEHOOK_SCROLLING,
-                      msll->pt.x, msll->pt.y);
+                      MAKEWPARAM(msll->pt.x, msll->pt.y), 0);
           break;
     }
 }

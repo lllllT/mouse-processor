@@ -1,9 +1,13 @@
 /*
  * main.h  --
  *
- * $Id: main.h,v 1.7 2004/12/31 21:33:00 hos Exp $
+ * $Id: main.h,v 1.8 2005/01/04 09:36:14 hos Exp $
  *
  */
+
+#include <windows.h>
+#include <tchar.h>
+#include <oleauto.h>
 
 
 #define MOUSE_BTN_MAX 5
@@ -12,12 +16,13 @@
 #define MOUSE_BTN_CONF_ENABLE_COMB 0x0001
 
 /* mouse_action.code */
-#define MOUSE_ACT_NONE   0x00
-#define MOUSE_ACT_BUTTON 0x01
-#define MOUSE_ACT_WHEEL  0x02
-#define MOUSE_ACT_MOVE   0x03
-#define MOUSE_ACT_MODECH 0x10
-#define MOUSE_ACT_SCROLL 0x20
+#define MOUSE_ACT_NONE        0x00
+#define MOUSE_ACT_BUTTON      0x01
+#define MOUSE_ACT_WHEEL       0x02
+#define MOUSE_ACT_WHEELPOST   0x03
+#define MOUSE_ACT_MOVE        0x04
+#define MOUSE_ACT_MODECH      0x10
+#define MOUSE_ACT_SCROLL      0x20
 
 /* scroll_context.mode */
 #define SCROLL_MODE_NATIVE_HV 0x00
@@ -30,10 +35,41 @@
 /* app_context.ignore_btn_mask */
 #define MOUSE_BTN_BIT(n) (1 << (n))
 
+struct mouse_conf;
+
+/* mode change config */
+struct mode_conf {
+    int mode;
+
+    union {
+        struct {
+            double x_ratio;
+            double y_ratio;
+        } scroll;
+    };
+};
+
 /* custom action */
 struct mouse_action {
     unsigned int code;
-    int data;
+
+    union {
+        int button;
+
+        struct {
+            double ratio;
+            int tick;
+        } wheel;
+
+        struct {
+            struct mouse_conf *mode;
+            struct mode_conf data;
+        } mode;
+    } conf;
+
+    union {
+        double wheel;
+    } data;
 };
 
 /* mouse configuration */
@@ -59,7 +95,12 @@ struct scroll_context {
     HWND target;
     SIZE target_size;
 
-    int dx, dy;
+    IDispatch *ie_target;
+
+    double x_ratio, y_ratio;
+    double dx, dy;
+
+    double dw;
 };
 
 /* application context */
@@ -70,6 +111,16 @@ struct app_context {
     struct mouse_conf *conf;
     struct mouse_conf norm_conf;
     struct mouse_conf scroll_conf;
+
+    struct {
+        double x_ratio;
+        double y_ratio;
+        int tick;
+    } scroll_wheel;
+    struct {
+        double x_ratio;
+        double y_ratio;
+    } scroll_line;
 
     unsigned int ignore_btn_mask;
 
@@ -91,14 +142,16 @@ extern struct app_context ctx;
 #define MOTION_MOVE  2
 #define MOTION_WHEEL 3
 
-#define WM_MOUSEHOOK_SCROLL_BEGIN (WM_APP + 10)
+#define WM_MOUSEHOOK_SCROLL_MODE  (WM_APP + 10)
 #define WM_MOUSEHOOK_SCROLLING    (WM_APP + 11)
-#define WM_MOUSEHOOK_SCROLL_END   (WM_APP + 12)
 
 
 int set_hook(void);
 int clear_hook(void);
 
-LRESULT scroll_begin(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
+
+LRESULT scroll_mode(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 LRESULT scrolling(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
-LRESULT scroll_end(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
+
+
+HRESULT get_ie_target(HWND hwnd, int x, int y, IDispatch **elem);

@@ -1,13 +1,9 @@
 /*
  * main.c  -- main part of mouse-processor
  *
- * $Id: main.c,v 1.5 2004/12/31 18:55:51 hos Exp $
+ * $Id: main.c,v 1.6 2005/01/04 09:36:14 hos Exp $
  *
  */
-
-
-#include <windows.h>
-#include <tchar.h>
 
 #include "main.h"
 #include "util.h"
@@ -272,9 +268,8 @@ LRESULT CALLBACK main_window_proc(HWND hwnd, UINT msg,
         {WM_COMMAND, main_command},
         {WM_TASKTRAY, main_tasktray},
 
-        {WM_MOUSEHOOK_SCROLL_BEGIN, scroll_begin},
+        {WM_MOUSEHOOK_SCROLL_MODE, scroll_mode},
         {WM_MOUSEHOOK_SCROLLING, scrolling},
-        {WM_MOUSEHOOK_SCROLL_END, scroll_end},
 
         {0, NULL}
     };
@@ -362,37 +357,56 @@ int main(int ac, char **av)
 
         memset(&ctx, 0, sizeof(ctx));
 
-        ctx.norm_conf.comb_time = 200;
+        ctx.norm_conf.comb_time = 250;
+
+        ctx.scroll_wheel.x_ratio = 0;
+        ctx.scroll_wheel.y_ratio = -5;
+        ctx.scroll_wheel.tick = 120;
+
+        ctx.scroll_line.x_ratio = 0.1;
+        ctx.scroll_line.y_ratio = 0.1;
 
         ctx.conf = &ctx.norm_conf;
 
         for(i = 0; i < MOUSE_BTN_MAX; i++) {
             ctx.norm_conf.button[i].act.code = MOUSE_ACT_BUTTON;
-            ctx.norm_conf.button[i].act.data = i;
+            ctx.norm_conf.button[i].act.conf.button = i;
 
             ctx.scroll_conf.button[i].act.code = MOUSE_ACT_MODECH;
+            ctx.scroll_conf.button[i].act.conf.mode.mode = &ctx.norm_conf;
+            ctx.scroll_conf.button[i].act.conf.mode.data.mode = 0;
         }
 
-        ctx.norm_conf.wheel_act.code = MOUSE_ACT_WHEEL;
-        ctx.norm_conf.wheel_act.data = 1;
+        ctx.norm_conf.wheel_act.code = MOUSE_ACT_WHEELPOST;
+        ctx.norm_conf.wheel_act.conf.wheel.ratio = 1;
+        ctx.norm_conf.wheel_act.conf.wheel.tick = 120;
         ctx.norm_conf.move_act.code = MOUSE_ACT_MOVE;
 
-        ctx.scroll_conf.wheel_act.code = MOUSE_ACT_WHEEL;
-        ctx.scroll_conf.wheel_act.data = 1;
+        ctx.scroll_conf.wheel_act.code = MOUSE_ACT_WHEELPOST;
+        ctx.scroll_conf.wheel_act.conf.wheel.ratio = 1;
+        ctx.scroll_conf.wheel_act.conf.wheel.tick = 120;
         ctx.scroll_conf.move_act.code = MOUSE_ACT_SCROLL;
 
         /* dbg */
         ctx.norm_conf.button[0].flags |= MOUSE_BTN_CONF_ENABLE_COMB;
         ctx.norm_conf.button[0].comb_act[1].code = MOUSE_ACT_MODECH;
+        ctx.norm_conf.button[0].comb_act[1].conf.mode.mode = &ctx.scroll_conf;
+        ctx.norm_conf.button[0].comb_act[1].conf.mode.data.mode = 1;
+        ctx.norm_conf.button[0].comb_act[1].conf.mode.data.scroll.x_ratio = 1;
+        ctx.norm_conf.button[0].comb_act[1].conf.mode.data.scroll.y_ratio = 1;
         ctx.norm_conf.button[1].flags |= MOUSE_BTN_CONF_ENABLE_COMB;
         ctx.norm_conf.button[1].comb_act[0].code = MOUSE_ACT_MODECH;
+        ctx.norm_conf.button[1].comb_act[0].conf.mode.mode = &ctx.scroll_conf;
+        ctx.norm_conf.button[1].comb_act[0].conf.mode.data.mode = 1;
+        ctx.norm_conf.button[1].comb_act[0].conf.mode.data.scroll.x_ratio = 1;
+        ctx.norm_conf.button[1].comb_act[0].conf.mode.data.scroll.y_ratio = 1;
 
         ctx.norm_conf.button[2].flags |= MOUSE_BTN_CONF_ENABLE_COMB;
         ctx.norm_conf.button[2].comb_act[3].code = MOUSE_ACT_BUTTON;
-        ctx.norm_conf.button[2].comb_act[3].data = 4;
+        ctx.norm_conf.button[2].comb_act[3].conf.button = 4;
         ctx.norm_conf.button[3].flags |= MOUSE_BTN_CONF_ENABLE_COMB;
         ctx.norm_conf.button[3].comb_act[2].code = MOUSE_ACT_BUTTON;
-        ctx.norm_conf.button[3].comb_act[2].data = 4;
+        ctx.norm_conf.button[3].comb_act[2].conf.button = 4;
     }
 
     {
@@ -419,7 +433,19 @@ int main(int ac, char **av)
         return 1;
     }
 
+    {
+        HRESULT hres;
+
+        hres = CoInitializeEx(NULL, 0);
+        if(FAILED(hres)) {
+            error_message("CoInitializeEx() failed");
+            return 1;
+        }
+    }
+
     ret = message_loop();
+
+    CoUninitialize();
 
     return ret;
 }

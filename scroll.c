@@ -1,15 +1,13 @@
 /*
  * scroll.c  -- scroll window
  *
- * $Id: scroll.c,v 1.2 2004/12/31 21:33:00 hos Exp $
+ * $Id: scroll.c,v 1.3 2005/01/04 09:36:15 hos Exp $
  *
  */
 
-#include <windows.h>
-#include <commctrl.h>
-#include <tchar.h>
-
 #include "main.h"
+#include "util.h"
+#include <commctrl.h>
 
 
 static
@@ -63,6 +61,10 @@ int scroll_window(int bar, int delta, int length)
     int pos;
     SCROLLINFO si;
 
+    if(delta == 0) {
+        return 0;
+    }
+
     if(! get_scroll_pos(bar, delta, length, &pos)) {
         return 0;
     }
@@ -85,6 +87,10 @@ void scroll_line(int bar, int delta)
 {
     int i, n, dir;
 
+    if(delta == 0) {
+        return;
+    }
+
     n = (delta < 0 ? -delta : delta);
     dir = (delta < 0 ? SB_LINELEFT : SB_LINERIGHT);
 
@@ -96,10 +102,108 @@ void scroll_line(int bar, int delta)
 }
 
 
-LRESULT scroll_begin(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+static
+void scrolling_native_h(int x, int y)
 {
-    ctx.scroll_data.start_pt.x = wparam;
-    ctx.scroll_data.start_pt.y = lparam;
+    if(scroll_window(SB_HORZ,
+                     ctx.scroll_data.dx, ctx.scroll_data.target_size.cx)) {
+        ctx.scroll_data.dx -= (int)ctx.scroll_data.dx;
+    }
+}
+
+static
+void scrolling_native_v(int x, int y)
+{
+    if(scroll_window(SB_VERT,
+                     ctx.scroll_data.dy, ctx.scroll_data.target_size.cy)) {
+        ctx.scroll_data.dy -= (int)ctx.scroll_data.dy;
+    }
+}
+
+static
+void scrolling_native_hv(int x, int y)
+{
+    scrolling_native_h(x, y);
+    scrolling_native_v(x, y);
+}
+
+static
+void scrolling_line(int x, int y)
+{
+    int dxi, dyi;
+
+    dxi = ctx.scroll_data.dx * ctx.scroll_line.x_ratio;
+    dyi = ctx.scroll_data.dy * ctx.scroll_line.y_ratio;
+
+    scroll_line(SB_HORZ, dxi);
+    scroll_line(SB_VERT, dyi);
+
+    ctx.scroll_data.dx -= dxi / ctx.scroll_line.x_ratio;
+    ctx.scroll_data.dy -= dyi / ctx.scroll_line.y_ratio;
+}
+
+static
+void scrolling_ie(int x, int y)
+{
+}
+
+static
+void scrolling_wheel(int x, int y)
+{
+    int wn, data, i;
+
+    ctx.scroll_data.dw +=
+        ctx.scroll_data.dx * ctx.scroll_wheel.x_ratio +
+        ctx.scroll_data.dy * ctx.scroll_wheel.y_ratio;
+    ctx.scroll_data.dx = 0;
+    ctx.scroll_data.dy = 0;
+
+    wn= ctx.scroll_data.dw / ctx.scroll_wheel.tick;
+    if(wn == 0) {
+        return;
+    }
+
+    data = ctx.scroll_wheel.tick;
+    if(wn < 0) {
+        wn = -wn;
+        data = -data;
+    }
+
+    for(i = 0; i < wn; i++) {
+        PostMessage(
+            ctx.scroll_data.target,
+            WM_MOUSEWHEEL,
+            MAKEWPARAM(
+                (GetAsyncKeyState(VK_CONTROL) & 0x8000 ? MK_CONTROL : 0) |
+                (GetAsyncKeyState(VK_LBUTTON) & 0x8000 ? MK_LBUTTON : 0) |
+                (GetAsyncKeyState(VK_MBUTTON) & 0x8000 ? MK_MBUTTON : 0) |
+                (GetAsyncKeyState(VK_RBUTTON) & 0x8000 ? MK_RBUTTON : 0) |
+                (GetAsyncKeyState(VK_SHIFT) & 0x8000 ? MK_SHIFT : 0) |
+                (GetAsyncKeyState(VK_XBUTTON1) & 0x8000 ? MK_XBUTTON1 : 0) |
+                (GetAsyncKeyState(VK_XBUTTON2) & 0x8000 ? MK_XBUTTON2 : 0),
+                data),
+            MAKELPARAM(x, y));
+    }
+
+    ctx.scroll_data.dw -= data * wn;
+}
+
+
+LRESULT scroll_mode(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+{
+    struct mode_conf *data;
+
+    ctx.scroll_data.start_pt.x = LOWORD(wparam);
+    ctx.scroll_data.start_pt.y = HIWORD(wparam);
+
+    data = (struct mode_conf *)lparam;
+
+    if(data->mode != 1) {
+        return 0;
+    }
+
+    ctx.scroll_data.x_ratio = data->scroll.x_ratio;
+    ctx.scroll_data.y_ratio = data->scroll.y_ratio;
 
     ctx.scroll_data.target = WindowFromPoint(ctx.scroll_data.start_pt);
 
@@ -112,8 +216,18 @@ LRESULT scroll_begin(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
         if(_tcscmp(class, _T("SysListView32")) == 0) {
             ctx.scroll_data.mode = SCROLL_MODE_LINESCRL;
         } else if(_tcscmp(class, _T("Internet Explorer_Server")) == 0) {
+            HRESULT hres;
+
             ctx.scroll_data.mode = SCROLL_MODE_IE;
             ctx.scroll_data.mode = SCROLL_MODE_LINESCRL;
+
+            hres = get_ie_target(ctx.scroll_data.target,
+                                 ctx.scroll_data.start_pt.x,
+                                 ctx.scroll_data.start_pt.y,
+                                 &ctx.scroll_data.ie_target);
+            if(FAILED(hres)) {
+                ctx.scroll_data.mode = SCROLL_MODE_LINESCRL;
+            }
         } else {
             LONG_PTR style;
 
@@ -143,6 +257,8 @@ LRESULT scroll_begin(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
     ctx.scroll_data.dx = 0;
     ctx.scroll_data.dy = 0;
 
+    ctx.scroll_data.dw = 0;
+
     return 0;
 }
 
@@ -150,40 +266,32 @@ LRESULT scrolling(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
     int x, y;
 
-    x = wparam;
-    y = lparam;
+    typedef void (*mode_proc_t)(int, int);
+    mode_proc_t proc;
 
-    ctx.scroll_data.dx += x - ctx.scroll_data.start_pt.x;
-    ctx.scroll_data.dy += y - ctx.scroll_data.start_pt.y;
+    static struct uint_ptr_pair mode_map[] = {
+        {SCROLL_MODE_NATIVE_HV, scrolling_native_hv},
+        {SCROLL_MODE_NATIVE_H, scrolling_native_h},
+        {SCROLL_MODE_NATIVE_V, scrolling_native_v},
+        {SCROLL_MODE_LINESCRL, scrolling_line},
+        {SCROLL_MODE_IE, scrolling_ie},
+        {SCROLL_MODE_WHEEL, scrolling_wheel},
 
-    if(ctx.scroll_data.mode == SCROLL_MODE_NATIVE_H ||
-       ctx.scroll_data.mode == SCROLL_MODE_NATIVE_HV) {
-        if(scroll_window(SB_HORZ,
-                         ctx.scroll_data.dx, ctx.scroll_data.target_size.cx)) {
-            ctx.scroll_data.dx = 0;
-        }
+        {0, NULL}
+    };
+
+    x = LOWORD(wparam);
+    y = HIWORD(wparam);
+
+    ctx.scroll_data.dx += (x - ctx.scroll_data.start_pt.x) *
+                          ctx.scroll_data.x_ratio;
+    ctx.scroll_data.dy += (y - ctx.scroll_data.start_pt.y) *
+                          ctx.scroll_data.y_ratio;
+
+    proc = assq_pair(mode_map, ctx.scroll_data.mode, NULL);
+    if(proc) {
+        proc(x, y);
     }
 
-    if(ctx.scroll_data.mode == SCROLL_MODE_NATIVE_V ||
-       ctx.scroll_data.mode == SCROLL_MODE_NATIVE_HV) {
-        if(scroll_window(SB_VERT,
-                         ctx.scroll_data.dy, ctx.scroll_data.target_size.cy)) {
-            ctx.scroll_data.dy = 0;
-        }
-    }
-
-    if(ctx.scroll_data.mode == SCROLL_MODE_LINESCRL) {
-        scroll_line(SB_HORZ, ctx.scroll_data.dx);
-        scroll_line(SB_VERT, ctx.scroll_data.dy);
-
-        ctx.scroll_data.dx = 0;
-        ctx.scroll_data.dy = 0;
-    }
-
-    return 0;
-}
-
-LRESULT scroll_end(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
-{
     return 0;
 }
