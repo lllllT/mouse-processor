@@ -1,7 +1,7 @@
 /*
  * hook.c  -- hook funcs
  *
- * $Id: hook.c,v 1.12 2005/01/05 09:30:31 hos Exp $
+ * $Id: hook.c,v 1.13 2005/01/07 05:50:00 hos Exp $
  *
  */
 
@@ -353,7 +353,7 @@ LRESULT CALLBACK mouse_ll_proc(int code, WPARAM wparam, LPARAM lparam)
                     memcpy(&ctx.pressed_btn_data, msll,
                            sizeof(MSLLHOOKSTRUCT));
                     SetTimer(ctx.main_window, COMB_TIMER_ID,
-                             ctx.conf->comb_time, comb_timer);
+                             ctx.comb_time, comb_timer);
                     return 1;
                 }
             }

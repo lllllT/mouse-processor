@@ -1,7 +1,7 @@
 /*
  * main.c  -- main part of mouse-processor
  *
- * $Id: main.c,v 1.9 2005/01/06 08:49:03 hos Exp $
+ * $Id: main.c,v 1.10 2005/01/07 05:50:01 hos Exp $
  *
  */
 
@@ -378,8 +378,8 @@ int main(int ac, char **av)
     {
         int i;
 
-        ctx.norm_conf.comb_time =
-            get_conf_int(300, L"global", L"combination-time", NULL);
+        ctx.comb_time = get_conf_int(300,
+                                     L"global", L"combination-time", NULL);
 
         ctx.scroll_wheel.x_ratio = 0;
         ctx.scroll_wheel.y_ratio = -5;

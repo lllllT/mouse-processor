@@ -1,7 +1,7 @@
 /*
  * main.h  --
  *
- * $Id: main.h,v 1.11 2005/01/07 04:54:06 hos Exp $
+ * $Id: main.h,v 1.12 2005/01/07 05:50:01 hos Exp $
  *
  */
 
@@ -75,8 +75,6 @@ struct mouse_action {
 
 /* mouse configuration */
 struct mouse_conf {
-    int comb_time;
-
     struct {
         unsigned int flags;
 
@@ -112,6 +110,7 @@ struct app_context {
     LPWSTR conf_file;
     s_exp_data_t *conf_data;
 
+    int comb_time;
     struct mouse_conf *conf;
     struct mouse_conf norm_conf;
     struct mouse_conf scroll_conf;
