@@ -1,7 +1,7 @@
 /*
  * conf.h  -- configuration
  *
- * $Id: conf.c,v 1.18 2005/01/26 08:34:48 hos Exp $
+ * $Id: conf.c,v 1.19 2005/01/27 05:38:23 hos Exp $
  *
  */
 
@@ -156,6 +156,19 @@ static
 s_exp_data_t *get_conf_v(struct app_setting *conf, int type, va_list ap)
 {
     return s_exp_massq_v(conf->conf_data, type, ap);
+}
+
+static
+s_exp_data_t *get_conf(struct app_setting *conf, int type, ...)
+{
+    va_list ap;
+    s_exp_data_t *data;
+
+    va_start(ap, type);
+    data = get_conf_v(conf, type, ap);
+    va_end(ap);
+
+    return data;
 }
 
 static
@@ -946,10 +959,13 @@ int apply_setting(struct app_setting *app_conf)
     int ret;
 
     /* global setting */
+
+    /* combination time */
     app_conf->comb_time = get_conf_int(app_conf, 300,
                                        L"global", L"combination-time",
                                        NULL);
 
+    /* tray icon */
     {
         s_exp_data_t *t, *tt;
 
@@ -964,6 +980,35 @@ int apply_setting(struct app_setting *app_conf)
         } else {
             app_conf->tray_icon_hide = 1;
             app_conf->tray_icon_file = NULL;
+        }
+    }
+
+    /* process priority class */
+    app_conf->priority_class = NORMAL_PRIORITY_CLASS;
+    {
+        s_exp_data_t *t;
+
+        t = get_conf(app_conf, S_EXP_TYPE_SYMBOL,
+                     L"global", L"priority", NULL);
+        if(t != NULL) {
+            int i;
+            static struct uint_ptr_pair class_map[] = {
+                /*{REALTIME_PRIORITY_CLASS, L"realtime"},*/
+                {HIGH_PRIORITY_CLASS, L"high"},
+                {ABOVE_NORMAL_PRIORITY_CLASS, L"above-normal"},
+                {NORMAL_PRIORITY_CLASS, L"normal"},
+                {BELOW_NORMAL_PRIORITY_CLASS, L"below-normal"},
+                {IDLE_PRIORITY_CLASS, L"idle"},
+
+                {0, NULL}
+            };
+
+            for(i = 0; class_map[i].ptr != NULL; i++) {
+                if(wcscmp(t->symbol.name, class_map[i].ptr) == 0) {
+                    app_conf->priority_class = class_map[i].key;
+                    break;
+                }
+            }
         }
     }
 
@@ -1051,20 +1096,25 @@ int load_setting(LPWSTR conf_file, int force_apply)
         struct mode_conf data;
         POINT pt;
 
-        GetCursorPos(&pt);
-
-        memset(&data, 0, sizeof(data));
-        data.mode = MODE_CH_NORMAL;
-
+        /* replace config data */
         memcpy(&prev_conf, &ctx.app_conf, sizeof(struct app_setting));
         memcpy(&ctx.app_conf, &conf, sizeof(struct app_setting));
 
+        /* notify mode change */
+        memset(&data, 0, sizeof(data));
+        data.mode = MODE_CH_NORMAL;
+        GetCursorPos(&pt);
         ctx.mode_data.cur_conf = &ctx.app_conf.normal_conf[0];
         SendMessage(ctx.main_window, WM_MOUSEHOOK_MODECH,
                     MAKEWPARAM(pt.x, pt.y), (LPARAM)&data);
 
+        /* notify tray icon change */
         SendMessage(ctx.main_window, WM_TASKTRAY_CH, 0, 0);
 
+        /* set process priority */
+        SetPriorityClass(GetCurrentProcess(), ctx.app_conf.priority_class);
+
+        /* free previous config */
         free_setting(&prev_conf);
     }
 
