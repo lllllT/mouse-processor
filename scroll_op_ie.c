@@ -1,7 +1,7 @@
 /*
  * scroll_op_ie.c  -- scroll operator for IE component
  *
- * $Id: scroll_op_ie.c,v 1.3 2005/01/21 08:54:52 hos Exp $
+ * $Id: scroll_op_ie.c,v 1.4 2005/01/28 02:58:45 hos Exp $
  *
  */
 
@@ -535,6 +535,8 @@ int MP_OP_API ie_scroll_init_ctx(void *ctxp, int size, const op_arg_t *arg)
     /* scroll mode */
     ctx->mode = get_scroll_op_mode(ie_scroll_mode_map, mode_name);
     if(ctx->mode < 0) {
+        spr->log_printf(LOG_LEVEL_DEBUG,
+                        L"ie-scroll: unknown mode: %ls\n", mode_name);
         return 0;
     }
 

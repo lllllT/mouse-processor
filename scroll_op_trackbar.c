@@ -1,7 +1,7 @@
 /*
  * scroll_op_trackbar.c  -- scroll operator for trackbar control
  *
- * $Id: scroll_op_trackbar.c,v 1.4 2005/01/21 08:54:54 hos Exp $
+ * $Id: scroll_op_trackbar.c,v 1.5 2005/01/28 02:58:46 hos Exp $
  *
  */
 
@@ -255,6 +255,8 @@ int MP_OP_API trackbar_control_init_ctx(void *ctxp, int size,
     /* scroll mode */
     ctx->mode = get_scroll_op_mode(trackbar_mode_map, mode_name);
     if(ctx->mode < 0) {
+        spr->log_printf(LOG_LEVEL_DEBUG,
+                        L"trackbar-control: unknown mode: %ls\n", mode_name);
         return 0;
     }
 
@@ -268,6 +270,9 @@ int MP_OP_API trackbar_control_init_ctx(void *ctxp, int size,
         style = GetWindowLongPtr(ctx->target, GWL_STYLE);
         if((style & (TBS_HORZ | TBS_VERT)) != TBS_HORZ &&
            (style & (TBS_HORZ | TBS_VERT)) != TBS_VERT) {
+            spr->log_printf(
+                LOG_LEVEL_DEBUG,
+                L"trackbar-control: not scrollable: style = 0x%08X\n", style);
             return 0;
         }
 

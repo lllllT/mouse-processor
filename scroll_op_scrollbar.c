@@ -1,7 +1,7 @@
 /*
  * scroll_op_scrollbar.c  -- scroll operators for scrollbar
  *
- * $Id: scroll_op_scrollbar.c,v 1.9 2005/01/24 05:06:14 hos Exp $
+ * $Id: scroll_op_scrollbar.c,v 1.10 2005/01/28 02:58:45 hos Exp $
  *
  */
 
@@ -229,6 +229,8 @@ int MP_OP_API window_scrollbar_init_ctx(void *ctxp, int size,
     /* scroll mode */
     ctx->mode = get_scroll_op_mode(scrollbar_mode_map, mode_name);
     if(ctx->mode < 0) {
+        spr->log_printf(LOG_LEVEL_DEBUG,
+                        L"window-scrollbar: unknown mode: %ls\n", mode_name);
         return 0;
     }
 
@@ -254,6 +256,9 @@ int MP_OP_API window_scrollbar_init_ctx(void *ctxp, int size,
 
           style = GetWindowLongPtr(ctx->target, GWL_STYLE);
           if((style & (WS_HSCROLL | WS_VSCROLL)) == 0) {
+              spr->log_printf(LOG_LEVEL_DEBUG,
+                              L"window-scrollbar: window has no scrollbar: "
+                              L"style = 0x%08X\n", style);
               return 0;
           }
 
@@ -362,7 +367,8 @@ int is_in_margin(int v1, int v2, int m)
 inline static
 int is_in_range(int v1, int v2, int min, int max, int m)
 {
-    return ((v1 >= min - m) && (v2 <= max + m));
+    return ((v1 >= min - m) && (v1 <= max) &&
+            (v2 <= max + m) && (v2 >= min));
 }
 
 static
@@ -393,6 +399,8 @@ BOOL CALLBACK enum_neighborhood_scrollbar(HWND hwnd, LPARAM lparam)
     }
 
     if((style & WS_VISIBLE) == 0) {
+        spr->log_printf(LOG_LEVEL_DEBUG,
+                        L"neighborhood-scrollbar: not visible: %p\n", hwnd);
         return TRUE;
     }
 
@@ -411,11 +419,19 @@ BOOL CALLBACK enum_neighborhood_scrollbar(HWND hwnd, LPARAM lparam)
 
             if(ctx->h_bar != NULL) {
                 ctx->h_bar = ctx->v_bar = NULL;
+
+                spr->log_printf(
+                    LOG_LEVEL_DEBUG,
+                    L"neighborhood-scrollbar: multiple h-bar: %p\n", hwnd);
                 return FALSE;
             }
 
             ctx->h_bar = hwnd;
             ctx->target_size.cx = rt.right - rt.left;
+
+            spr->log_printf(
+                LOG_LEVEL_DEBUG,
+                L"neighborhood-scrollbar: h-bar matched: %p\n", hwnd);
             return TRUE;
         }
     }
@@ -435,15 +451,25 @@ BOOL CALLBACK enum_neighborhood_scrollbar(HWND hwnd, LPARAM lparam)
 
             if(ctx->v_bar != NULL) {
                 ctx->h_bar = ctx->v_bar = NULL;
+
+                spr->log_printf(
+                    LOG_LEVEL_DEBUG,
+                    L"neighborhood-scrollbar: multiple v-bar: %p\n", hwnd);
                 return FALSE;
             }
 
             ctx->v_bar = hwnd;
             ctx->target_size.cy = rt.bottom - rt.top;
+
+            spr->log_printf(
+                LOG_LEVEL_DEBUG,
+                L"neighborhood-scrollbar: v-bar matched: %p\n", hwnd);
             return TRUE;
         }
     }
 
+    spr->log_printf(LOG_LEVEL_DEBUG,
+                    L"neighborhood-scrollbar: not match: %p\n", hwnd);
     return TRUE;
 }
 
@@ -470,6 +496,9 @@ int MP_OP_API neighborhood_scrollbar_init_ctx(void *ctxp, int size,
     /* scroll mode */
     ctx->mode = get_scroll_op_mode(scrollbar_mode_map, mode_name);
     if(ctx->mode < 0) {
+        spr->log_printf(LOG_LEVEL_DEBUG,
+                        L"neighborhood-scrollbar: unknown mode: %ls\n",
+                        mode_name);
         return 0;
     }
 
@@ -487,6 +516,8 @@ int MP_OP_API neighborhood_scrollbar_init_ctx(void *ctxp, int size,
 
     /* window rect */
     if(GetWindowRect(ctx->target, &ctx->target_rect) == 0) {
+        spr->log_lasterror(LOG_LEVEL_DEBUG,
+                           L"neighborhood-scrollbar: GetWindowRect()", 1);
         return 0;
     }
 
@@ -497,23 +528,39 @@ int MP_OP_API neighborhood_scrollbar_init_ctx(void *ctxp, int size,
     nb_y_sbh = GetSystemMetrics(SM_CYHSCROLL);
 
     /* search neighborhood scrollbars */
+    spr->log_printf(LOG_LEVEL_DEBUG,
+                    L"neighborhood-scrollbar: searching child scrollbar...\n");
     ctx->h_bar = ctx->v_bar = NULL;
     EnumChildWindows(ctx->target, enum_neighborhood_scrollbar, (LPARAM)ctx);
 
     if(ctx->h_bar == NULL && ctx->v_bar == NULL) {
         HWND parent = GetParent(ctx->target);
 
+        spr->log_printf(LOG_LEVEL_DEBUG,
+                        L"neighborhood-scrollbar: no child scrollbar\n");
+
         if(parent == NULL) {
+            spr->log_printf(LOG_LEVEL_DEBUG,
+                            L"neighborhood-scrollbar: no parent\n");
             return 0;
         }
 
+        spr->log_printf(
+            LOG_LEVEL_DEBUG,
+            L"neighborhood-scrollbar: searching sibling scrollbar...\n");
         ctx->h_bar = ctx->v_bar = NULL;
         EnumChildWindows(parent, enum_neighborhood_scrollbar, (LPARAM)ctx);
 
         if(ctx->h_bar == NULL && ctx->v_bar == NULL) {
+            spr->log_printf(LOG_LEVEL_DEBUG,
+                            L"neighborhood-scrollbar: no sibling scrollbar\n");
             return 0;
         }
     }
+    spr->log_printf(
+        LOG_LEVEL_DEBUG,
+        L"neighborhood-scrollbar: scrollbar found: h-bar=%p, v-bar=%p\n",
+        ctx->h_bar, ctx->v_bar);
 
     /* initial delta */
     ctx->dx = 0;
@@ -616,6 +663,8 @@ int MP_OP_API scrollbar_control_init_ctx(void *ctxp, int size,
     /* scroll mode */
     ctx->mode = get_scroll_op_mode(scrollbar_mode_map, mode_name);
     if(ctx->mode < 0) {
+        spr->log_printf(LOG_LEVEL_DEBUG,
+                        L"scrollbar-control: unknown mode: %ls\n", mode_name);
         return 0;
     }
 
@@ -629,6 +678,9 @@ int MP_OP_API scrollbar_control_init_ctx(void *ctxp, int size,
         style = GetWindowLongPtr(ctx->target, GWL_STYLE);
         if((style & SCROLLBAR_STYLE_MASK) != SBS_HORZ &&
            (style & SCROLLBAR_STYLE_MASK) != SBS_VERT) {
+            spr->log_printf(
+                LOG_LEVEL_DEBUG,
+                L"scrollbar-control: not scrollable: style = 0x%08X\n", style);
             return 0;
         }
 
