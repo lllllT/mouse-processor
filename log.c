@@ -1,7 +1,7 @@
 /*
  * log.c  -- logging procs
  *
- * $Id: log.c,v 1.10 2005/01/18 10:43:50 hos Exp $
+ * $Id: log.c,v 1.11 2005/01/19 08:31:55 hos Exp $
  *
  */
 
@@ -27,9 +27,6 @@ static HWND log_close_btn = NULL, log_clear_btn = NULL;
 static HWND log_detail_chk = NULL;
 
 static HFONT log_edit_font = NULL;
-
-static HANDLE log_rpipe_hdl = INVALID_HANDLE_VALUE;
-static HANDLE log_wpipe_hdl = INVALID_HANDLE_VALUE;
 
 
 static
@@ -277,53 +274,33 @@ INT_PTR CALLBACK log_dlg_proc(HWND hwnd, UINT msg,
 
 
 static
-void __cdecl log_thread(void *arg)
+int log_append(const wchar_t *str)
 {
-    unsigned char buf[512], text[512], *buf_start, *pp;
-    const unsigned char *rest;
-    wchar_t *wbuf;
-    DWORD buf_offset, rest_size, read_size, plen;
-    DWORD log_size;
+    wchar_t buf[256];
+    const wchar_t *p;
+    DWORD len, buf_len, log_size;
 
-    buf_offset = 0;
-    while(1) {
-        buf_start = buf + buf_offset;
-        rest_size = sizeof(buf) - buf_offset - 2;
-
-        memset(buf_start, 0, rest_size + 2);
-
-        if(ReadFile(log_rpipe_hdl,
-                    buf_start, rest_size, &read_size, NULL) == 0) {
-            break;
+    while(str[0] != 0) {
+        p = wcschr(str, L'\n');
+        if(p == NULL) {
+            p = str + wcslen(str) - 1;
         }
 
-        if(read_size <= 0) {
-            break;
-        }
+        len = p - str + 1;
+        while(len > 0) {
+            buf_len = (len > 256 - 3 ? 256 - 3 : len);
 
-        buf_start[read_size] = 0;
-
-        plen = 0;
-        rest = "";
-        while(1) {
-            strcpy(text, buf + plen);
-
-            pp = strchr(text, '\n');
-            if(pp != NULL) {
-                pp[0] = '\r';
-                pp[1] = '\n';
-                pp[2] = 0;
-
-                plen += (pp - text) + 1;
-            }
-
-            wbuf = wcs_dup_from_u8s(text, &rest);
-            if(wbuf == NULL) {
-                break;
+            memcpy(buf, str, sizeof(wchar_t) * buf_len);
+            if(str[buf_len - 1] == L'\n') {
+                buf[buf_len - 1] = L'\r';
+                buf[buf_len + 0] = L'\n';
+                buf[buf_len + 1] = 0;
+            } else {
+                buf[buf_len + 0] = 0;
             }
 
             log_size = SendMessageW(log_edit, WM_GETTEXTLENGTH, 0, 0);
-            while(log_size + wcslen(wbuf) > EDIT_TEXT_MAX) {
+            while(log_size + wcslen(buf) > EDIT_TEXT_MAX) {
                 DWORD idx;
 
                 idx = SendMessageW(log_edit, EM_LINEINDEX, 1, 0);
@@ -334,49 +311,16 @@ void __cdecl log_thread(void *arg)
             }
 
             SendMessageW(log_edit, EM_SETSEL, log_size, log_size);
-            SendMessageW(log_edit, EM_REPLACESEL, FALSE, (LPARAM)wbuf);
+            SendMessageW(log_edit, EM_REPLACESEL, FALSE, (LPARAM)buf);
             SendMessageW(log_edit, WM_VSCROLL, MAKEWPARAM(SB_BOTTOM, 0), 0);
             SendMessageW(log_edit, WM_HSCROLL, MAKEWPARAM(SB_LEFT, 0), 0);
 
-            free(wbuf);
-
-            if(pp == NULL) {
-                break;
-            }
+            len -= buf_len;
+            str += buf_len;
         }
-
-        buf_offset = strlen(rest);
-        memmove(buf, rest, buf_offset);
-    }
-
-    CloseHandle(log_rpipe_hdl);
-}
-
-static
-int start_logger(void)
-{
-    HANDLE pin = INVALID_HANDLE_VALUE, pout = INVALID_HANDLE_VALUE;
-
-    if(CreatePipe(&pin, &pout, NULL, 0) == 0) {
-        goto fail_end;
-    }
-
-    log_rpipe_hdl = pin;
-    log_wpipe_hdl = pout;
-
-    if((long)_beginthread(log_thread, 0, NULL) == -1) {
-        goto fail_end;
     }
 
     return 1;
-
-  fail_end:
-    if(pin != INVALID_HANDLE_VALUE) CloseHandle(pin);
-    if(pout != INVALID_HANDLE_VALUE) CloseHandle(pout);
-    log_rpipe_hdl = INVALID_HANDLE_VALUE;
-    log_wpipe_hdl = INVALID_HANDLE_VALUE;
-
-    return 0;
 }
 
 
@@ -456,10 +400,6 @@ int create_logger(void)
         return 0;
     }
 
-    if(start_logger() == 0) {
-        return 0;
-    }
-
     return 1;
 }
 
@@ -467,8 +407,6 @@ int destroy_logger(void)
 {
     DestroyWindow(ctx.log_window);
     ctx.log_window = NULL;
-
-    CloseHandle(log_wpipe_hdl);
 
     return 1;
 }
@@ -485,6 +423,7 @@ int show_logger(BOOL show)
 
 int log_printf(int level, const wchar_t *fmt, ...)
 {
+    va_list ap;
     static wchar_t *buf = NULL;
     static int buf_nch = -1;
     int ret;
@@ -497,70 +436,37 @@ int log_printf(int level, const wchar_t *fmt, ...)
         buf_nch = 256;
         buf = (wchar_t *)malloc(sizeof(wchar_t) * buf_nch);
         if(buf == NULL) {
-            return -1;
+            return 0;
         }
     }
-
-    va_list ap;
 
     va_start(ap, fmt);
 
     while(1) {
         memset(buf, 0, sizeof(wchar_t) * buf_nch);
 
-        if(_vsnwprintf(buf, buf_nch - 1, fmt, ap) < 0) {
+        if(_vsnwprintf(buf, buf_nch - 1, fmt, ap) >= 0) {
+            break;
+        }
+
+        {
             wchar_t *p;
             int nch;
 
             nch = buf_nch + 256;
             p = (wchar_t *)realloc(buf, sizeof(wchar_t) * nch);
             if(p == NULL) {
-                return -1;
+                return 0;
             }
 
             buf = p;
             buf_nch = nch;
-            continue;
         }
-
-        {
-            unsigned char *u8s_buf, *p;
-            DWORD buf_size, wsize;
-
-            u8s_buf = u8s_dup_from_wcs(buf);
-            if(u8s_buf == NULL) {
-                return -1;
-            }
-
-            buf_size = strlen(u8s_buf);
-
-            ret = 0;
-            p = u8s_buf;
-            while(1) {
-                if(WriteFile(log_wpipe_hdl, p, buf_size, &wsize, NULL) == 0) {
-                    break;
-                }
-
-                if(wsize <= 0) {
-                    break;
-                }
-
-                buf_size -= wsize;
-                p += wsize;
-                ret += wsize;
-
-                if(buf_size <= 0) {
-                    break;
-                }
-            }
-
-            free(u8s_buf);
-        }
-
-        break;
     }
 
     va_end(ap);
+
+    ret = log_append(buf);
 
     if(level >= LOG_LEVEL_WARNING) {
         show_logger(TRUE);
@@ -572,8 +478,8 @@ int log_printf(int level, const wchar_t *fmt, ...)
 int log_print_s_exp(int level, const s_exp_data_t *data)
 {
     int ret;
-    unsigned char *str, *p;
-    DWORD len, ws;
+    unsigned char *str;
+    wchar_t *wstr;
 
     if(level < log_level) {
         return 0;
@@ -581,30 +487,18 @@ int log_print_s_exp(int level, const s_exp_data_t *data)
 
     str = u8s_write_s_exp(data);
     if(str == NULL) {
-        return -1;
+        return 0;
     }
 
-    len = strlen(str);
-
-    p = str;
-    ret = 0;
-    while(1) {
-        if(WriteFile(log_wpipe_hdl, p, len, &ws, NULL) == 0) {
-            break;
-        }
-
-        if(ws <= 0) {
-            break;
-        }
-
-        len -= ws;
-        p += ws;
-        ret += ws;
-
-        if(len <= 0) {
-            break;
-        }
+    wstr = wcs_dup_from_u8s(str, NULL);
+    if(wstr == NULL) {
+        free(str);
+        return 0;
     }
+
+    ret = log_append(wstr);
+
+    free(str);
 
     return ret;
 }
