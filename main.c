@@ -1,7 +1,7 @@
 /*
  * main.c  -- main part of mouse-processor
  *
- * $Id: main.c,v 1.25 2005/01/20 08:15:13 hos Exp $
+ * $Id: main.c,v 1.26 2005/01/20 09:39:42 hos Exp $
  *
  */
 
@@ -9,6 +9,8 @@
 #include "util.h"
 
 #include "resource.h"
+
+#define LR_VGACOLOR 0x0080
 
 
 #define WM_TASKTRAY (WM_APP + 1)
@@ -31,6 +33,24 @@ static HMENU popup_menu = NULL;
 static int pause = 0;
 
 
+static
+int is_winxp_or_later(void)
+{
+    OSVERSIONINFOEX osv;
+    DWORDLONG cond;
+
+    memset(&osv, 0, sizeof(osv));
+    osv.dwOSVersionInfoSize = sizeof(osv);
+    osv.dwMajorVersion = 5;
+    osv.dwMinorVersion = 1;
+
+    cond = 0;
+    cond = VerSetConditionMask(cond, VER_MAJORVERSION, VER_GREATER_EQUAL);
+    cond = VerSetConditionMask(cond, VER_MINORVERSION, VER_GREATER_EQUAL);
+
+    return VerifyVersionInfo(&osv, VER_MAJORVERSION | VER_MINORVERSION, cond);
+}
+
 /* tasktray icon */
 static
 int set_tasktray_icon(HWND hwnd, int msg)
@@ -39,7 +59,8 @@ int set_tasktray_icon(HWND hwnd, int msg)
     HICON icon;
 
     icon = LoadImage(ctx.instance, MAKEINTRESOURCE(ID_ICON_MAIN),
-                     IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR);
+                     IMAGE_ICON, 16, 16,
+                     (is_winxp_or_later() ? LR_DEFAULTCOLOR : LR_VGACOLOR));
     if(icon == NULL) {
         return 0;
     }
