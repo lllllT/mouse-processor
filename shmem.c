@@ -1,14 +1,14 @@
 /*
  * shmem.c  -- shared memory
  *
- * $Id: shmem.c,v 1.1 2005/02/01 11:28:25 hos Exp $
+ * $Id: shmem.c,v 1.2 2005/02/01 17:03:50 hos Exp $
  *
  */
 
 #include <windows.h>
 
 
-void *create_shared_mem(LPCWSTR name, DWORD size)
+void *create_shared_mem(LPCWSTR name, DWORD size, HANDLE *hmap)
 {
     HANDLE map;
     void *ptr;
@@ -25,12 +25,14 @@ void *create_shared_mem(LPCWSTR name, DWORD size)
 
     ptr = MapViewOfFile(map, FILE_MAP_ALL_ACCESS, 0, 0, size);
 
-    CloseHandle(map);
+    if(ptr != NULL) {
+        *hmap = map;
+    }
 
     return ptr;
 }
 
-void *open_shared_mem(LPCWSTR name, DWORD size)
+void *open_shared_mem(LPCWSTR name, DWORD size, HANDLE *hmap)
 {
     HANDLE map;
     void *ptr;
@@ -42,12 +44,17 @@ void *open_shared_mem(LPCWSTR name, DWORD size)
 
     ptr = MapViewOfFile(map, FILE_MAP_ALL_ACCESS, 0, 0, size);
 
-    CloseHandle(map);
+    if(ptr != NULL) {
+        *hmap = map;
+    }
 
     return ptr;
 }
 
-int close_shared_mem(void *ptr)
+int close_shared_mem(void *ptr, HANDLE hmap)
 {
-    return UnmapViewOfFile(ptr);
+    UnmapViewOfFile(ptr);
+    CloseHandle(hmap);
+
+    return 1;
 }

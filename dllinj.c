@@ -1,7 +1,7 @@
 /*
  * dllinj.c  -- DLL injection
  *
- * $Id: dllinj.c,v 1.4 2005/02/01 11:28:22 hos Exp $
+ * $Id: dllinj.c,v 1.5 2005/02/01 17:03:48 hos Exp $
  *
  */
 
@@ -35,16 +35,21 @@ int replace_imported_proc(HMODULE mod,
         return 0;
     }
 
-    imp_desc = (IMAGE_IMPORT_DESCRIPTOR *)
-               (base_addr + nt_hdr->OptionalHeader.
-                DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress);
-    if((void *)imp_desc == (void *)nt_hdr) {
+    if(nt_hdr->OptionalHeader.
+       DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].Size == 0 ||
+       nt_hdr->OptionalHeader.
+       DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress == 0) {
         return 0;
     }
 
-    for(; imp_desc->Name != 0; imp_desc++) {
-        char *name = (char *)(base_addr + imp_desc->Name);
+    imp_desc = (IMAGE_IMPORT_DESCRIPTOR *)
+               (base_addr + nt_hdr->OptionalHeader.
+                DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress);
 
+    for(; imp_desc->Name != 0; imp_desc++) {
+        char *name;
+
+        name = (char *)(base_addr + imp_desc->Name);
         if(lstrcmpiA(name, target_proc_mod_name) != 0) {
             continue;
         }

@@ -1,30 +1,51 @@
 /*
  * dllmain.c  -- entry point of DLL
  *
- * $Id: sbi_dllmain.c,v 1.2 2005/02/01 11:28:23 hos Exp $
+ * $Id: sbi_dllmain.c,v 1.3 2005/02/01 17:03:48 hos Exp $
  *
  */
 
 #include <windows.h>
 #include "dllinj.h"
+#include "shmem.h"
+#include "scroll_op_scrollbar.h"
 
 
-static HINSTANCE dll_instance = NULL;
-
 typedef BOOL (* WINAPI get_scroll_info_proc_t)(HWND, int, LPSCROLLINFO);
 static get_scroll_info_proc_t org_get_scroll_info = NULL;
+
+static fake_gsinfo_data_t *gsinfo_data = NULL;
+static HANDLE fmap = NULL;
 
 
 static
 BOOL WINAPI fake_get_scroll_info(HWND hwnd, int bar, LPSCROLLINFO si)
 {
-    return org_get_scroll_info(hwnd, bar, si);
+    BOOL ret;
+
+    ret = org_get_scroll_info(hwnd, bar, si);
+    if(ret != FALSE && si != NULL && gsinfo_data != NULL &&
+       hwnd == gsinfo_data->hwnd &&
+       bar == gsinfo_data->bar &&
+       (si->fMask & SIF_TRACKPOS) && gsinfo_data->valid) {
+        si->nTrackPos = gsinfo_data->track_pos;
+    }
+
+    return ret;
 }
 
 
 static
 BOOL init(void)
 {
+    /* attach shared memory */
+    gsinfo_data =
+        open_shared_mem(FAKE_GSINFO_SHMEM_NAME, sizeof(fake_gsinfo_data_t),
+                        &fmap);
+    if(gsinfo_data == NULL) {
+        return FALSE;
+    }
+
     /* inject */
     org_get_scroll_info = replace_all_imported_proc("USER32.DLL",
                                                     "GetScrollInfo",
@@ -44,6 +65,11 @@ BOOL finit(void)
                               "GetScrollInfo",
                               fake_get_scroll_info, 1);
 
+    /* detach shared memory */
+    close_shared_mem(gsinfo_data, fmap);
+    gsinfo_data = NULL;
+    fmap = NULL;
+
     return TRUE;
 }
 
@@ -51,7 +77,6 @@ BOOL finit(void)
 BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, LPVOID reserved)
 {
     if(reason == DLL_PROCESS_ATTACH) {
-        dll_instance = instance;
         return init();
     } else if(reason == DLL_PROCESS_DETACH) {
         return finit();

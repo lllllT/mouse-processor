@@ -1,7 +1,7 @@
 /*
  * scroll_op_scrollbar.c  -- scroll operators for scrollbar
  *
- * $Id: scroll_op_scrollbar.c,v 1.12 2005/02/01 11:28:24 hos Exp $
+ * $Id: scroll_op_scrollbar.c,v 1.13 2005/02/01 17:03:49 hos Exp $
  *
  */
 
@@ -20,12 +20,15 @@ static const support_procs_t *spr = NULL;
 
 static struct {
     fake_gsinfo_data_t *gsinfo_data;
+    HANDLE fmap;
+
+    DWORD pid[2];
     HANDLE process[2];
     HMODULE module[2];
     WCHAR module_name[512];
 } inject_sb_data;
 
-#define INJECT_SB_MODULE_BASE L"\\mpsup.dll"
+#define INJECT_SB_MODULE_BASE L"mpsb.dll"
 
 static
 void inject_scrollbar_support_proc_to(HWND hwnd)
@@ -38,7 +41,17 @@ void inject_scrollbar_support_proc_to(HWND hwnd)
     SIZE_T size;
     int n;
 
+    if(inject_sb_data.process[0] == NULL) {
+        n = 0;
+    } else {
+        n = 1;
+    }
+
     GetWindowThreadProcessId(hwnd, &pid);
+    if(n == 1 && inject_sb_data.pid[0] == pid) {
+        goto end;
+    }
+
     ph = OpenProcess(PROCESS_VM_OPERATION |
                      PROCESS_VM_WRITE | PROCESS_VM_READ |
                      PROCESS_CREATE_THREAD | PROCESS_QUERY_INFORMATION,
@@ -47,7 +60,7 @@ void inject_scrollbar_support_proc_to(HWND hwnd)
         goto end;
     }
 
-    size = wcslen(inject_sb_data.module_name) + 1;
+    size = sizeof(inject_sb_data.module_name);
     name = VirtualAllocEx(ph, NULL, size, MEM_COMMIT, PAGE_READWRITE);
     if(name == NULL) {
         goto end;
@@ -77,15 +90,11 @@ void inject_scrollbar_support_proc_to(HWND hwnd)
         goto end;
     }
 
-    if(inject_sb_data.process[0] == NULL) {
-        n = 0;
-    } else {
-        n = 1;
-    }
     DuplicateHandle(GetCurrentProcess(), ph,
                     GetCurrentProcess(), &inject_sb_data.process[n],
                     0, FALSE, DUPLICATE_SAME_ACCESS);
     inject_sb_data.module[n] = mod;
+    inject_sb_data.pid[n] = pid;
 
   end:
     if(name != NULL) VirtualFreeEx(ph, name, size, MEM_DECOMMIT);
@@ -116,14 +125,29 @@ void uninject_scrollbar_support_proc_from(int n)
 }
 
 static
+void uninject_scrollbar_support_proc(void)
+{
+    close_shared_mem(inject_sb_data.gsinfo_data, inject_sb_data.fmap);
+    inject_sb_data.gsinfo_data = NULL;
+    inject_sb_data.fmap = NULL;
+
+    if(inject_sb_data.process[0] != NULL)
+        uninject_scrollbar_support_proc_from(0);
+    if(inject_sb_data.process[1] != NULL)
+        uninject_scrollbar_support_proc_from(1);
+}
+
+static
 void inject_scrollbar_support_proc(HWND hwnd1, HWND hwnd2, int is_control)
 {
     memset(&inject_sb_data, 0, sizeof(inject_sb_data));
 
     /* allocate shared memory */
     inject_sb_data.gsinfo_data =
-        create_shared_mem(FAKE_GSINFO_SHMEM_NAME, sizeof(fake_gsinfo_data_t));
+        create_shared_mem(FAKE_GSINFO_SHMEM_NAME, sizeof(fake_gsinfo_data_t),
+                          &inject_sb_data.fmap);
     if(inject_sb_data.gsinfo_data == NULL) {
+        uninject_scrollbar_support_proc();
         return;
     }
     memset(inject_sb_data.gsinfo_data, 0, sizeof(fake_gsinfo_data_t));
@@ -135,6 +159,7 @@ void inject_scrollbar_support_proc(HWND hwnd1, HWND hwnd2, int is_control)
         if(GetModuleFileNameW(NULL, inject_sb_data.module_name,
                               sizeof(inject_sb_data.module_name) /
                               sizeof(WCHAR)) == 0) {
+            uninject_scrollbar_support_proc();
             return;
         }
 
@@ -146,6 +171,7 @@ void inject_scrollbar_support_proc(HWND hwnd1, HWND hwnd2, int is_control)
         if(wcslen(inject_sb_data.module_name) +
            wcslen(INJECT_SB_MODULE_BASE) + 1 >
            sizeof(inject_sb_data.module_name) / sizeof(WCHAR)) {
+            uninject_scrollbar_support_proc();
             return;
         }
 
@@ -159,17 +185,6 @@ void inject_scrollbar_support_proc(HWND hwnd1, HWND hwnd2, int is_control)
 
     if(hwnd1 != NULL) inject_scrollbar_support_proc_to(hwnd1);
     if(hwnd2 != NULL) inject_scrollbar_support_proc_to(hwnd2);
-}
-
-static
-void uninject_scrollbar_support_proc(void)
-{
-    close_shared_mem(inject_sb_data.gsinfo_data);
-
-    if(inject_sb_data.process[0] != NULL)
-        uninject_scrollbar_support_proc_from(0);
-    if(inject_sb_data.process[1] != NULL)
-        uninject_scrollbar_support_proc_from(1);
 }
 
 
@@ -264,15 +279,30 @@ int scrollbar_r_scroll(HWND hwnd, int bar,
         pos = max;
     }
 
-    memset(&si, 0, sizeof(si));
-    si.cbSize = sizeof(si);
-    si.fMask = SIF_POS;
-    si.nPos = pos;
-    SetScrollInfo(hwnd, bar, &si, FALSE);
+    SendMessageTimeout(msg_hwnd, msg,
+                       MAKEWPARAM(SB_THUMBTRACK, org_pos),
+                       (bar == SB_CTL ? (LPARAM)hwnd : 0),
+                       SMTO_ABORTIFHUNG, 1000, NULL);
+
+    if(inject_sb_data.gsinfo_data != NULL) {
+        inject_sb_data.gsinfo_data->hwnd = hwnd;
+        inject_sb_data.gsinfo_data->bar = bar;
+        inject_sb_data.gsinfo_data->track_pos = pos;
+        inject_sb_data.gsinfo_data->valid = 1;
+    }
+
+    SendMessageTimeout(msg_hwnd, msg,
+                       MAKEWPARAM(SB_THUMBTRACK, pos),
+                       (bar == SB_CTL ? (LPARAM)hwnd : 0),
+                       SMTO_ABORTIFHUNG, 1000, NULL);
     SendMessageTimeout(msg_hwnd, msg,
                        MAKEWPARAM(SB_THUMBPOSITION, pos),
                        (bar == SB_CTL ? (LPARAM)hwnd : 0),
-                       SMTO_ABORTIFHUNG, 500, NULL);
+                       SMTO_ABORTIFHUNG, 1000, NULL);
+
+    if(inject_sb_data.gsinfo_data != NULL) {
+        inject_sb_data.gsinfo_data->valid = 0;
+    }
 
     memset(&si, 0, sizeof(si));
     si.cbSize = sizeof(si);
@@ -728,6 +758,9 @@ int MP_OP_API neighborhood_scrollbar_init_ctx(void *ctxp, int size,
         L"neighborhood-scrollbar: scrollbar found: h-bar=%p, v-bar=%p\n",
         ctx->h_bar, ctx->v_bar);
 
+    /* try to inject */
+    inject_scrollbar_support_proc(ctx->h_bar, ctx->v_bar, 1);
+
     /* initial delta */
     ctx->dx = 0;
     ctx->dy = 0;
@@ -761,6 +794,8 @@ int MP_OP_API neighborhood_scrollbar_scroll(void *ctxp,
 static
 int MP_OP_API neighborhood_scrollbar_end_scroll(void *ctxp)
 {
+    uninject_scrollbar_support_proc();
+
     return 1;
 }
 
@@ -892,6 +927,9 @@ int MP_OP_API scrollbar_control_init_ctx(void *ctxp, int size,
     if(ctx->parent == NULL) {
         return 0;
     }
+
+    /* try to inject */
+    inject_scrollbar_support_proc(ctx->target, NULL, 1);
 
     /* initial delta */
     ctx->ds = 0;

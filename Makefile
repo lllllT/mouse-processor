@@ -1,7 +1,7 @@
 #
 # Makefile
 #
-# $Id: Makefile,v 1.27 2005/02/01 17:03:48 hos Exp $
+# $Id: Makefile,v 1.28 2005/02/01 17:05:11 hos Exp $
 #
 
 DEFINES = 
@@ -123,4 +123,4 @@ pack-clean:
 	-$(RM) -r $(TARGET_NAME)-$(VERSION) $(TARGET_NAME)_src-$(VERSION)
 
 clean: clean-rec pack-clean
-	-$(RM) $(EXE_NAME) *.o *.res *.tmp *~
+	-$(RM) $(TARGET) *.o *.res *.tmp *~
