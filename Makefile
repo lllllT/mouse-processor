@@ -1,7 +1,7 @@
 #
 # Makefile
 #
-# $Id: Makefile,v 1.12 2005/01/13 09:39:54 hos Exp $
+# $Id: Makefile,v 1.13 2005/01/13 17:13:20 hos Exp $
 #
 
 DEFINES = 
@@ -16,8 +16,7 @@ EXE_OBJS = main.o hook.o \
            scroll.o scroll_op.o \
            scroll_op_scrollbar.o scroll_op_trackbar.o \
            scroll_op_ie.o scroll_op_tab.o scroll_op_wheel.o \
-           regexp.o \
-           ie.o conf.o resource.o
+           regexp.o conf.o resource.o
 EXE_HEADERS = main.h scroll_op.h scroll_op_utils.h resource.h
 EXE_LDLIBS = $(UTIL_LIBS) -lpsapi -lole32 -loleaut32 -loleacc -luuid
 EXE_LDFLAGS = $(LDFLAGS)

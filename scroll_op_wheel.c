@@ -1,7 +1,7 @@
 /*
  * scroll_op_wheel.c  -- scroll operator for wheel message
  *
- * $Id: scroll_op_wheel.c,v 1.1 2005/01/13 09:40:01 hos Exp $
+ * $Id: scroll_op_wheel.c,v 1.2 2005/01/13 17:13:21 hos Exp $
  *
  */
 
@@ -127,7 +127,7 @@ int SCROLL_OP_API wheel_message_end_scroll(void *ctxp)
 }
 
 int SCROLL_OP_API wheel_message_get_operator(scroll_op_procs_t *op,
-                                                int api_ver)
+                                             int api_ver)
 {
     if(api_ver < SCROLL_OP_API_VERSION) {
         return 0;

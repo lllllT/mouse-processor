@@ -1,7 +1,7 @@
 /*
  * scroll.c  -- scroll window
  *
- * $Id: scroll.c,v 1.13 2005/01/13 09:39:56 hos Exp $
+ * $Id: scroll.c,v 1.14 2005/01/13 17:13:20 hos Exp $
  *
  */
 
@@ -9,188 +9,6 @@
 #include "util.h"
 #include <commctrl.h>
 #include <psapi.h>
-
-#include <math.h>
-
-static
-int get_scroll_pos(HWND hwnd, int bar, double *delta, int length, int *ret_pos)
-{
-    SCROLLINFO si;
-    int min, max, pos;
-    double spd, d;
-
-    memset(&si, 0, sizeof(si));
-    si.cbSize = sizeof(si);
-    si.fMask = SIF_POS | SIF_RANGE | SIF_PAGE;
-    if(GetScrollInfo(hwnd, bar, &si) == 0) {
-        *ret_pos = 0;
-        return 0;
-    }
-
-    {
-        int range;
-        double page_ratio;
-
-        min = si.nMin;
-        max = si.nMax - (si.nPage ? si.nPage - 1 : 0);
-        range = max - min + 1;
-        page_ratio = (double)si.nPage / (si.nMax - si.nMin + 1);
-        spd = (page_ratio == 1 ? 0 : (range / (length * (1 - page_ratio))));
-        pos = si.nPos;
-    }
-
-    d = trunc(*delta * spd);
-    if(d == 0) {
-        *ret_pos = pos;
-        return 0;
-    }
-
-    pos += d;
-    if(pos < min) {
-        pos = min;
-    } else if(pos > max) {
-        pos = max;
-    }
-
-    *delta -= d / spd;
-    *ret_pos = pos;
-    return 1;
-}
-
-
-static
-int scroll_window(HWND hwnd, int bar, double *delta, int length)
-{
-    int pos;
-    SCROLLINFO si;
-
-    if(*delta == 0) {
-        return 0;
-    }
-
-    if(! get_scroll_pos(hwnd, bar, delta, length, &pos)) {
-        return 0;
-    }
-
-    memset(&si, 0, sizeof(si));
-    si.cbSize = sizeof(si);
-    si.fMask = SIF_POS;
-    si.nPos = pos;
-    SetScrollInfo(hwnd, bar, &si, FALSE);
-    SendMessageTimeout(hwnd,
-                       (bar == SB_HORZ ? WM_HSCROLL : WM_VSCROLL),
-                       MAKEWPARAM(SB_THUMBPOSITION, pos), 0,
-                       SMTO_ABORTIFHUNG, 500, NULL);
-
-    return 1;
-}
-
-static
-void scroll_line(HWND hwnd, int bar, int delta)
-{
-    int i, n, dir;
-
-    if(delta == 0) {
-        return;
-    }
-
-    n = (delta < 0 ? -delta : delta);
-    dir = (delta < 0 ? SB_LINELEFT : SB_LINERIGHT);
-
-    for(i = 0; i < n; i++) {
-        PostMessage(hwnd,
-                    (bar == SB_HORZ ? WM_HSCROLL : WM_VSCROLL),
-                    MAKEWPARAM(dir, 0), 0);
-    }
-}
-
-
-static
-void scrolling_native_h(int x, int y)
-{
-    scroll_window(ctx.mode_data.scroll.target, SB_HORZ,
-                  &ctx.mode_data.scroll.dx, ctx.scroll_data.target_size.cx);
-}
-
-static
-void scrolling_native_v(int x, int y)
-{
-    scroll_window(ctx.mode_data.scroll.target, SB_VERT,
-                  &ctx.mode_data.scroll.dy, ctx.scroll_data.target_size.cy);
-}
-
-static
-void scrolling_native_hv(int x, int y)
-{
-    scrolling_native_h(x, y);
-    scrolling_native_v(x, y);
-}
-
-static
-void scrolling_line(int x, int y)
-{
-    int dxi, dyi;
-
-    dxi = ctx.mode_data.scroll.dx * ctx.scroll_line.x_ratio;
-    dyi = ctx.mode_data.scroll.dy * ctx.scroll_line.y_ratio;
-
-    scroll_line(ctx.mode_data.scroll.target, SB_HORZ, dxi);
-    scroll_line(ctx.mode_data.scroll.target, SB_VERT, dyi);
-
-    ctx.mode_data.scroll.dx -= dxi / ctx.scroll_line.x_ratio;
-    ctx.mode_data.scroll.dy -= dyi / ctx.scroll_line.y_ratio;
-}
-
-static
-void scrolling_ie(int x, int y)
-{
-    scroll_ie_h(ctx.scroll_data.ie_target,
-                &ctx.mode_data.scroll.dx, ctx.scroll_data.target_size.cx);
-
-    scroll_ie_v(ctx.scroll_data.ie_target,
-                &ctx.mode_data.scroll.dy, ctx.scroll_data.target_size.cy);
-}
-
-static
-void scrolling_wheel(int x, int y)
-{
-    int wn, data, i;
-
-    ctx.scroll_data.dw +=
-        ctx.mode_data.scroll.dx * ctx.scroll_wheel.x_ratio +
-        ctx.mode_data.scroll.dy * ctx.scroll_wheel.y_ratio;
-    ctx.mode_data.scroll.dx = 0;
-    ctx.mode_data.scroll.dy = 0;
-
-    wn= ctx.scroll_data.dw / ctx.scroll_wheel.tick;
-    if(wn == 0) {
-        return;
-    }
-
-    data = ctx.scroll_wheel.tick;
-    if(wn < 0) {
-        wn = -wn;
-        data = -data;
-    }
-
-    for(i = 0; i < wn; i++) {
-        PostMessage(
-            ctx.mode_data.scroll.target,
-            WM_MOUSEWHEEL,
-            MAKEWPARAM(
-                (GetAsyncKeyState(VK_CONTROL) & 0x8000 ? MK_CONTROL : 0) |
-                (GetAsyncKeyState(VK_LBUTTON) & 0x8000 ? MK_LBUTTON : 0) |
-                (GetAsyncKeyState(VK_MBUTTON) & 0x8000 ? MK_MBUTTON : 0) |
-                (GetAsyncKeyState(VK_RBUTTON) & 0x8000 ? MK_RBUTTON : 0) |
-                (GetAsyncKeyState(VK_SHIFT) & 0x8000 ? MK_SHIFT : 0) |
-                (GetAsyncKeyState(VK_XBUTTON1) & 0x8000 ? MK_XBUTTON1 : 0) |
-                (GetAsyncKeyState(VK_XBUTTON2) & 0x8000 ? MK_XBUTTON2 : 0),
-                data),
-            MAKELPARAM(x, y));
-    }
-
-    ctx.scroll_data.dw -= data * wn;
-}
 
 
 static
@@ -310,6 +128,8 @@ LRESULT start_scroll_mode(struct mode_conf *data)
     int i;
     struct scroll_window_conf *target_win_conf;
 
+    memset(&ctx.mode_data.scroll, 0, sizeof(ctx.mode_data.scroll));
+
     /* x and y ratio */
     ctx.mode_data.scroll.x_ratio = ctx.app_conf.cur_conf->scroll_mode.x_ratio;
     ctx.mode_data.scroll.y_ratio = ctx.app_conf.cur_conf->scroll_mode.y_ratio;
@@ -375,7 +195,6 @@ LRESULT start_scroll_mode(struct mode_conf *data)
     /* start operator */
     {
         scroll_op_arg_t arg;
-        int ret;
 
         memset(&arg, 0, sizeof(arg));
         arg.conf = target_win_conf->op->conf;
@@ -383,10 +202,14 @@ LRESULT start_scroll_mode(struct mode_conf *data)
         arg.hwnd = ctx.mode_data.scroll.target;
         arg.pos = ctx.mode_data.scroll.start_pt;
 
-        ctx.mode_data.scroll.op_context_size =
-            target_win_conf->op->proc.get_context_size(&arg);
-        if(ctx.mode_data.scroll.op_context_size < 0) {
-            return 0;
+        if(target_win_conf->op->proc.get_context_size != NULL) {
+            ctx.mode_data.scroll.op_context_size =
+                target_win_conf->op->proc.get_context_size(&arg);
+            if(ctx.mode_data.scroll.op_context_size < 0) {
+                return 0;
+            }
+        } else {
+            ctx.mode_data.scroll.op_context_size = 0;
         }
 
         ctx.mode_data.scroll.op_context =
@@ -397,70 +220,17 @@ LRESULT start_scroll_mode(struct mode_conf *data)
         memset(ctx.mode_data.scroll.op_context, 0,
                ctx.mode_data.scroll.op_context_size);
 
-        ret =
-            target_win_conf->op->proc.init_context(
-                ctx.mode_data.scroll.op_context,
-                ctx.mode_data.scroll.op_context_size,
-                &arg);
+        if(target_win_conf->op->proc.init_context != NULL) {
+            if(target_win_conf->op->proc.init_context(
+                   ctx.mode_data.scroll.op_context,
+                   ctx.mode_data.scroll.op_context_size,
+                   &arg) == 0) {
+                return 0;
+            }
+        }
 
         ctx.mode_data.scroll.op = target_win_conf->op;
     }
-
-    /* scroll mode */
-    {
-        TCHAR class[256];
-
-        memset(class, 0, sizeof(class));
-        GetClassName(ctx.mode_data.scroll.target, class, 256);
-
-        if(_tcscmp(class, _T("SysListView32")) == 0) {
-            ctx.scroll_data.mode = SCROLL_MODE_LINESCRL;
-        } else if(_tcscmp(class, _T("Internet Explorer_Server")) == 0) {
-            HRESULT hres;
-
-            ctx.scroll_data.mode = SCROLL_MODE_IE;
-
-            hres = get_ie_target(ctx.mode_data.scroll.target,
-                                 ctx.mode_data.scroll.start_pt.x,
-                                 ctx.mode_data.scroll.start_pt.y,
-                                 &ctx.scroll_data.ie_target);
-            if(FAILED(hres)) {
-                ctx.scroll_data.mode = SCROLL_MODE_LINESCRL;
-            }
-        } else {
-            LONG_PTR style;
-
-            style = GetWindowLongPtr(ctx.mode_data.scroll.target, GWL_STYLE);
-
-            if((style & WS_HSCROLL) && (style & WS_VSCROLL)) {
-                ctx.scroll_data.mode = SCROLL_MODE_NATIVE_HV;
-            } else if(style & WS_HSCROLL) {
-                ctx.scroll_data.mode = SCROLL_MODE_NATIVE_H;
-            } else if(style & WS_VSCROLL) {
-                ctx.scroll_data.mode = SCROLL_MODE_NATIVE_V;
-            } else {
-                ctx.scroll_data.mode = SCROLL_MODE_WHEEL;
-            }
-        }
-    }
-
-    /* initialize mode data */
-    if(ctx.scroll_data.mode != SCROLL_MODE_IE ||
-       FAILED(get_ie_elem_size(ctx.scroll_data.ie_target,
-                               &ctx.scroll_data.target_size)) ||
-       FAILED(init_ie_dpids(ctx.scroll_data.ie_target))) {
-        RECT rt;
-
-        GetClientRect(ctx.mode_data.scroll.target, &rt);
-
-        ctx.scroll_data.target_size.cx = rt.right - rt.left + 1;
-        ctx.scroll_data.target_size.cy = rt.bottom - rt.top + 1;
-    }
-
-    ctx.mode_data.scroll.dx = 0;
-    ctx.mode_data.scroll.dy = 0;
-
-    ctx.scroll_data.dw = 0;
 
     return 0;
 }
@@ -482,6 +252,12 @@ LRESULT end_scroll_mode(struct mode_conf *data)
 
     ctx.mode_data.scroll.class = NULL;
     ctx.mode_data.scroll.title = NULL;
+
+    if(ctx.mode_data.scroll.op != NULL &&
+       ctx.mode_data.scroll.op->proc.end_scroll != NULL) {
+        ctx.mode_data.scroll.op->proc.end_scroll(
+            ctx.mode_data.scroll.op_context);
+    }
 
     if(ctx.mode_data.scroll.op_context != NULL)
         free(ctx.mode_data.scroll.op_context);
@@ -527,33 +303,23 @@ LRESULT scroll_modech(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
 /* MODE_MSG_SCROLL */
 static
-LRESULT scroll_modemsg_scroll(int x, int y, struct mode_conf *data)
+LRESULT scroll_modemsg_scroll(struct mode_conf *data)
 {
-    typedef void (*mode_proc_t)(int, int);
-    mode_proc_t proc;
-
-    static struct uint_ptr_pair mode_map[] = {
-        {SCROLL_MODE_NATIVE_HV, scrolling_native_hv},
-        {SCROLL_MODE_NATIVE_H, scrolling_native_h},
-        {SCROLL_MODE_NATIVE_V, scrolling_native_v},
-        {SCROLL_MODE_LINESCRL, scrolling_line},
-        {SCROLL_MODE_IE, scrolling_ie},
-        {SCROLL_MODE_WHEEL, scrolling_wheel},
-
-        {0, NULL}
-    };
-
-    proc = assq_pair(mode_map, ctx.scroll_data.mode, NULL);
-    if(proc) {
-        proc(x, y);
+    if(ctx.mode_data.scroll.op == NULL ||
+       ctx.mode_data.scroll.op->proc.scroll == NULL) {
+        return 0;
     }
+
+    ctx.mode_data.scroll.op->proc.scroll(ctx.mode_data.scroll.op_context,
+                                         ctx.mode_data.scroll.dx,
+                                         ctx.mode_data.scroll.dy);
 
     return 0;
 }
 
 /* MODE_MSG_MUL_RATIO */
 static
-LRESULT scroll_modemsg_mulratio(int x, int y, struct mode_conf *data)
+LRESULT scroll_modemsg_mulratio(struct mode_conf *data)
 {
     ctx.mode_data.scroll.x_ratio *= data->ratio.x;
     ctx.mode_data.scroll.y_ratio *= data->ratio.y;
@@ -563,7 +329,7 @@ LRESULT scroll_modemsg_mulratio(int x, int y, struct mode_conf *data)
 
 /* MODE_MSG_SET_RATIO */
 static
-LRESULT scroll_modemsg_setratio(int x, int y, struct mode_conf *data)
+LRESULT scroll_modemsg_setratio(struct mode_conf *data)
 {
     ctx.mode_data.scroll.x_ratio = data->ratio.x;
     ctx.mode_data.scroll.y_ratio = data->ratio.y;
@@ -578,7 +344,7 @@ LRESULT scroll_modemsg(HWND hwnd, UINT msgid, WPARAM wparam, LPARAM lparam)
     struct mode_conf *data;
     MSG msg;
 
-    typedef void (*mode_proc_t)(int, int, struct mode_conf *);
+    typedef LRESULT (*mode_proc_t)(struct mode_conf *);
     mode_proc_t proc;
 
     static struct uint_ptr_pair mode_map[] = {
@@ -628,7 +394,7 @@ LRESULT scroll_modemsg(HWND hwnd, UINT msgid, WPARAM wparam, LPARAM lparam)
 
     proc = assq_pair(mode_map, data->mode, NULL);
     if(proc) {
-        proc(x, y, data);
+        return proc(data);
     }
 
     return 0;

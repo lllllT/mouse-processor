@@ -1,7 +1,7 @@
 /*
  * main.h  --
  *
- * $Id: main.h,v 1.22 2005/01/13 09:39:55 hos Exp $
+ * $Id: main.h,v 1.23 2005/01/13 17:13:20 hos Exp $
  *
  */
 
@@ -105,7 +105,7 @@ struct mouse_conf {
 
 /* scroll operator configuration */
 struct scroll_operator_conf {
-    LPWSTR *name;
+    LPWSTR name;
 
     struct scroll_operator_procs proc;
     s_exp_data_t *conf;
@@ -140,7 +140,7 @@ struct app_setting {
     struct scroll_window_conf *window_conf;
 
     int scroll_operator_num;
-    struct scroll_operator_conf *operator_conf;
+    struct scroll_operator_conf *scroll_operator_conf;
 };
 
 /* hook context */
@@ -153,17 +153,6 @@ struct hook_context {
 
     int combinated;
     int combination[MOUSE_BTN_MAX * 3];
-};
-
-/* scroll context: todo: discard */
-struct scroll_context {
-    int mode;
-
-    SIZE target_size;
-
-    IDispatch *ie_target;
-
-    double dw;
 };
 
 /* scroll mode context */
@@ -198,20 +187,9 @@ struct app_context {
 
     struct app_setting app_conf;
 
-    struct {
-        double x_ratio;
-        double y_ratio;
-        int tick;
-    } scroll_wheel;
-    struct {
-        double x_ratio;
-        double y_ratio;
-    } scroll_line;
-
     struct hook_context hook_data;
 
     struct mode_context mode_data;
-    struct scroll_context scroll_data;
 };
 
 extern struct app_context ctx;
@@ -234,15 +212,30 @@ LRESULT scroll_modech(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 LRESULT scroll_modemsg(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 
 
-HRESULT get_ie_target(HWND hwnd, int x, int y, IDispatch **elem);
-HRESULT get_ie_elem_size(IDispatch *elem, SIZE *sz);
-HRESULT init_ie_dpids(IDispatch *elem);
-
-int scroll_ie_h(IDispatch *elem, double *delta, int length);
-int scroll_ie_v(IDispatch *elem, double *delta, int length);
-
 s_exp_data_t *load_conf(LPCWSTR conf_file);
 int apply_setting(void);
+
+
+int SCROLL_OP_API window_scrollbar_get_operator(scroll_op_procs_t *op,
+                                                int api_ver);
+int SCROLL_OP_API neighborhood_scrollbar_get_operator(scroll_op_procs_t *op,
+                                                      int api_ver);
+int SCROLL_OP_API scrollbar_control_get_operator(scroll_op_procs_t *op,
+                                                 int api_ver);
+int SCROLL_OP_API trackbar_control_get_operator(scroll_op_procs_t *op,
+                                                int api_ver);
+int SCROLL_OP_API ie_scroll_get_operator(scroll_op_procs_t *op,
+                                         int api_ver);
+int SCROLL_OP_API tab_control_get_operator(scroll_op_procs_t *op,
+                                           int api_ver);
+int SCROLL_OP_API wheel_message_get_operator(scroll_op_procs_t *op,
+                                             int api_ver);
+
+struct scroll_operator_def {
+    wchar_t *name;
+    get_operator_proc_t get_op_proc;
+};
+extern struct scroll_operator_def builtin_scroll_op[];
 
 
 int is_regexp_match(BSTR re_str, BSTR test_str);

@@ -1,7 +1,7 @@
 /*
  * conf.h  -- configuration
  *
- * $Id: conf.c,v 1.6 2005/01/12 09:39:45 hos Exp $
+ * $Id: conf.c,v 1.7 2005/01/13 17:13:20 hos Exp $
  *
  */
 
@@ -146,19 +146,6 @@ s_exp_data_t *get_conf_v(int type, va_list ap)
 }
 
 static
-s_exp_data_t *get_conf(int type, ...)
-{
-    va_list ap;
-    s_exp_data_t *data;
-
-    va_start(ap, type);
-    data = get_conf_v(type, ap);
-    va_end(ap);
-
-    return data;
-}
-
-static
 int get_conf_int(int def_val, ...)
 {
     va_list ap;
@@ -181,49 +168,6 @@ int get_conf_int(int def_val, ...)
         } else {
             return (int)data->flonum.val;
         }
-    }
-}
-
-static
-double get_conf_double(int def_val, ...)
-{
-    va_list ap;
-    s_exp_data_t *data;
-
-    va_start(ap, def_val);
-
-    data = get_conf_v(S_EXP_TYPE_INTEGER, ap);
-    if(data == NULL) {
-        data = get_conf_v(S_EXP_TYPE_FLONUM, ap);
-    }
-
-    va_end(ap);
-
-    if(data == NULL) {
-        return def_val;
-    } else {
-        if(data->type == S_EXP_TYPE_INTEGER) {
-            return (double)data->number.val;
-        } else {
-            return data->flonum.val;
-        }
-    }
-}
-
-static
-wchar_t *get_conf_string(const wchar_t *def_val, ...)
-{
-    va_list ap;
-    s_exp_data_t *data;
-
-    va_start(ap, def_val);
-    data = get_conf_v(S_EXP_TYPE_STRING, ap);
-    va_end(ap);
-
-    if(data == NULL) {
-        return (wchar_t *)def_val;
-    } else {
-        return data->string.str;
     }
 }
 
@@ -635,20 +579,233 @@ int apply_mode_conf(void)
 }
 
 
+static
+int apply_scroll_operator(void)
+{
+    int i, n_builtin_sop;
+
+    /* number of builtin scroll operators */
+    for(i = 0; builtin_scroll_op[i].name != NULL; i++) ;
+    n_builtin_sop = i;
+
+    /* allocate */
+    ctx.app_conf.scroll_operator_num = n_builtin_sop;
+    ctx.app_conf.scroll_operator_conf =
+        (struct scroll_operator_conf *)
+        malloc(sizeof(struct scroll_operator_conf) *
+               ctx.app_conf.scroll_operator_num);
+    if(ctx.app_conf.scroll_operator_conf == NULL) {
+        return 0;
+    }
+
+    memset(ctx.app_conf.scroll_operator_conf, 0,
+           sizeof(struct scroll_operator_conf) *
+           ctx.app_conf.scroll_operator_num);
+
+    /* setup builtin scroll operators */
+    for(i = 0; i < n_builtin_sop; i++) {
+        ctx.app_conf.scroll_operator_conf[i].name = builtin_scroll_op[i].name;
+
+        if(builtin_scroll_op[i].get_op_proc(
+               &ctx.app_conf.scroll_operator_conf[i].proc,
+               SCROLL_OP_API_VERSION) == 0) {
+            return 0;
+        }
+    }
+
+    /* fill configuration for each operators */
+    for(i = 0; i < ctx.app_conf.scroll_operator_num; i++) {
+        ctx.app_conf.scroll_operator_conf[i].conf =
+            get_conf_list(S_EXP_NIL,
+                          L"scroll-operator",
+                          ctx.app_conf.scroll_operator_conf[i].name,
+                          NULL);
+    }
+
+    return 1;
+}
+
+
+static
+int get_class_title_regexp(const s_exp_data_t *e,
+                           wchar_t **class_re, wchar_t **title_re,
+                           int *class_or_title)
+{
+    if(e->type == S_EXP_TYPE_STRING) {
+        *class_re = e->string.str;
+        *title_re = NULL;
+        *class_or_title = 0;
+        return 1;
+    } else if(e->type == S_EXP_TYPE_CONS) {
+        if(S_EXP_CAR(e)->type != S_EXP_TYPE_SYMBOL) {
+            return 0;
+        }
+
+        if(wcscmp(S_EXP_CAR(e)->symbol.name, L"class") == 0) {
+            if(S_EXP_CDR(e)->type != S_EXP_TYPE_CONS ||
+               S_EXP_CADR(e)->type != S_EXP_TYPE_STRING ||
+               S_EXP_CDDR(e) != S_EXP_NIL) {
+                return 0;
+            }
+
+            *class_re = S_EXP_CADR(e)->string.str;
+            *title_re = NULL;
+            *class_or_title = 0;
+            return 1;
+        }
+
+        if(wcscmp(S_EXP_CAR(e)->symbol.name, L"title") == 0) {
+            if(S_EXP_CDR(e)->type != S_EXP_TYPE_CONS ||
+               S_EXP_CADR(e)->type != S_EXP_TYPE_STRING ||
+               S_EXP_CDDR(e) != S_EXP_NIL) {
+                return 0;
+            }
+
+            *class_re = NULL;
+            *title_re = S_EXP_CADR(e)->string.str;
+            *class_or_title = 0;
+            return 1;
+        }
+
+        if(wcscmp(S_EXP_CAR(e)->symbol.name, L"or") == 0 ||
+           wcscmp(S_EXP_CAR(e)->symbol.name, L"and") == 0) {
+            wchar_t *cr1, *tr1, *cr2, *tr2;
+            int o1, o2;
+
+            if(S_EXP_CDR(e)->type != S_EXP_TYPE_CONS ||
+               S_EXP_CDDR(e)->type != S_EXP_TYPE_CONS ||
+               S_EXP_CDDDR(e) != S_EXP_NIL) {
+                return 0;
+            }
+
+            if(get_class_title_regexp(S_EXP_CADR(e), &cr1, &tr1, &o1) == 0 ||
+               get_class_title_regexp(S_EXP_CADDR(e), &cr2, &tr2, &o2) == 0) {
+                return 0;
+            }
+
+            if((cr1 != NULL && cr2 != NULL) ||
+               (tr1 != NULL && tr2 != NULL) ||
+               (cr1 == NULL && cr2 == NULL && tr1 == NULL && tr2 == NULL)) {
+                return 0;
+            }
+
+            *class_re = (cr1 != NULL ? cr1 : cr2);
+            *title_re = (tr1 != NULL ? tr1 : tr2);
+            *class_or_title = (wcscmp(S_EXP_CAR(e)->symbol.name, L"or") == 0);
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+static
+int apply_scroll_window(void)
+{
+    s_exp_data_t *list, *p;
+    int i, j;
+
+    /* number of scroll window configuration */
+    list = get_conf_list(S_EXP_NIL, L"scroll-window", NULL);
+
+    /* allocate */
+    ctx.app_conf.window_conf_num = s_exp_length(list);
+    ctx.app_conf.window_conf =
+        (struct scroll_window_conf *)
+        malloc(sizeof(struct scroll_window_conf) *
+               ctx.app_conf.window_conf_num);
+    if(ctx.app_conf.window_conf == NULL) {
+        return 0;
+    }
+
+    /* for each window configuration */
+    i = 0;
+    S_EXP_FOR_EACH(list, p) {
+        s_exp_data_t *e, *op_arg;
+        wchar_t *class_re, *title_re, *op_name;
+        int class_or_title;
+        struct scroll_operator_conf *op;
+
+        e = S_EXP_CAR(p);
+
+        if(e->type != S_EXP_TYPE_CONS) {
+            continue;
+        }
+
+        /* class/title regexp */
+        if(get_class_title_regexp(S_EXP_CAR(e),
+                                  &class_re, &title_re,
+                                  &class_or_title) == 0) {
+            continue;
+        }
+
+        /* operator name and args */
+        if(S_EXP_CDR(e)->type != S_EXP_TYPE_CONS ||
+           S_EXP_CADR(e)->type != S_EXP_TYPE_CONS ||
+           S_EXP_CAADR(e)->type != S_EXP_TYPE_SYMBOL) {
+            continue;
+        }
+
+        op_name = S_EXP_CAADR(p)->symbol.name;
+        op_arg = S_EXP_CDADR(p);
+
+        /* operator */
+        op = NULL;
+        for(j = 0; j < ctx.app_conf.scroll_operator_num; j++) {
+            if(wcscmp(op_name,
+                      ctx.app_conf.scroll_operator_conf[j].name) == 0) {
+                op = &ctx.app_conf.scroll_operator_conf[j];
+                break;
+            }
+        }
+        if(op == NULL) {
+            continue;
+        }
+
+        /* fill */
+        ctx.app_conf.window_conf[i].class_regexp = class_re;
+        ctx.app_conf.window_conf[i].title_regexp = title_re;
+        ctx.app_conf.window_conf[i].class_or_title = class_or_title;
+        ctx.app_conf.window_conf[i].op = op;
+        ctx.app_conf.window_conf[i].args = op_arg;
+
+        i += 1;
+    }
+
+    ctx.app_conf.window_conf_num = i;
+
+    return 1;
+}
+
+
 int apply_setting(void)
 {
     int ret;
 
+    /* global setting */
     ctx.app_conf.comb_time = get_conf_int(300,
                                           L"global", L"combination-time",
                                           NULL);
 
+    /* normal, scroll mode */
     ret = apply_mode_conf();
     if(ret == 0) {
         return 0;
     }
 
     ctx.app_conf.cur_conf = &ctx.app_conf.normal_conf[0];
+
+    /* scroll operator */
+    ret = apply_scroll_operator();
+    if(ret == 0) {
+        return 0;
+    }
+
+    /* scroll window */
+    ret = apply_scroll_window();
+    if(ret == 0) {
+        return 0;
+    }
 
     return 1;
 }

@@ -1,7 +1,7 @@
 /*
  * main.c  -- main part of mouse-processor
  *
- * $Id: main.c,v 1.15 2005/01/10 07:47:36 hos Exp $
+ * $Id: main.c,v 1.16 2005/01/13 17:13:20 hos Exp $
  *
  */
 
@@ -360,6 +360,7 @@ int main(int ac, char **av)
 
     memset(&ctx, 0, sizeof(ctx));
 
+    /* command line option */
     {
         LPWSTR *avw;
         int acw;
@@ -370,6 +371,7 @@ int main(int ac, char **av)
         }
     }
 
+    /* load setting file */
     ctx.app_conf.conf_data = load_conf(ctx.app_conf.conf_file);
     if(ctx.app_conf.conf_data == NULL) {
         ctx.app_conf.conf_data = S_EXP_NIL;
@@ -385,21 +387,14 @@ int main(int ac, char **av)
         return 1;
     }
 
+    /* apply setting for config */
     ret = apply_setting();
     if(ret == 0) {
         error_message(L"failed to load setting file.");
         return 1;
     }
 
-    {
-        ctx.scroll_wheel.x_ratio = 0;
-        ctx.scroll_wheel.y_ratio = -5;
-        ctx.scroll_wheel.tick = 120;
-
-        ctx.scroll_line.x_ratio = 0.1;
-        ctx.scroll_line.y_ratio = 0.1;
-    }
-
+    /* instance handle of this module */
     {
         HMODULE module;
 
@@ -412,18 +407,21 @@ int main(int ac, char **av)
         ctx.instance = (HINSTANCE)module;
     }
 
+    /* message id of taskbar created notify */
     taskbar_created_message = RegisterWindowMessage(_T("TaskbarCreated"));
     if(taskbar_created_message == 0) {
         error_message_le("RegisterWindowMessage() failed");
         return 1;
     }
 
+    /* create main message window */
     ctx.main_window = create_main_window();
     if(ctx.main_window == NULL) {
         error_message_le("create_main_window() failed");
         return 1;
     }
 
+    /* initialize COM */
     {
         HRESULT hres;
 
@@ -434,8 +432,10 @@ int main(int ac, char **av)
         }
     }
 
+    /* main message loop */
     ret = message_loop();
 
+    /* uninitialize COM */
     CoUninitialize();
 
     return ret;
