@@ -1,7 +1,7 @@
 /*
  * sbh_dllmain.c  -- entry point of DLL for scrollbar hook
  *
- * $Id: sbh_dllmain.c,v 1.4 2005/02/03 15:55:55 hos Exp $
+ * $Id: sbh_dllmain.c,v 1.5 2005/02/10 09:24:41 hos Exp $
  *
  */
 
@@ -15,6 +15,8 @@ static HANDLE fmap = NULL;
 static HHOOK *hook = NULL;
 
 static WNDPROC org_wnd_proc = NULL;
+
+static BOOL init(void);
 
 
 static
@@ -38,7 +40,7 @@ LRESULT CALLBACK gsi_call_proc(int code, WPARAM wparam, LPARAM lparam)
 {
     CWPSTRUCT *cw = (CWPSTRUCT *)lparam;
 
-    if(gsinfo_data != NULL &&
+    if((gsinfo_data != NULL || init() == TRUE) &&
        cw->message == gsinfo_data->hook_subclass_msg &&
        gsinfo_data->valid &&
        gsinfo_data->bar == SB_CTL) {

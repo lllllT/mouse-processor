@@ -1,7 +1,7 @@
 /*
  * sbi_dllmain.c  -- entry point of DLL for scrollbar injection
  *
- * $Id: sbi_dllmain.c,v 1.5 2005/02/02 12:04:33 hos Exp $
+ * $Id: sbi_dllmain.c,v 1.6 2005/02/10 09:24:41 hos Exp $
  *
  */
 
@@ -17,6 +17,8 @@ static get_scroll_info_proc_t org_get_scroll_info = NULL;
 static fake_gsinfo_data_t *gsinfo_data = NULL;
 static HANDLE fmap = NULL;
 
+static BOOL init_shmem(void);
+
 
 static
 BOOL WINAPI fake_get_scroll_info(HWND hwnd, int bar, LPSCROLLINFO si)
@@ -24,7 +26,8 @@ BOOL WINAPI fake_get_scroll_info(HWND hwnd, int bar, LPSCROLLINFO si)
     BOOL ret;
 
     ret = org_get_scroll_info(hwnd, bar, si);
-    if(ret != FALSE && si != NULL && gsinfo_data != NULL &&
+    if(ret != FALSE && si != NULL &&
+       (gsinfo_data != NULL || init_shmem() == TRUE) &&
        hwnd == gsinfo_data->hwnd &&
        bar == gsinfo_data->bar &&
        (si->fMask & SIF_TRACKPOS) && gsinfo_data->valid) {
@@ -36,7 +39,7 @@ BOOL WINAPI fake_get_scroll_info(HWND hwnd, int bar, LPSCROLLINFO si)
 
 
 static
-BOOL init(void)
+BOOL init_shmem(void)
 {
     /* attach shared memory */
     gsinfo_data =
@@ -45,6 +48,15 @@ BOOL init(void)
     if(gsinfo_data == NULL) {
         return FALSE;
     }
+
+    return TRUE;
+}
+
+static
+BOOL init(void)
+{
+    /* attach shared memory */
+    init_shmem();
 
     /* inject */
     org_get_scroll_info = replace_all_imported_proc("USER32.DLL",
@@ -74,6 +86,7 @@ BOOL finit(void)
 }
 
 
+__declspec(dllexport)           /* for dummy export */
 BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, LPVOID reserved)
 {
     if(reason == DLL_PROCESS_ATTACH) {

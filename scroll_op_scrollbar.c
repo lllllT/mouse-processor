@@ -1,7 +1,7 @@
 /*
  * scroll_op_scrollbar.c  -- scroll operators for scrollbar
  *
- * $Id: scroll_op_scrollbar.c,v 1.20 2005/02/10 07:51:20 hos Exp $
+ * $Id: scroll_op_scrollbar.c,v 1.21 2005/02/10 09:24:42 hos Exp $
  *
  */
 
@@ -1051,6 +1051,8 @@ int MP_OP_API scrollbar_control_scroll(void *ctxp, double dx, double dy)
 static
 int MP_OP_API scrollbar_control_end_scroll(void *ctxp)
 {
+    uninject_scrollbar_support_proc();
+
     return 1;
 }
 
