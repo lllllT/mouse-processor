@@ -137,10 +137,13 @@ Known Problem
        そこで、DLL injection で GetScrollInfo() を差し替えて無理矢理書
        き換えることで対応した (スクロールバーコントロールの場合はサブ
        クラス化して SBM_GETSCROLLINFO メッセージも補足する)。
-       ただ、これでも MS Word は動作しない。原因よく分からず。また、
-       GetProcAddress() で実行時に関数ポインタを得た場合にも対応できな
-       い。UPX 等の packer を使っていて、本来の import table がヘッダ
-       から辿れないものにも対応できない。
+       ただ、これでも MS Word は動作しない。原因よく分からず。
+       また、GetProcAddress() で実行時に関数ポインタを得た場合にも対応
+       できない。
+       USER32.DLL で登録されたコントロールクラスで GetScrollInfo() を
+       使われても対応できない。(65545行以上のエディットコントロール等)
+       UPX 等の packer を使っていて、本来の import table がヘッダから
+       辿れないものにも対応できない。
 
 
 TODO
@@ -158,4 +161,4 @@ Link
  - mouse-processor <http://www.tamanegi.org/prog/mouse-processor/>
 
 
-$Id: README.txt,v 1.10 2005/02/10 17:27:33 hos Exp $
+$Id: README.txt,v 1.11 2005/02/18 08:16:26 hos Exp $
