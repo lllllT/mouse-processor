@@ -1,7 +1,7 @@
 /*
  * conf.h  -- configuration
  *
- * $Id: conf.c,v 1.15 2005/01/24 05:39:51 hos Exp $
+ * $Id: conf.c,v 1.16 2005/01/25 05:05:02 hos Exp $
  *
  */
 
@@ -218,6 +218,38 @@ double get_nth_double(const s_exp_data_t *list, int nth, double def_val)
     }
 
     return def_val;
+}
+
+static
+int get_nth_int(const s_exp_data_t *list, int nth, int def_val)
+{
+    const s_exp_data_t *v;
+
+    v = s_exp_nth(list, nth);
+    if(v != NULL) {
+        if(v->type == S_EXP_TYPE_FLONUM) {
+            return (int)v->flonum.val;
+        } else if(v->type == S_EXP_TYPE_INTEGER) {
+            return v->number.val;
+        }
+    }
+
+    return def_val;
+}
+
+static
+LPWSTR get_nth_str(const s_exp_data_t *list, int nth, LPCWSTR def_val)
+{
+    const s_exp_data_t *v;
+
+    v = s_exp_nth(list, nth);
+    if(v != NULL) {
+        if(v->type == S_EXP_TYPE_STRING) {
+            return v->string.str;
+        }
+    }
+
+    return (LPWSTR)def_val;
 }
 
 
@@ -918,6 +950,16 @@ int apply_setting(struct app_setting *app_conf)
                                        L"global", L"combination-time",
                                        NULL);
 
+    {
+        s_exp_data_t *t;
+
+        t = get_conf_list(app_conf, S_EXP_NIL,
+                          L"global", L"tray-icon",
+                          NULL);
+        app_conf->tray_icon_file = get_nth_str(t, 0, NULL);
+        app_conf->tray_icon_idx = get_nth_int(t, 1, 0);
+    }
+
     /* normal, scroll mode */
     ret = apply_mode_conf(app_conf);
     if(ret == 0) {
@@ -1013,6 +1055,8 @@ int load_setting(LPWSTR conf_file, int force_apply)
         ctx.mode_data.cur_conf = &ctx.app_conf.normal_conf[0];
         SendMessage(ctx.main_window, WM_MOUSEHOOK_MODECH,
                     MAKEWPARAM(pt.x, pt.y), (LPARAM)&data);
+
+        SendMessage(ctx.main_window, WM_TASKTRAY_CH, 0, 0);
 
         free_setting(&prev_conf);
     }

@@ -1,7 +1,7 @@
 /*
  * main.h  --
  *
- * $Id: main.h,v 1.34 2005/01/24 05:39:52 hos Exp $
+ * $Id: main.h,v 1.35 2005/01/25 05:05:02 hos Exp $
  *
  */
 
@@ -132,6 +132,9 @@ struct app_setting {
 
     int comb_time;
 
+    LPWSTR tray_icon_file;
+    int tray_icon_idx;
+
     int normal_conf_num;
     struct mouse_conf *normal_conf;
 
@@ -188,6 +191,7 @@ struct app_context {
     HINSTANCE instance;
     HWND main_window;
     HWND log_window;
+    HICON tray_icon;
 
     struct app_setting app_conf;
 
@@ -201,13 +205,15 @@ struct app_context {
 extern struct app_context ctx;
 
 
+#define WM_TASKTRAY           (WM_APP + 1)
+#define WM_TASKTRAY_CH        (WM_APP + 2)
+#define WM_MOUSEHOOK_MODECH   (WM_APP + 10)
+#define WM_MOUSEHOOK_MODEMSG  (WM_APP + 11)
+
 #define MOTION_DOWN  0
 #define MOTION_UP    1
 #define MOTION_MOVE  2
 #define MOTION_WHEEL 3
-
-#define WM_MOUSEHOOK_MODECH   (WM_APP + 10)
-#define WM_MOUSEHOOK_MODEMSG  (WM_APP + 11)
 
 
 int set_hook(void);

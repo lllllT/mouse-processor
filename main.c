@@ -1,7 +1,7 @@
 /*
  * main.c  -- main part of mouse-processor
  *
- * $Id: main.c,v 1.28 2005/01/21 08:54:50 hos Exp $
+ * $Id: main.c,v 1.29 2005/01/25 05:05:02 hos Exp $
  *
  */
 
@@ -13,8 +13,6 @@
 #define LR_VGACOLOR 0x0080
 
 
-#define WM_TASKTRAY (WM_APP + 1)
-
 typedef LRESULT (* msg_proc_t)(HWND, UINT, WPARAM, LPARAM);
 
 
@@ -56,13 +54,15 @@ static
 int set_tasktray_icon(HWND hwnd, int msg)
 {
     NOTIFYICONDATA ni;
-    HICON icon;
 
-    icon = LoadImage(ctx.instance, MAKEINTRESOURCE(ID_ICON_MAIN),
-                     IMAGE_ICON, 16, 16,
-                     (is_winxp_or_later() ? LR_DEFAULTCOLOR : LR_VGACOLOR));
-    if(icon == NULL) {
-        return 0;
+    if(ctx.tray_icon == NULL) {
+        ctx.tray_icon = LoadImage(ctx.instance, MAKEINTRESOURCE(ID_ICON_MAIN),
+                                  IMAGE_ICON, 16, 16,
+                                  (is_winxp_or_later() ?
+                                   LR_DEFAULTCOLOR : LR_VGACOLOR));
+        if(ctx.tray_icon == NULL) {
+            return 0;
+        }
     }
 
     memset(&ni, 0, sizeof(ni));
@@ -70,7 +70,7 @@ int set_tasktray_icon(HWND hwnd, int msg)
     ni.hWnd = hwnd;
     ni.uID = notify_icon_id;
     ni.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
-    ni.hIcon = icon;
+    ni.hIcon = ctx.tray_icon;
     ni.uCallbackMessage = WM_TASKTRAY;
     _tcscpy(ni.szTip, window_title_name);
 
@@ -294,6 +294,9 @@ static
 LRESULT main_destroy(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
     set_tasktray_icon(hwnd, NIM_DELETE);
+    DestroyIcon(ctx.tray_icon);
+    ctx.tray_icon = NULL;
+
     clear_hook();
 
     PostQuitMessage(0);
@@ -308,6 +311,35 @@ LRESULT main_taskbar_created(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
     int ret;
 
     ret = set_tasktray_icon(hwnd, NIM_ADD);
+    if(ret == 0) {
+        error_message_le("set_tasktray_icon() failed");
+    }
+
+    return 0;
+}
+
+/* WM_TASKTRAY_CH */
+static
+LRESULT main_tasktray_ch(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+{
+    int ret;
+    HICON icon;
+
+    if(ctx.app_conf.tray_icon_file != NULL) {
+        if(ExtractIconExW(ctx.app_conf.tray_icon_file,
+                          ctx.app_conf.tray_icon_idx,
+                          NULL, &icon, 1) != 1) {
+            error_message("ExtractIconEx() failed");
+            return 0;
+        }
+    } else {
+        icon = NULL;
+    }
+
+    DestroyIcon(ctx.tray_icon);
+    ctx.tray_icon = icon;
+
+    ret = set_tasktray_icon(hwnd, NIM_MODIFY);
     if(ret == 0) {
         error_message_le("set_tasktray_icon() failed");
     }
@@ -366,6 +398,7 @@ LRESULT CALLBACK main_window_proc(HWND hwnd, UINT msg,
         {WM_DESTROY, main_destroy},
         {WM_COMMAND, main_command},
         {WM_TASKTRAY, main_tasktray},
+        {WM_TASKTRAY_CH, main_tasktray_ch},
 
         {WM_MOUSEHOOK_MODECH, scroll_modech},
         {WM_MOUSEHOOK_MODEMSG, scroll_modemsg},

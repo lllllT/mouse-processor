@@ -3,6 +3,9 @@
 (global
  ;; threshold time to detect button combination [msec]
  (combination-time . 300)
+
+ ;; tasktray icon
+ ;(tray-icon "main.cpl" 0)		; mouse icon
  )
 
 (normal-mode
@@ -43,7 +46,6 @@
   (wheel (post-wheel-message))
   )
 
- (scroll-v
  ;; scroll mode (only vertical)
  ;;   button 1     => return to normal mode
  ;;   button 1+2   => return to normal mode
@@ -53,6 +55,7 @@
  ;;   button 3+4   => reset scroll speed
  ;;   button 5     => return to normal mode
  ;;   wheel        => post wheel message to under pointer window
+ (scroll-v
   (scroll-ratio 0.0 1.0)
   (button-u-1 (normal-mode normal))
   (button-u-2 (scroll-mode scroll-hv))
