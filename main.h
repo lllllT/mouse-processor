@@ -1,7 +1,7 @@
 /*
  * main.h  --
  *
- * $Id: main.h,v 1.15 2005/01/09 13:56:59 hos Exp $
+ * $Id: main.h,v 1.16 2005/01/09 14:48:05 hos Exp $
  *
  */
 
@@ -182,8 +182,8 @@ HRESULT get_ie_target(HWND hwnd, int x, int y, IDispatch **elem);
 HRESULT get_ie_elem_size(IDispatch *elem, SIZE *sz);
 HRESULT init_ie_dpids(IDispatch *elem);
 
-int scroll_ie_h(IDispatch *elem, int delta, int length);
-int scroll_ie_v(IDispatch *elem, int delta, int length);
+int scroll_ie_h(IDispatch *elem, double *delta, int length);
+int scroll_ie_v(IDispatch *elem, double *delta, int length);
 
 s_exp_data_t *load_conf(LPCWSTR conf_file);
 int apply_setting(void);

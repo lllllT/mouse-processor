@@ -1,7 +1,7 @@
 /*
  * ie.c  -- ie compornent operation
  *
- * $Id: ie.c,v 1.5 2005/01/08 21:47:52 hos Exp $
+ * $Id: ie.c,v 1.6 2005/01/09 14:48:04 hos Exp $
  *
  */
 
@@ -262,11 +262,11 @@ HRESULT init_ie_dpids(IDispatch *elem)
 
 
 static
-int scroll_ie(IDispatch *elem, int delta, int length,
+int scroll_ie(IDispatch *elem, double *delta, int length,
               DISPID pos_id, DISPID page_id, DISPID all_id)
 {
     long pos, page, all, range;
-    double page_ratio, spd;
+    double page_ratio, spd, d;
 
     if(FAILED(get_property_longd(elem, pos_id, &pos)) ||
        FAILED(get_property_longd(elem, page_id, &page)) ||
@@ -282,12 +282,12 @@ int scroll_ie(IDispatch *elem, int delta, int length,
     page_ratio = (double)page / all;
     spd = range / (length * (1 - page_ratio));
 
-    delta *= spd;
-    if(delta == 0) {
+    d = *delta * spd;
+    if((int)d == 0) {
         return 0;
     }
 
-    pos += delta;
+    pos += d;
     if(pos < 0) {
         pos = 0;
     } else if(pos > all - page - 1) {
@@ -298,16 +298,18 @@ int scroll_ie(IDispatch *elem, int delta, int length,
         return 0;
     }
 
+    *delta -= (int)d / spd;
+
     return 1;
 }
 
-int scroll_ie_h(IDispatch *elem, int delta, int length)
+int scroll_ie_h(IDispatch *elem, double *delta, int length)
 {
     return scroll_ie(elem, delta, length,
                      elem_scroll_left, elem_client_width, elem_scroll_width);
 }
 
-int scroll_ie_v(IDispatch *elem, int delta, int length)
+int scroll_ie_v(IDispatch *elem, double *delta, int length)
 {
     return scroll_ie(elem, delta, length,
                      elem_scroll_top, elem_client_height, elem_scroll_height);

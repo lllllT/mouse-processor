@@ -1,7 +1,7 @@
 /*
  * scroll.c  -- scroll window
  *
- * $Id: scroll.c,v 1.8 2005/01/09 14:21:46 hos Exp $
+ * $Id: scroll.c,v 1.9 2005/01/09 14:48:05 hos Exp $
  *
  */
 
@@ -143,15 +143,11 @@ void scrolling_line(int x, int y)
 static
 void scrolling_ie(int x, int y)
 {
-    if(scroll_ie_h(ctx.scroll_data.ie_target,
-                   ctx.scroll_data.dx, ctx.scroll_data.target_size.cx)) {
-        ctx.scroll_data.dx -= (int)ctx.scroll_data.dx;
-    }
+    scroll_ie_h(ctx.scroll_data.ie_target,
+                &ctx.scroll_data.dx, ctx.scroll_data.target_size.cx);
 
-    if(scroll_ie_v(ctx.scroll_data.ie_target,
-                   ctx.scroll_data.dy, ctx.scroll_data.target_size.cy)) {
-        ctx.scroll_data.dy -= (int)ctx.scroll_data.dy;
-    }
+    scroll_ie_v(ctx.scroll_data.ie_target,
+                &ctx.scroll_data.dy, ctx.scroll_data.target_size.cy);
 }
 
 static
