@@ -1,7 +1,7 @@
 /*
  * main.c  -- main part of mouse-processor
  *
- * $Id: main.c,v 1.1 2004/12/27 05:40:15 hos Exp $
+ * $Id: main.c,v 1.2 2004/12/27 09:22:13 hos Exp $
  *
  */
 
@@ -20,8 +20,7 @@
 typedef LRESULT (* msg_proc_t)(HWND, UINT, WPARAM, LPARAM);
 
 
-HINSTANCE instance = NULL;
-HWND main_window = NULL;
+struct app_context ctx;
 
 
 const LPTSTR window_class_name = _T("mouse-processor");
@@ -43,7 +42,7 @@ int set_tasktray_icon(HWND hwnd, int msg)
     NOTIFYICONDATA ni;
     HICON icon;
 
-    icon = LoadIcon(instance, MAKEINTRESOURCE(ID_ICON_TRAY));
+    icon = LoadIcon(ctx.instance, MAKEINTRESOURCE(ID_ICON_TRAY));
     if(icon == NULL) {
         return 0;
     }
@@ -170,7 +169,7 @@ LRESULT main_create(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
     {
         HMENU menu;
 
-        menu = LoadMenu(instance, MAKEINTRESOURCE(ID_MENU_TRAY));
+        menu = LoadMenu(ctx.instance, MAKEINTRESOURCE(ID_MENU_TRAY));
         if(menu == NULL) {
             error_message("LoadMenu() failed");
             return -1;
@@ -298,7 +297,7 @@ HWND create_main_window(void)
         wc.lpfnWndProc = main_window_proc;
         wc.cbClsExtra = 0;
         wc.cbWndExtra = 0;
-        wc.hInstance = instance;
+        wc.hInstance = ctx.instance;
         wc.hIcon = NULL;
         wc.hCursor = NULL;
         wc.hbrBackground = NULL;
@@ -318,7 +317,7 @@ HWND create_main_window(void)
 
         wnd = CreateWindow(window_class_name, window_title_name,
                            0, 0, 0, 0, 0,
-                           HWND_MESSAGE, NULL, instance, NULL);
+                           HWND_MESSAGE, NULL, ctx.instance, NULL);
 
         return wnd;
     }
@@ -354,6 +353,8 @@ int main(int ac, char **av)
 {
     int ret;
 
+    memset(&ctx, 0, sizeof(ctx));
+
     {
         HMODULE module;
 
@@ -363,7 +364,7 @@ int main(int ac, char **av)
             return 1;
         }
 
-        instance = (HINSTANCE)module;
+        ctx.instance = (HINSTANCE)module;
     }
 
     taskbar_created_message = RegisterWindowMessage(_T("TaskbarCreated"));
@@ -372,12 +373,11 @@ int main(int ac, char **av)
         return 1;
     }
 
-    main_window = create_main_window();
-    if(main_window == NULL) {
+    ctx.main_window = create_main_window();
+    if(ctx.main_window == NULL) {
         error_message("create_main_window() failed");
         return 1;
     }
-    ShowWindow(main_window, SW_SHOW);
 
     ret = message_loop();
 

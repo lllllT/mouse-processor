@@ -1,7 +1,7 @@
 /*
  * hook.c  -- hook funcs
  *
- * $Id: hook.c,v 1.1 2004/12/27 05:40:14 hos Exp $
+ * $Id: hook.c,v 1.2 2004/12/27 09:22:13 hos Exp $
  *
  */
 
@@ -13,6 +13,137 @@
 
 
 static HHOOK mouse_ll_hook = NULL;
+
+
+static
+int msg_to_motion(WPARAM msg)
+{
+    switch(msg) {
+      case WM_LBUTTONDOWN:
+      case WM_RBUTTONDOWN:
+      case WM_MBUTTONDOWN:
+      case WM_XBUTTONDOWN:
+          return MOTION_DOWN;
+
+      case WM_LBUTTONUP:
+      case WM_RBUTTONUP:
+      case WM_MBUTTONUP:
+      case WM_XBUTTONUP:
+          return MOTION_UP;
+
+      case WM_MOUSEMOVE:
+          return MOTION_MOVE;
+
+      case WM_MOUSEWHEEL:
+          return MOTION_WHEEL;
+    }
+
+    return -1;
+}
+
+static
+int msg_to_button(WPARAM msg, DWORD mouse_data)
+{
+    switch(msg) {
+      case WM_LBUTTONDOWN:
+      case WM_LBUTTONUP:
+          return 0;
+
+      case WM_RBUTTONDOWN:
+      case WM_RBUTTONUP:
+          return 1;
+
+      case WM_MBUTTONDOWN:
+      case WM_MBUTTONUP:
+          return 2;
+
+      case WM_XBUTTONDOWN:
+      case WM_XBUTTONUP:
+          switch(HIWORD(mouse_data)) {
+            case XBUTTON1:
+                return 3;
+
+            case XBUTTON2:
+                return 4;
+          }
+    }
+
+    return -1;
+}
+
+static
+void fill_input(INPUT *in, int motion, int data)
+{
+    switch(motion) {
+      case MOTION_DOWN:
+          switch(data) {
+            case 0:
+                in->mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
+                break;
+
+            case 1:
+                in->mi.dwFlags = MOUSEEVENTF_RIGHTDOWN;
+                break;
+
+            case 2:
+                in->mi.dwFlags = MOUSEEVENTF_MIDDLEDOWN;
+                break;
+
+            case 3:
+                in->mi.dwFlags = MOUSEEVENTF_XDOWN;
+                in->mi.mouseData = XBUTTON1;
+                break;
+
+            case 4:
+                in->mi.dwFlags = MOUSEEVENTF_XDOWN;
+                in->mi.mouseData = XBUTTON2;
+                break;
+          }
+          break;
+
+      case MOTION_UP:
+          switch(data) {
+            case 0:
+                in->mi.dwFlags = MOUSEEVENTF_LEFTUP;
+                break;
+
+            case 1:
+                in->mi.dwFlags = MOUSEEVENTF_RIGHTUP;
+                break;
+
+            case 2:
+                in->mi.dwFlags = MOUSEEVENTF_MIDDLEUP;
+                break;
+
+            case 3:
+                in->mi.dwFlags = MOUSEEVENTF_XUP;
+                in->mi.mouseData = XBUTTON1;
+                break;
+
+            case 4:
+                in->mi.dwFlags = MOUSEEVENTF_XUP;
+                in->mi.mouseData = XBUTTON2;
+                break;
+          }
+          break;
+
+      case MOTION_MOVE:
+          in->mi.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE;
+          break;
+
+      case MOTION_WHEEL:
+          in->mi.dwFlags = MOUSEEVENTF_WHEEL;
+          in->mi.mouseData = data;
+          break;
+    }
+}
+
+
+static inline
+int post_main(int motion, int data)
+{
+    PostMessage(ctx.main_window, WM_MOUSEHOOK_MOTION, motion, data);
+}
 
 
 static
@@ -28,6 +159,75 @@ LRESULT CALLBACK mouse_ll_proc(int code, WPARAM wparam, LPARAM lparam)
 
     if(msll->flags & LLMHF_INJECTED) {
         goto norm_end;
+    }
+
+    {
+        int motion, btn;
+
+        motion = msg_to_motion(wparam);
+        btn = msg_to_button(wparam, msll->mouseData);
+
+        if(btn >= 0) {
+            if(! ctx.pressed) {
+                if(ctx.conf.button[btn].flags & MOUSE_BTN_CONF_ENABLE_COMB) {
+                    if(motion == MOTION_DOWN) {
+                        ctx.pressed = 1;
+                        memcpy(&ctx.pressed_btn, msll, sizeof(MSLLHOOKSTRUCT));
+                        post_to_main(motion, btn);
+                        return 1;
+                    } else {
+                        INPUT in[2];
+                        int send_btn;
+
+                        send_btn = (ctx.conf.button[btn].flags &
+                                    MOUSE_BTN_CONF_REPLACE ?
+                                    ctx.conf.button[btn].replace : btn);
+
+                        memset(&in, 0, sizeof(in));
+
+                        in[0].type = INPUT_MOUSE;
+                        in[0].mi.dx = ctx.pressed_btn.pt.x;
+                        in[0].mi.dy = ctx.pressed_btn.pt.y;
+                        in[0].mi.time = ctx.pressed_btn.time;
+                        in[0].mi.dwExtraInfo = ctx.pressed_btn.dwExtraInfo;
+                        fill_input(&in[0], MOTION_DOWN, send_btn);
+
+                        in[1].type = INPUT_MOUSE;
+                        in[1].mi.dx = msll->pt.x;
+                        in[1].mi.dy = msll->pt.y;
+                        in[1].mi.time = msll->time;
+                        in[1].mi.dwExtraInfo = msll->dwExtraInfo;
+                        fill_input(&in[1], MOTION_UP, send_btn);
+
+                        SendInput(2, &in, sizeof(INPUT));
+                        ctx.pressed = 0;
+                        return 1;
+                    }
+                }
+                if(ctx.conf.button[btn].flags & MOUSE_BTN_CONF_REPLACE) {
+                    INPUT in;
+
+                    memset(&in, 0, sizeof(in));
+
+                    in.type = INPUT_MOUSE;
+                    in.mi.dx = msll->pt.x;
+                    in.mi.dy = msll->pt.y;
+                    in.mi.time = msll->time;
+                    in.mi.dwExtraInfo = msll->dwExtraInfo;
+                    fill_input(&in, motion, ctx.conf.button[btn].replace);
+
+                    SendInput(1, &in, sizeof(INPUT));
+                    ctx.pressed = 0;
+                    return 1;
+                }
+
+                goto norm_end;
+            }
+        }
+
+        if(btn < 0) {
+            goto norm_end;
+        }
     }
 
     {
@@ -201,7 +401,8 @@ int set_hook(void)
         return 1;
     }
 
-    mouse_ll_hook = SetWindowsHookEx(WH_MOUSE_LL, mouse_ll_proc, instance, 0);
+    mouse_ll_hook = SetWindowsHookEx(WH_MOUSE_LL, mouse_ll_proc,
+                                     ctx.instance, 0);
     if(mouse_ll_hook == NULL) {
         return 0;
     }
