@@ -1,7 +1,7 @@
 /*
  * dllinj.c  -- DLL injection
  *
- * $Id: dllinj.c,v 1.5 2005/02/01 17:03:48 hos Exp $
+ * $Id: dllinj.c,v 1.6 2005/02/03 15:55:54 hos Exp $
  *
  */
 
@@ -103,7 +103,7 @@ void *replace_all_imported_proc(const char *target_proc_mod_name,
     memset(&sinfo, 0, sizeof(sinfo));
     GetSystemInfo(&sinfo);
 
-    target_proc_mod = GetModuleHandle(target_proc_mod_name);
+    target_proc_mod = GetModuleHandleA(target_proc_mod_name);
     if(target_proc_mod == NULL) {
         return NULL;
     }

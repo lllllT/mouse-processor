@@ -1,7 +1,7 @@
 #
 # Makefile
 #
-# $Id: Makefile,v 1.32 2005/02/03 09:51:12 hos Exp $
+# $Id: Makefile,v 1.33 2005/02/03 15:55:54 hos Exp $
 #
 
 DEFINES = -D_WIN32_WINNT=0x0500 -DUNICODE=1 -D_UNICODE=1
@@ -34,7 +34,7 @@ SBI_DLL_RSRC =
 SBI_DLL_OBJS = $(SBI_DLL_SRCS:%.c=%.o) $(SBI_DLL_RSRC:%.rc=%.o)
 SBI_DLL_HEADERS = dllinj.h scroll_op_scrollbar.h shmem.h
 SBI_DLL_LDLIBS = -lpsapi -lkernel32
-SBI_DLL_LDFLAGS = $(LDFLAGS) -shared -nostartfiles -nostdlib -e _DllMain@12
+SBI_DLL_LDFLAGS = $(LDFLAGS) -e _DllMain@12
 
 SBH_DLL_NAME = $(TARGET_NAME)sbh.dll
 SBH_DLL_SRCS = sbh_dllmain.c shmem.c
@@ -42,10 +42,7 @@ SBH_DLL_RSRC =
 SBH_DLL_OBJS = $(SBH_DLL_SRCS:%.c=%.o) $(SBH_DLL_RSRC:%.rc=%.o)
 SBH_DLL_HEADERS = scroll_op_scrollbar.h shmem.h
 SBH_DLL_LDLIBS = -lkernel32 -luser32
-#SBH_DLL_LDFLAGS = $(LDFLAGS) -shared -nostartfiles -nostdlib -e _DllMain@12 \
-#                  -Wl,--out-implib,lib$(SBH_DLL_NAME).a
-SBH_DLL_LDFLAGS = $(LDFLAGS) -shared \
-                  -Wl,--out-implib,lib$(SBH_DLL_NAME).a
+SBH_DLL_LDFLAGS = $(LDFLAGS) -e _DllMain@12 --output-lib lib$(SBH_DLL_NAME).a
 
 PACK_BIN_FILES = $(EXE_NAME) $(SBI_DLL_NAME)
 PACK_BIN_ADD_FILES = README.txt VERSION default.mprc
@@ -59,7 +56,7 @@ VERSION = `cat VERSION`
 
 RC = rc
 WINDRES = windres
-DLLTOOL = dlltool
+DLLWRAP = dllwrap
 ZIP = zip
 GTAR = tar
 INSTALL = install
@@ -80,10 +77,10 @@ $(EXE_NAME): $(EXE_OBJS) $(UTIL_LIBS) lib$(SBH_DLL_NAME).a
 	$(CC) $(EXE_LDFLAGS) $(EXE_OBJS) $(EXE_LDLIBS) -o $@
 
 $(SBI_DLL_NAME): $(SBI_DLL_OBJS)
-	$(CC) $(SBI_DLL_LDFLAGS) $(SBI_DLL_OBJS) $(SBI_DLL_LDLIBS) -o $@
+	$(DLLWRAP) $(SBI_DLL_LDFLAGS) $(SBI_DLL_OBJS) $(SBI_DLL_LDLIBS) -o $@
 
 $(SBH_DLL_NAME): $(SBH_DLL_OBJS)
-	$(CC) $(SBH_DLL_LDFLAGS) $(SBH_DLL_OBJS) $(SBH_DLL_LDLIBS) -o $@
+	$(DLLWRAP) $(SBH_DLL_LDFLAGS) $(SBH_DLL_OBJS) $(SBH_DLL_LDLIBS) -o $@
 
 lib$(SBH_DLL_NAME).a: $(SBH_DLL_NAME)
 

@@ -1,7 +1,7 @@
 /*
  * scroll_op_scrollbar.c  -- scroll operators for scrollbar
  *
- * $Id: scroll_op_scrollbar.c,v 1.17 2005/02/03 09:51:14 hos Exp $
+ * $Id: scroll_op_scrollbar.c,v 1.18 2005/02/03 15:55:55 hos Exp $
  *
  */
 
@@ -351,12 +351,10 @@ int scrollbar_r_scroll(HWND hwnd, int bar,
         pos = max;
     }
 
-    if(inject_sb_data.gsinfo_data == NULL || bar != SB_CTL) {
-        SendMessageTimeout(msg_hwnd, msg,
-                           MAKEWPARAM(SB_THUMBTRACK, org_pos),
-                           (bar == SB_CTL ? (LPARAM)hwnd : 0),
-                           SMTO_ABORTIFHUNG, 1000, NULL);
-    }
+    SendMessageTimeout(msg_hwnd, msg,
+                       MAKEWPARAM(SB_THUMBTRACK, org_pos),
+                       (bar == SB_CTL ? (LPARAM)hwnd : 0),
+                       SMTO_ABORTIFHUNG, 1000, NULL);
 
     if(inject_sb_data.gsinfo_data != NULL) {
         inject_sb_data.gsinfo_data->msg = msg;
@@ -365,25 +363,16 @@ int scrollbar_r_scroll(HWND hwnd, int bar,
         inject_sb_data.gsinfo_data->org_pos = org_pos;
         inject_sb_data.gsinfo_data->track_pos = pos;
         inject_sb_data.gsinfo_data->valid = 1;
-
-        if(bar == SB_CTL) {
-            SendMessageTimeout(hwnd,
-                               inject_sb_data.gsinfo_data->hook_subclass_msg,
-                               0, 0,
-                               SMTO_ABORTIFHUNG, 1000, NULL);
-        }
     }
 
-    if(inject_sb_data.gsinfo_data == NULL || bar != SB_CTL) {
-        SendMessageTimeout(msg_hwnd, msg,
-                           MAKEWPARAM(SB_THUMBTRACK, pos),
-                           (bar == SB_CTL ? (LPARAM)hwnd : 0),
-                           SMTO_ABORTIFHUNG, 1000, NULL);
-        SendMessageTimeout(msg_hwnd, msg,
-                           MAKEWPARAM(SB_THUMBPOSITION, pos),
-                           (bar == SB_CTL ? (LPARAM)hwnd : 0),
-                           SMTO_ABORTIFHUNG, 1000, NULL);
-    }
+    SendMessageTimeout(msg_hwnd, msg,
+                       MAKEWPARAM(SB_THUMBTRACK, pos),
+                       (bar == SB_CTL ? (LPARAM)hwnd : 0),
+                       SMTO_ABORTIFHUNG, 1000, NULL);
+    SendMessageTimeout(msg_hwnd, msg,
+                       MAKEWPARAM(SB_THUMBPOSITION, pos),
+                       (bar == SB_CTL ? (LPARAM)hwnd : 0),
+                       SMTO_ABORTIFHUNG, 1000, NULL);
 
     if(inject_sb_data.gsinfo_data != NULL) {
         inject_sb_data.gsinfo_data->valid = 0;
