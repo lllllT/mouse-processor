@@ -1,7 +1,7 @@
 /*
  * main.c  -- main part of mouse-processor
  *
- * $Id: main.c,v 1.7 2005/01/04 15:33:28 hos Exp $
+ * $Id: main.c,v 1.8 2005/01/05 06:55:26 hos Exp $
  *
  */
 
@@ -449,7 +449,7 @@ int main(int ac, char **av)
     {
         HRESULT hres;
 
-        hres = CoInitializeEx(NULL, 0);
+        hres = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
         if(FAILED(hres)) {
             error_message("CoInitializeEx() failed");
             return 1;

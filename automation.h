@@ -1,7 +1,7 @@
 /*
  * automation.h  -- COM automation helper
  *
- * $Id: automation.h,v 1.1 2005/01/04 09:36:12 hos Exp $
+ * $Id: automation.h,v 1.2 2005/01/05 06:55:25 hos Exp $
  *
  */
 
@@ -25,10 +25,13 @@ HRESULT call_method_s(IDispatch *dpch, LPOLESTR name,
 HRESULT get_property_s(IDispatch *dpch, LPOLESTR name, VARIANT *result);
 HRESULT get_property_v(IDispatch *dpch, LPOLESTR *name, VARIANT *result);
 HRESULT get_property_dp(IDispatch *dpch, LPOLESTR name, IDispatch **result);
+HRESULT get_property_dpd(IDispatch *dpch, DISPID dpid, IDispatch **result);
 HRESULT get_property_dpv(IDispatch *dpch, LPOLESTR *name, IDispatch **result);
 HRESULT get_property_str(IDispatch *dpch, LPOLESTR name, BSTR *result);
+HRESULT get_property_strd(IDispatch *dpch, DISPID dpid, BSTR *result);
 HRESULT get_property_strv(IDispatch *dpch, LPOLESTR *name, BSTR *result);
 HRESULT get_property_long(IDispatch *dpch, LPOLESTR name, long *result);
+HRESULT get_property_longd(IDispatch *dpch, DISPID dpid, long *result);
 HRESULT get_property_longv(IDispatch *dpch, LPOLESTR *name, long *result);
 
 HRESULT put_property_s(IDispatch *dpch, LPOLESTR name, VARIANTARG *val);
@@ -36,4 +39,5 @@ HRESULT put_property_v(IDispatch *dpch, LPOLESTR *name, VARIANTARG *val);
 HRESULT put_property_str(IDispatch *dpch, LPOLESTR name, BSTR val);
 HRESULT put_property_strv(IDispatch *dpch, LPOLESTR *name, BSTR val);
 HRESULT put_property_long(IDispatch *dpch, LPOLESTR name, long val);
+HRESULT put_property_longd(IDispatch *dpch, DISPID dpid, long val);
 HRESULT put_property_longv(IDispatch *dpch, LPOLESTR *name, long val);

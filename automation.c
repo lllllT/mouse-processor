@@ -1,7 +1,7 @@
 /*
  * automation.c  -- COM automation helper
  *
- * $Id: automation.c,v 1.1 2005/01/04 09:36:11 hos Exp $
+ * $Id: automation.c,v 1.2 2005/01/05 06:55:24 hos Exp $
  *
  */
 
@@ -169,6 +169,25 @@ HRESULT get_property_dp(IDispatch *dpch, LPOLESTR name, IDispatch **result)
     return S_OK;
 }
 
+HRESULT get_property_dpd(IDispatch *dpch, DISPID dpid, IDispatch **result)
+{
+    VARIANT var;
+    HRESULT hres;
+
+    hres = get_property(dpch, dpid, &var);
+    if(FAILED(hres)) {
+        return hres;
+    }
+
+    if(var.vt != VT_DISPATCH) {
+        return E_FAIL;
+    }
+
+    *result = var.pdispVal;
+
+    return S_OK;
+}
+
 HRESULT get_property_dpv(IDispatch *dpch, LPOLESTR *name, IDispatch **result)
 {
     VARIANT var;
@@ -207,6 +226,25 @@ HRESULT get_property_str(IDispatch *dpch, LPOLESTR name, BSTR *result)
     return S_OK;
 }
 
+HRESULT get_property_strd(IDispatch *dpch, DISPID dpid, BSTR *result)
+{
+    VARIANT var;
+    HRESULT hres;
+
+    hres = get_property(dpch, dpid, &var);
+    if(FAILED(hres)) {
+        return hres;
+    }
+
+    if(var.vt != VT_BSTR) {
+        return E_FAIL;
+    }
+
+    *result = var.bstrVal;
+
+    return S_OK;
+}
+
 HRESULT get_property_strv(IDispatch *dpch, LPOLESTR *name, BSTR *result)
 {
     VARIANT var;
@@ -232,6 +270,25 @@ HRESULT get_property_long(IDispatch *dpch, LPOLESTR name, long *result)
     HRESULT hres;
 
     hres = get_property_s(dpch, name, &var);
+    if(FAILED(hres)) {
+        return hres;
+    }
+
+    if(var.vt != VT_I4) {
+        return E_FAIL;
+    }
+
+    *result = var.lVal;
+
+    return S_OK;
+}
+
+HRESULT get_property_longd(IDispatch *dpch, DISPID dpid, long *result)
+{
+    VARIANT var;
+    HRESULT hres;
+
+    hres = get_property(dpch, dpid, &var);
     if(FAILED(hres)) {
         return hres;
     }
@@ -347,4 +404,14 @@ HRESULT put_property_longv(IDispatch *dpch, LPOLESTR *name, long val)
     arg.lVal = val;
 
     return put_property_v(dpch, name, &arg);
+}
+
+HRESULT put_property_longd(IDispatch *dpch, DISPID dpid, long val)
+{
+    VARIANTARG arg;
+
+    arg.vt = VT_I4;
+    arg.lVal = val;
+
+    return put_property(dpch, dpid, &arg);
 }

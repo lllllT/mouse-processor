@@ -1,7 +1,7 @@
 /*
  * main.h  --
  *
- * $Id: main.h,v 1.8 2005/01/04 09:36:14 hos Exp $
+ * $Id: main.h,v 1.9 2005/01/05 06:55:27 hos Exp $
  *
  */
 
@@ -155,3 +155,8 @@ LRESULT scrolling(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 
 
 HRESULT get_ie_target(HWND hwnd, int x, int y, IDispatch **elem);
+HRESULT get_ie_elem_size(IDispatch *elem, SIZE *sz);
+HRESULT init_ie_dpids(IDispatch *elem);
+
+int scroll_ie_h(IDispatch *elem, int delta, int length);
+int scroll_ie_v(IDispatch *elem, int delta, int length);

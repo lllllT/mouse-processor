@@ -1,7 +1,7 @@
 /*
  * scroll.c  -- scroll window
  *
- * $Id: scroll.c,v 1.3 2005/01/04 09:36:15 hos Exp $
+ * $Id: scroll.c,v 1.4 2005/01/05 06:55:27 hos Exp $
  *
  */
 
@@ -11,7 +11,7 @@
 
 
 static
-int get_scroll_pos(int bar, int delta, int length, int *ret_pos)
+int get_scroll_pos(HWND hwnd, int bar, int delta, int length, int *ret_pos)
 {
     SCROLLINFO si;
     int min, max, pos;
@@ -20,7 +20,7 @@ int get_scroll_pos(int bar, int delta, int length, int *ret_pos)
     memset(&si, 0, sizeof(si));
     si.cbSize = sizeof(si);
     si.fMask = SIF_POS | SIF_RANGE | SIF_PAGE;
-    if(GetScrollInfo(ctx.scroll_data.target, bar, &si) == 0) {
+    if(GetScrollInfo(hwnd, bar, &si) == 0) {
         *ret_pos = 0;
         return 0;
     }
@@ -56,7 +56,7 @@ int get_scroll_pos(int bar, int delta, int length, int *ret_pos)
 
 
 static
-int scroll_window(int bar, int delta, int length)
+int scroll_window(HWND hwnd, int bar, int delta, int length)
 {
     int pos;
     SCROLLINFO si;
@@ -65,7 +65,7 @@ int scroll_window(int bar, int delta, int length)
         return 0;
     }
 
-    if(! get_scroll_pos(bar, delta, length, &pos)) {
+    if(! get_scroll_pos(hwnd, bar, delta, length, &pos)) {
         return 0;
     }
 
@@ -73,8 +73,8 @@ int scroll_window(int bar, int delta, int length)
     si.cbSize = sizeof(si);
     si.fMask = SIF_POS;
     si.nPos = pos;
-    SetScrollInfo(ctx.scroll_data.target, bar, &si, FALSE);
-    SendMessageTimeout(ctx.scroll_data.target,
+    SetScrollInfo(hwnd, bar, &si, FALSE);
+    SendMessageTimeout(hwnd,
                        (bar == SB_HORZ ? WM_HSCROLL : WM_VSCROLL),
                        MAKEWPARAM(SB_THUMBPOSITION, pos), 0,
                        SMTO_ABORTIFHUNG, 500, NULL);
@@ -83,7 +83,7 @@ int scroll_window(int bar, int delta, int length)
 }
 
 static
-void scroll_line(int bar, int delta)
+void scroll_line(HWND hwnd, int bar, int delta)
 {
     int i, n, dir;
 
@@ -95,7 +95,7 @@ void scroll_line(int bar, int delta)
     dir = (delta < 0 ? SB_LINELEFT : SB_LINERIGHT);
 
     for(i = 0; i < n; i++) {
-        PostMessage(ctx.scroll_data.target,
+        PostMessage(hwnd,
                     (bar == SB_HORZ ? WM_HSCROLL : WM_VSCROLL),
                     MAKEWPARAM(dir, 0), 0);
     }
@@ -105,7 +105,7 @@ void scroll_line(int bar, int delta)
 static
 void scrolling_native_h(int x, int y)
 {
-    if(scroll_window(SB_HORZ,
+    if(scroll_window(ctx.scroll_data.target, SB_HORZ,
                      ctx.scroll_data.dx, ctx.scroll_data.target_size.cx)) {
         ctx.scroll_data.dx -= (int)ctx.scroll_data.dx;
     }
@@ -114,7 +114,7 @@ void scrolling_native_h(int x, int y)
 static
 void scrolling_native_v(int x, int y)
 {
-    if(scroll_window(SB_VERT,
+    if(scroll_window(ctx.scroll_data.target, SB_VERT,
                      ctx.scroll_data.dy, ctx.scroll_data.target_size.cy)) {
         ctx.scroll_data.dy -= (int)ctx.scroll_data.dy;
     }
@@ -135,8 +135,8 @@ void scrolling_line(int x, int y)
     dxi = ctx.scroll_data.dx * ctx.scroll_line.x_ratio;
     dyi = ctx.scroll_data.dy * ctx.scroll_line.y_ratio;
 
-    scroll_line(SB_HORZ, dxi);
-    scroll_line(SB_VERT, dyi);
+    scroll_line(ctx.scroll_data.target, SB_HORZ, dxi);
+    scroll_line(ctx.scroll_data.target, SB_VERT, dyi);
 
     ctx.scroll_data.dx -= dxi / ctx.scroll_line.x_ratio;
     ctx.scroll_data.dy -= dyi / ctx.scroll_line.y_ratio;
@@ -145,6 +145,15 @@ void scrolling_line(int x, int y)
 static
 void scrolling_ie(int x, int y)
 {
+    if(scroll_ie_h(ctx.scroll_data.ie_target,
+                   ctx.scroll_data.dx, ctx.scroll_data.target_size.cx)) {
+        ctx.scroll_data.dx -= (int)ctx.scroll_data.dx;
+    }
+
+    if(scroll_ie_v(ctx.scroll_data.ie_target,
+                   ctx.scroll_data.dy, ctx.scroll_data.target_size.cy)) {
+        ctx.scroll_data.dy -= (int)ctx.scroll_data.dy;
+    }
 }
 
 static
@@ -219,7 +228,6 @@ LRESULT scroll_mode(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
             HRESULT hres;
 
             ctx.scroll_data.mode = SCROLL_MODE_IE;
-            ctx.scroll_data.mode = SCROLL_MODE_LINESCRL;
 
             hres = get_ie_target(ctx.scroll_data.target,
                                  ctx.scroll_data.start_pt.x,
@@ -245,7 +253,10 @@ LRESULT scroll_mode(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
         }
     }
 
-    {
+    if(ctx.scroll_data.mode != SCROLL_MODE_IE ||
+       FAILED(get_ie_elem_size(ctx.scroll_data.ie_target,
+                               &ctx.scroll_data.target_size)) ||
+       FAILED(init_ie_dpids(ctx.scroll_data.ie_target))) {
         RECT rt;
 
         GetClientRect(ctx.scroll_data.target, &rt);
