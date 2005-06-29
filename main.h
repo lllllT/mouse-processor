@@ -1,7 +1,7 @@
 /*
  * main.h  --
  *
- * $Id: main.h,v 1.40 2005/02/09 09:22:20 hos Exp $
+ * $Id: main.h,v 1.41 2005/06/29 04:46:31 hos Exp $
  *
  */
 
@@ -239,6 +239,8 @@ int MP_OP_API ie_scroll_get_operator(scroll_op_procs_t *op, int size,
                                      const support_procs_t *sprocs);
 int MP_OP_API wheel_message_get_operator(scroll_op_procs_t *op, int size,
                                          const support_procs_t *sprocs);
+int MP_OP_API post_wheel_message_get_operator(scroll_op_procs_t *op, int size,
+                                              const support_procs_t *sprocs);
 
 int MP_OP_API or_get_operator(scroll_op_procs_t *op, int size,
                               const support_procs_t *sprocs);

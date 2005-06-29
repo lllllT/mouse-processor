@@ -148,4 +148,8 @@
  (wheel-message
   (ratio 0.0 -5.0)
   (tick . 120))
+
+ (post-wheel-message
+  (ratio 0.0 -5.0)
+  (tick . 120))
  )

@@ -1,7 +1,7 @@
 /*
  * scroll_op.c  -- scroll operators
  *
- * $Id: scroll_op.c,v 1.13 2005/02/04 17:08:39 hos Exp $
+ * $Id: scroll_op.c,v 1.14 2005/06/29 04:46:32 hos Exp $
  *
  */
 
@@ -51,25 +51,23 @@ void get_scroll_op_xy_ratio(const s_exp_data_t *arg,
 {
     s_exp_data_t *xr, *yr;
 
+    *x_ratio = def_x_ratio;
     if((xr = s_exp_nth(arg, 0)) != NULL ||
        (xr = s_exp_nth(mode_conf, 0)) != NULL) {
         if(xr->type == S_EXP_TYPE_INTEGER) {
             *x_ratio = xr->number.val;
         } else if(xr->type == S_EXP_TYPE_FLONUM) {
             *x_ratio = xr->flonum.val;
-        } else {
-            *x_ratio = def_x_ratio;
         }
     }
 
+    *y_ratio = def_y_ratio;
     if((yr = s_exp_nth(arg, 1)) != NULL ||
        (yr = s_exp_nth(mode_conf, 1)) != NULL) {
         if(yr->type == S_EXP_TYPE_INTEGER) {
             *y_ratio = yr->number.val;
         } else if(yr->type == S_EXP_TYPE_FLONUM) {
             *y_ratio = yr->flonum.val;
-        } else {
-            *y_ratio = def_y_ratio;
         }
     }
 }
@@ -99,6 +97,7 @@ struct scroll_operator_def builtin_scroll_op[] = {
     {L"trackbar-control", trackbar_control_get_operator},
     {L"ie-scroll", ie_scroll_get_operator},
     {L"wheel-message", wheel_message_get_operator},
+    {L"post-wheel-message", post_wheel_message_get_operator},
 
     {L"or", or_get_operator},
     {L"apply-parent", apply_parent_get_operator},
