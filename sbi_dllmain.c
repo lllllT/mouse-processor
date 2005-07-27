@@ -1,7 +1,7 @@
 /*
  * sbi_dllmain.c  -- entry point of DLL for scrollbar injection
  *
- * $Id: sbi_dllmain.c,v 1.6 2005/02/10 09:24:41 hos Exp $
+ * $Id: sbi_dllmain.c,v 1.7 2005/07/27 05:54:33 hos Exp $
  *
  */
 
@@ -18,6 +18,8 @@ static fake_gsinfo_data_t *gsinfo_data = NULL;
 static HANDLE fmap = NULL;
 
 static BOOL init_shmem(void);
+
+__declspec(dllexport) int sbi_dummy; /* for dummy export */
 
 
 static
@@ -86,7 +88,6 @@ BOOL finit(void)
 }
 
 
-__declspec(dllexport)           /* for dummy export */
 BOOL WINAPI DllMain(HINSTANCE instance, DWORD reason, LPVOID reserved)
 {
     if(reason == DLL_PROCESS_ATTACH) {

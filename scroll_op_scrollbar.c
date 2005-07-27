@@ -1,7 +1,7 @@
 /*
  * scroll_op_scrollbar.c  -- scroll operators for scrollbar
  *
- * $Id: scroll_op_scrollbar.c,v 1.23 2005/02/28 02:34:13 hos Exp $
+ * $Id: scroll_op_scrollbar.c,v 1.24 2005/07/27 05:54:34 hos Exp $
  *
  */
 
@@ -37,6 +37,10 @@ static struct {
 #define HOOK_SB_MODULE_BASE _T("mpsbh.dll")
 #define HOOK_SB_SUBCLASS_MSG \
 _T("mouse-processsor-{63F91666-6E29-4f58-A2DF-A89E6B3FD1CF}")
+
+extern int sbi_dummy; /* for dummy import */
+__declspec(unused)
+static int *dummy = &sbi_dummy;
 
 __declspec(dllimport)
 LRESULT CALLBACK gsi_call_proc(int code, WPARAM wparam, LPARAM lparam);

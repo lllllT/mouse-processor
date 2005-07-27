@@ -76,7 +76,7 @@
  (":OperaWindowClass$" (window-scrollbar line-scroll))
  ((title ":AVTreeViewClass:AVTreeNodeSimpleView$")
   (apply-parent (neighborhood-scrollbar)))
- ("XWin(_GL)?\\.exe" (post-wheel-message))
+ ("XWin(_GL)?\\.exe:" (post-wheel-message))
 
  ("Jane2ch\\.exe:.*:Internet Explorer_Server$" (ie-scroll pixel 20.0 20.0))
  (":Internet Explorer_Server$" (or (ie-scroll)

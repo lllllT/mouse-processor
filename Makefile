@@ -1,7 +1,7 @@
 #
 # Makefile
 #
-# $Id: Makefile,v 1.40 2005/02/18 08:34:03 hos Exp $
+# $Id: Makefile,v 1.41 2005/07/27 05:54:33 hos Exp $
 #
 
 DEFINES = -D_WIN32_WINNT=0x0500 -DUNICODE=1 -D_UNICODE=1
@@ -24,7 +24,7 @@ EXE_RSRC = resource.rc
 EXE_OBJS = $(EXE_SRCS:%.c=%.o) $(EXE_RSRC:%.rc=%.o)
 EXE_HEADERS = main.h operator.h resource.h \
               scroll_op_utils.h scroll_op_scrollbar.h shmem.h
-EXE_LDLIBS = $(UTIL_LIBS) -L. -l$(SBH_DLL_NAME) \
+EXE_LDLIBS = $(UTIL_LIBS) -L. -l$(SBI_DLL_NAME) -l$(SBH_DLL_NAME) \
              -lpsapi -lole32 -loleaut32 -loleacc -luuid
 EXE_LDFLAGS = $(LDFLAGS)
 
@@ -34,7 +34,8 @@ SBI_DLL_RSRC =
 SBI_DLL_OBJS = $(SBI_DLL_SRCS:%.c=%.o) $(SBI_DLL_RSRC:%.rc=%.o)
 SBI_DLL_HEADERS = dllinj.h scroll_op_scrollbar.h shmem.h
 SBI_DLL_LDLIBS = -lkernel32 -lpsapi
-SBI_DLL_LDFLAGS = $(LDFLAGS) -shared -nostdlib -e _DllMain@12
+SBI_DLL_LDFLAGS = $(LDFLAGS) -shared -nostdlib -e _DllMain@12 \
+		  -Wl,--out-implib,lib$(SBI_DLL_NAME).a
 
 SBH_DLL_NAME = $(TARGET_NAME)sbh.dll
 SBH_DLL_SRCS = sbh_dllmain.c shmem.c
@@ -79,7 +80,7 @@ all: all-rec $(TARGET)
 
 .SUFFIXES: .rc
 
-$(EXE_NAME): $(EXE_OBJS) $(UTIL_LIBS) lib$(SBH_DLL_NAME).a
+$(EXE_NAME): $(EXE_OBJS) $(UTIL_LIBS) lib$(SBI_DLL_NAME).a lib$(SBH_DLL_NAME).a
 	$(CC) $(EXE_LDFLAGS) $(EXE_OBJS) $(EXE_LDLIBS) -o $@
 
 $(SBI_DLL_NAME): $(SBI_DLL_OBJS)
@@ -87,6 +88,8 @@ $(SBI_DLL_NAME): $(SBI_DLL_OBJS)
 
 $(SBH_DLL_NAME): $(SBH_DLL_OBJS)
 	$(CC) $(SBH_DLL_LDFLAGS) $(SBH_DLL_OBJS) $(SBH_DLL_LDLIBS) -o $@
+
+lib$(SBI_DLL_NAME).a: $(SBI_DLL_NAME)
 
 lib$(SBH_DLL_NAME).a: $(SBH_DLL_NAME)
 
