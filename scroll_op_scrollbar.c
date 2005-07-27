@@ -1,7 +1,7 @@
 /*
  * scroll_op_scrollbar.c  -- scroll operators for scrollbar
  *
- * $Id: scroll_op_scrollbar.c,v 1.24 2005/07/27 05:54:34 hos Exp $
+ * $Id: scroll_op_scrollbar.c,v 1.25 2005/07/27 09:59:18 hos Exp $
  *
  */
 
@@ -105,8 +105,12 @@ void inject_scrollbar_support_proc_to(HWND hwnd)
     }
 
     GetWindowThreadProcessId(hwnd, &pid);
+    spr->log_printf(LOG_LEVEL_DEBUG, L"try to inject DLL: PID, %d\n", pid);
+
     if((n == 1 && inject_sb_data.pid[0] == pid) ||
        (pid == GetCurrentProcessId())) {
+        spr->log_printf(LOG_LEVEL_DEBUG,
+                        L"no need to inject DLL: PID, %d\n", pid);
         goto end;
     }
 
@@ -115,18 +119,24 @@ void inject_scrollbar_support_proc_to(HWND hwnd)
                      PROCESS_CREATE_THREAD | PROCESS_QUERY_INFORMATION,
                      FALSE, pid);
     if(ph == NULL) {
+        spr->log_lasterror(LOG_LEVEL_DEBUG,
+                           L"failed to inject DLL: OpenProcess()", 1);
         goto end;
     }
 
     size = sizeof(inject_sb_data.module_name);
     name = VirtualAllocEx(ph, NULL, size, MEM_COMMIT, PAGE_READWRITE);
     if(name == NULL) {
+        spr->log_lasterror(LOG_LEVEL_DEBUG,
+                           L"failed to inject DLL: VirtualAllocEx()", 1);
         goto end;
     }
 
     if(WriteProcessMemory(ph, name,
                           inject_sb_data.module_name, size,
                           NULL) == 0) {
+        spr->log_lasterror(LOG_LEVEL_DEBUG,
+                           L"failed to inject DLL: WriteProcessMemory()", 1);
         goto end;
     }
 
@@ -137,6 +147,8 @@ void inject_scrollbar_support_proc_to(HWND hwnd)
                                           "LoadLibraryW"),
                            name, 0, NULL);
     if(thread == NULL) {
+        spr->log_lasterror(LOG_LEVEL_DEBUG,
+                           L"failed to inject DLL: CreateRemoteThread()", 1);
         goto end;
     }
 
@@ -145,6 +157,8 @@ void inject_scrollbar_support_proc_to(HWND hwnd)
     CloseHandle(thread);
 
     if(mod == NULL) {
+        spr->log_printf(LOG_LEVEL_DEBUG,
+                        L"failed to inject DLL: remote LoadLibraryW()\n");
         goto end;
     }
 
@@ -153,6 +167,8 @@ void inject_scrollbar_support_proc_to(HWND hwnd)
                     0, FALSE, DUPLICATE_SAME_ACCESS);
     inject_sb_data.module[n] = mod;
     inject_sb_data.pid[n] = pid;
+
+    spr->log_printf(LOG_LEVEL_DEBUG, L"successfully injected: PID, %d\n", pid);
 
   end:
     if(name != NULL) VirtualFreeEx(ph, name, size, MEM_RELEASE);
@@ -164,6 +180,9 @@ void uninject_scrollbar_support_proc_from(int n)
 {
     HANDLE thread;
 
+    spr->log_printf(LOG_LEVEL_DEBUG,
+                    L"try to uninject DLL: PID, %d\n", inject_sb_data.pid[n]);
+
     thread =
         CreateRemoteThread(inject_sb_data.process[n], NULL, 0,
                            (LPTHREAD_START_ROUTINE)
@@ -171,11 +190,17 @@ void uninject_scrollbar_support_proc_from(int n)
                                           "FreeLibrary"),
                            inject_sb_data.module[n], 0, NULL);
     if(thread == NULL) {
+        spr->log_lasterror(LOG_LEVEL_DEBUG,
+                           L"failed to uninject DLL: CreateRemoteThread()", 1);
         goto end;
     }
 
     WaitForSingleObject(thread, INFINITE);
     CloseHandle(thread);
+
+    spr->log_printf(LOG_LEVEL_DEBUG,
+                    L"successfully uninjected: PID, %d\n",
+                    inject_sb_data.pid[n]);
 
   end:
     inject_sb_data.process[n] = NULL;

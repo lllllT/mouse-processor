@@ -1,7 +1,7 @@
 /*
  * shmem.c  -- shared memory
  *
- * $Id: shmem.c,v 1.2 2005/02/01 17:03:50 hos Exp $
+ * $Id: shmem.c,v 1.3 2005/07/27 09:59:19 hos Exp $
  *
  */
 
@@ -16,10 +16,6 @@ void *create_shared_mem(LPCWSTR name, DWORD size, HANDLE *hmap)
     map = CreateFileMappingW(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE,
                              0, size, name);
     if(map == NULL) {
-        return NULL;
-    }
-    if(GetLastError() == ERROR_ALREADY_EXISTS) {
-        CloseHandle(map);
         return NULL;
     }
 
