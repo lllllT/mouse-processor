@@ -1,7 +1,7 @@
 /*
  * conf.h  -- configuration
  *
- * $Id: conf.c,v 1.19 2005/01/27 05:38:23 hos Exp $
+ * $Id: conf.c,v 1.20 2005/07/28 09:41:16 hos Exp $
  *
  */
 
@@ -14,21 +14,24 @@
 
 
 #define HOME_ENV L"HOME"
-#define HOME_RC_NAME L"\\.mprc"
-#define MODULE_RC_NAME L"\\default.mprc"
+#define HOMEDRIVE_ENV L"HOMEDRIVE"
+#define HOMEPATH_ENV L"HOMEPATH"
+#define USERPROFILE_ENV L"USERPROFILE"
+
+static wchar_t *rc_names[] = { L".mprc", L"dot.mprc", L"default.mprc" };
 
 
 static
-LPWSTR get_home_path(void)
+LPWSTR get_env_path(LPCWSTR rel_path, LPCWSTR env)
 {
     DWORD size;
     LPWSTR path;
 
-    size = GetEnvironmentVariableW(HOME_ENV, NULL, 0);
+    size = GetEnvironmentVariableW(env, NULL, 0);
     if(size == 0) {
         return NULL;
     }
-    size += wcslen(HOME_RC_NAME);
+    size += 1 + wcslen(rel_path);
 
     path = (LPWSTR)malloc(sizeof(WCHAR) * size);
     if(path == NULL) {
@@ -36,15 +39,83 @@ LPWSTR get_home_path(void)
     }
     memset(path, 0, sizeof(WCHAR) * size);
 
-    GetEnvironmentVariable(HOME_ENV, path, size);
+    GetEnvironmentVariable(env, path, size);
 
-    wcscat(path, HOME_RC_NAME);
+    wcscat(path, L"\\");
+    wcscat(path, rel_path);
 
     return path;
 }
 
 static
-LPWSTR get_module_path(void)
+LPWSTR get_home_path(LPCWSTR rel_path)
+{
+    return get_env_path(rel_path, HOME_ENV);
+}
+
+static
+LPWSTR get_userprofile_path(LPCWSTR rel_path)
+{
+    return get_env_path(rel_path, USERPROFILE_ENV);
+}
+
+static
+LPWSTR get_home_drivepath(LPCWSTR rel_path)
+{
+    DWORD size;
+    LPWSTR path;
+
+    size = GetEnvironmentVariableW(HOMEDRIVE_ENV, NULL, 0) +
+           GetEnvironmentVariableW(HOMEPATH_ENV, NULL, 0);
+    if(size == 0) {
+        return NULL;
+    }
+    size += 1 + wcslen(rel_path);
+
+    path = (LPWSTR)malloc(sizeof(WCHAR) * size);
+    if(path == NULL) {
+        return NULL;
+    }
+    memset(path, 0, sizeof(WCHAR) * size);
+
+    GetEnvironmentVariable(HOMEDRIVE_ENV, path, size);
+    GetEnvironmentVariable(HOMEPATH_ENV,
+                           path + wcslen(path), size - wcslen(path));
+
+    wcscat(path, L"\\");
+    wcscat(path, rel_path);
+
+    return path;
+}
+
+static
+LPWSTR get_cwd_path(LPCWSTR rel_path)
+{
+    DWORD size;
+    LPWSTR path;
+
+    size = GetCurrentDirectory(0, NULL);
+    if(size == 0) {
+        return NULL;
+    }
+    size += 1 + wcslen(rel_path);
+
+    path = (LPWSTR)malloc(sizeof(WCHAR) * size);
+    if(path == NULL) {
+        return NULL;
+    }
+    memset(path, 0, sizeof(WCHAR) * size);
+
+    GetCurrentDirectory(size, path);
+
+    wcscat(path, L"\\");
+    wcscat(path, rel_path);
+
+    return path;
+}
+
+static
+LPWSTR get_module_path(LPCWSTR rel_path)
 {
     DWORD size;
     LPWSTR path;
@@ -54,7 +125,7 @@ LPWSTR get_module_path(void)
     if(size == 0) {
         return NULL;
     }
-    size += wcslen(MODULE_RC_NAME);
+    size += 1 + wcslen(rel_path);
 
     path = (LPWSTR)malloc(sizeof(WCHAR) * size);
     if(path == NULL) {
@@ -71,12 +142,15 @@ LPWSTR get_module_path(void)
         }
     }
 
-    wcscat(path, MODULE_RC_NAME);
+    wcscat(path, L"\\");
+    wcscat(path, rel_path);
 
     return path;
 }
 
 
+static s_exp_data_t *load_conf(LPCWSTR conf_file, s_exp_data_t *base_data);
+
 static
 s_exp_data_t *load_file_conf(LPCWSTR path)
 {
@@ -85,7 +159,7 @@ s_exp_data_t *load_file_conf(LPCWSTR path)
     s_exp_read_context_t *rc = NULL;
     s_exp_data_t *data = NULL;
 
-    log_printf(LOG_LEVEL_NOTIFY, L"Reading config file: %ls\n", path);
+    log_printf(LOG_LEVEL_DEBUG, L"Reading config file: %ls\n", path);
 
     u8s_path = u8s_dup_from_wcs(path);
     if(u8s_path == NULL) {
@@ -96,7 +170,7 @@ s_exp_data_t *load_file_conf(LPCWSTR path)
 
     fp = _wfopen(path, L"r");
     if(fp == NULL) {
-        log_printf(LOG_LEVEL_NOTIFY,
+        log_printf(LOG_LEVEL_DEBUG,
                    L"Failed to read: %ls: %hs\n", path, strerror(errno));
         goto end;
     }
@@ -121,17 +195,168 @@ s_exp_data_t *load_file_conf(LPCWSTR path)
 }
 
 static
-s_exp_data_t *load_conf(LPCWSTR conf_file)
+s_exp_data_t *merge_conf_data(s_exp_data_t *data, s_exp_data_t *part)
+{
+    if(part->type == S_EXP_TYPE_CONS &&
+       S_EXP_CAR(part)->type == S_EXP_TYPE_SYMBOL) {
+        /* part is pair and it's car is symbol: merge */
+        s_exp_data_t *sym = S_EXP_CAR(part);
+        s_exp_data_t *p = s_exp_assq_get(data, sym->symbol.name);
+
+        if(p == NULL) {
+            s_exp_data_t *d;
+
+            sym = s_exp_intern(sym->symbol.name);
+            if(S_EXP_ERROR(sym)) {
+                free_s_exp(data);
+                free_s_exp(part);
+                return sym;
+            }
+
+            p = s_exp_cons(sym, S_EXP_NIL);
+            if(S_EXP_ERROR(p)) {
+                free_s_exp(data);
+                free_s_exp(part);
+                return p;
+            }
+
+            d = s_exp_cons(p, data);
+            if(S_EXP_ERROR(d)) {
+                free_s_exp(p);
+                free_s_exp(data);
+                free_s_exp(part);
+                return d;
+            }
+
+            data = d;
+        }
+
+        if(S_EXP_CDR(part)->type != S_EXP_TYPE_CONS ||
+           S_EXP_CADR(part)->type != S_EXP_TYPE_CONS) {
+            S_EXP_CDR(p) = S_EXP_CDR(part);
+            S_EXP_CDR(part) = S_EXP_NIL;
+        } else {
+            s_exp_data_t *pp;
+            S_EXP_FOR_EACH(S_EXP_CDR(part), pp) {
+                s_exp_data_t *d = merge_conf_data(S_EXP_CDR(p),
+                                                  S_EXP_CAR(pp));
+                if(S_EXP_ERROR(d)) {
+                    S_EXP_CDR(p) = S_EXP_NIL;
+                    S_EXP_CAR(pp) = S_EXP_NIL;
+                    free_s_exp(data);
+                    free_s_exp(part);
+                    return d;
+                }
+
+                S_EXP_CDR(p) = d;
+                S_EXP_CAR(pp) = S_EXP_NIL;
+            }
+        }
+        free_s_exp(part);
+
+        return data;
+    } else {
+        /* prepend to data */
+        s_exp_data_t *d = s_exp_cons(part, data);
+        if(S_EXP_ERROR(d)) {
+            free_s_exp(data);
+            free_s_exp(part);
+        }
+
+        return d;
+    }
+}
+
+static
+s_exp_data_t *merge_conf_data_with_include(s_exp_data_t *data1,
+                                           s_exp_data_t *data2)
+{
+    s_exp_data_t *p;
+
+    S_EXP_FOR_EACH(data2, p) {
+        s_exp_data_t *l = S_EXP_CAR(p);
+
+        if(l->type == S_EXP_TYPE_CONS &&
+           S_EXP_CAR(l)->type == S_EXP_TYPE_SYMBOL &&
+           wcscmp(S_EXP_CAR(l)->symbol.name, L"include") == 0) {
+            /* (include ...) */
+            s_exp_data_t *pp;
+            S_EXP_FOR_EACH(S_EXP_CDR(l), pp) {
+                if(S_EXP_CAR(pp)->type != S_EXP_TYPE_STRING) {
+                    log_printf(LOG_LEVEL_ERROR, L"Invalid include argument: ");
+                    log_print_s_exp(LOG_LEVEL_ERROR, S_EXP_CAR(pp), 1);
+                    continue;
+                }
+
+                {
+                    s_exp_data_t *d = load_conf(S_EXP_CAR(pp)->string.str,
+                                                data1);
+                    if(d == NULL) {
+                        log_printf(LOG_LEVEL_ERROR,
+                                   L"include: config file not found: ");
+                        log_print_s_exp(LOG_LEVEL_ERROR, S_EXP_CAR(pp), 1);
+                        continue;
+                    }
+
+                    data1 = d;
+                }
+            }
+        } else {
+            /* merge */
+            data1 = merge_conf_data(data1, l);
+            if(S_EXP_ERROR(data1)) {
+                free_s_exp(data2);
+                return NULL;
+            }
+
+            S_EXP_CAR(p) = S_EXP_NIL;
+        }
+    }
+
+    free_s_exp(data2);
+
+    return data1;
+}
+
+static
+s_exp_data_t *load_merged_file_conf(LPCWSTR path, s_exp_data_t *data)
+{
+    s_exp_data_t *d = load_file_conf(path);
+    if(d == NULL) {
+        return NULL;
+    }
+
+    return merge_conf_data_with_include(data, d);
+}
+
+static
+s_exp_data_t *load_conf(LPCWSTR conf_file, s_exp_data_t *base_data)
 {
     LPWSTR path;
     s_exp_data_t *data;
 
-    if(conf_file != NULL) {
-        return load_file_conf(conf_file);
+    if(conf_file == NULL) {
+        int i;
+        for(i = 0; i < sizeof(rc_names) / sizeof(rc_names[0]); i++) {
+            data = load_conf(rc_names[i], base_data);
+            if(data != NULL) {
+                return data;
+            }
+        }
     }
 
-    if((path = get_home_path()) != NULL) {
-        data = load_file_conf(path);
+    if(conf_file[0] == L'/' ||
+       conf_file[0] == L'\\' ||
+       (((conf_file[0] >= L'a' && conf_file[0] <= L'z') ||
+         (conf_file[0] >= L'A' && conf_file[0] <= L'Z')) &&
+        conf_file[1] == L':')) {
+        /* abs path */
+        return load_merged_file_conf(conf_file, base_data);
+    }
+
+    /* try to read from "$HOME/..." */
+    if((path = get_home_path(conf_file)) != NULL) {
+        data = load_merged_file_conf(path, base_data);
         free(path);
 
         if(data != NULL) {
@@ -139,8 +364,39 @@ s_exp_data_t *load_conf(LPCWSTR conf_file)
         }
     }
 
-    if((path = get_module_path()) != NULL) {
-        data = load_file_conf(path);
+    /* try to read from "$HOMEDRIVE$HOMEPATH/..." */
+    if((path = get_home_drivepath(conf_file)) != NULL) {
+        data = load_merged_file_conf(path, base_data);
+        free(path);
+
+        if(data != NULL) {
+            return data;
+        }
+    }
+
+    /* try to read from "$USERPROFILE/..." */
+    if((path = get_userprofile_path(conf_file)) != NULL) {
+        data = load_merged_file_conf(path, base_data);
+        free(path);
+
+        if(data != NULL) {
+            return data;
+        }
+    }
+
+    /* try to read from current direcotry */
+    if((path = get_cwd_path(conf_file)) != NULL) {
+        data = load_merged_file_conf(path, base_data);
+        free(path);
+
+        if(data != NULL) {
+            return data;
+        }
+    }
+
+    /* try to read from "<module-path>/..." */
+    if((path = get_module_path(conf_file)) != NULL) {
+        data = load_merged_file_conf(path, base_data);
         free(path);
 
         if(data != NULL) {
@@ -1056,7 +1312,7 @@ int load_setting(LPWSTR conf_file, int force_apply)
     log_printf(LOG_LEVEL_NOTIFY, L"\n" L"Loading configuration...\n");
 
     /* load setting file */
-    conf.conf_data = load_conf(conf.conf_file);
+    conf.conf_data = load_conf(conf.conf_file, S_EXP_NIL);
     if(conf.conf_data == NULL) {
         log_printf(LOG_LEVEL_WARNING, L"Config file not found\n");
         conf.conf_data = S_EXP_NIL;

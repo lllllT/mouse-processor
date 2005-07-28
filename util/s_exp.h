@@ -1,7 +1,7 @@
 /*
  * s_exp.h  -- s-expression
  *
- * $Id: s_exp.h,v 1.6 2005/01/14 14:54:38 hos Exp $
+ * $Id: s_exp.h,v 1.7 2005/07/28 09:41:18 hos Exp $
  *
  */
 
@@ -120,8 +120,10 @@ s_exp_data_t *read_all_s_exp(s_exp_read_context_t *ctx);
 int write_s_exp(FILE *fp, const s_exp_data_t *data);
 unsigned char *u8s_write_s_exp(const s_exp_data_t *data);
 
+s_exp_data_t *s_exp_cons(s_exp_data_t *car, s_exp_data_t *cdr);
 s_exp_data_t *s_exp_intern(const wchar_t *str);
 
+s_exp_data_t *s_exp_assq_get(const s_exp_data_t *alist, const wchar_t *sym);
 s_exp_data_t *s_exp_assq(const s_exp_data_t *alist, const wchar_t *sym);
 s_exp_data_t *s_exp_massq(const s_exp_data_t *alist, int type, ...);
 s_exp_data_t *s_exp_massq_v(const s_exp_data_t *alist, int type, va_list ap);

@@ -1,7 +1,7 @@
 /*
  * scroll_op_wheel.c  -- scroll operator for wheel message
  *
- * $Id: scroll_op_wheel.c,v 1.7 2005/06/29 04:46:32 hos Exp $
+ * $Id: scroll_op_wheel.c,v 1.8 2005/07/28 09:41:17 hos Exp $
  *
  */
 
@@ -20,8 +20,6 @@ struct wheel_message_context {
     double x_ratio, y_ratio;
     int tick;
     double ds;
-
-    int use_post;
 };
 
 static
@@ -31,8 +29,7 @@ int MP_OP_API wheel_message_get_ctx_size(const op_arg_t *arg)
 }
 
 static
-int MP_OP_API wheel_message_init_ctx_comm(void *ctxp, int size,
-                                          const op_arg_t *arg, int use_post)
+int MP_OP_API wheel_message_init_ctx(void *ctxp, int size, const op_arg_t *arg)
 {
     struct wheel_message_context *ctx;
     s_exp_data_t *ratio_conf, *data;
@@ -78,23 +75,7 @@ int MP_OP_API wheel_message_init_ctx_comm(void *ctxp, int size,
     /* initial delta */
     ctx->ds = 0;
 
-    /* use PostMessage? */
-    ctx->use_post = use_post;
-
     return 1;
-}
-
-static
-int MP_OP_API wheel_message_init_ctx(void *ctxp, int size, const op_arg_t *arg)
-{
-    return wheel_message_init_ctx_comm(ctxp, size, arg, 0);
-}
-
-static
-int MP_OP_API post_wheel_message_init_ctx(void *ctxp, int size,
-                                          const op_arg_t *arg)
-{
-    return wheel_message_init_ctx_comm(ctxp, size, arg, 1);
 }
 
 static
@@ -127,12 +108,7 @@ int MP_OP_API wheel_message_scroll(void *ctxp, double dx, double dy)
                     data);
     lp = MAKELPARAM(ctx->pt.x, ctx->pt.y);
 
-    if(ctx->use_post) {
-        PostMessage(ctx->target, WM_MOUSEWHEEL, wp, lp);
-    } else {
-        SendMessageTimeout(ctx->target, WM_MOUSEWHEEL, wp, lp,
-                           SMTO_ABORTIFHUNG, 1000, NULL);
-    }
+    PostMessage(ctx->target, WM_MOUSEWHEEL, wp, lp);
 
     ctx->ds -= data;
 
@@ -161,18 +137,6 @@ int MP_OP_API wheel_message_get_operator(scroll_op_procs_t *op, int size,
     op->init_context = wheel_message_init_ctx;
     op->scroll = wheel_message_scroll;
     op->end_scroll = wheel_message_end_scroll;
-
-    return 1;
-}
-
-int MP_OP_API post_wheel_message_get_operator(scroll_op_procs_t *op, int size,
-                                              const support_procs_t *sprocs)
-{
-    if(wheel_message_get_operator(op, size, sprocs) == 0) {
-        return 0;
-    }
-
-    op->init_context = post_wheel_message_init_ctx;
 
     return 1;
 }

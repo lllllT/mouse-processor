@@ -1,7 +1,7 @@
 /*
  * read_s_exp.c  -- read s-expression
  *
- * $Id: read_s_exp.c,v 1.7 2005/01/29 21:16:56 hos Exp $
+ * $Id: read_s_exp.c,v 1.8 2005/07/28 09:41:18 hos Exp $
  *
  */
 
@@ -910,8 +910,7 @@ static s_exp_data_t *s_exp_sys_error(const char *name, int en)
 }
 
 
-static s_exp_data_t *s_exp_append(s_exp_data_t *head, s_exp_data_t **tail,
-                                  s_exp_data_t *data)
+s_exp_data_t *s_exp_cons(s_exp_data_t *car, s_exp_data_t *cdr)
 {
     s_exp_data_t *c;
 
@@ -920,8 +919,19 @@ static s_exp_data_t *s_exp_append(s_exp_data_t *head, s_exp_data_t **tail,
         return c;
     }
 
-    S_EXP_CAR(c) = data;
-    S_EXP_CDR(c) = S_EXP_NIL;
+    S_EXP_CAR(c) = car;
+    S_EXP_CDR(c) = cdr;
+
+    return c;
+}
+
+static s_exp_data_t *s_exp_append(s_exp_data_t *head, s_exp_data_t **tail,
+                                  s_exp_data_t *data)
+{
+    s_exp_data_t *c = s_exp_cons(data, S_EXP_NIL);
+    if(S_EXP_ERROR(c)) {
+        return c;
+    }
 
     if(head == S_EXP_NIL) {
         head = c;

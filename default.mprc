@@ -72,21 +72,19 @@
  )
 
 (scroll-window
- ("WINWORD\\.EXE:.*:_WwB:" (wheel-message))
- (":OperaWindowClass$" (window-scrollbar line-scroll))
- ((title ":AVTreeViewClass:AVTreeNodeSimpleView$")
-  (apply-parent (neighborhood-scrollbar)))
- ("XWin(_GL)?\\.exe:" (post-wheel-message))
+ (".*" (or (window-scrollbar)
+           (neighborhood-scrollbar)
+           (wheel-message)))
 
- ("Jane2ch\\.exe:.*:Internet Explorer_Server$" (ie-scroll pixel 20.0 20.0))
  (":Internet Explorer_Server$" (or (ie-scroll)
                                    (window-scrollbar line-scroll)))
  (":ScrollBar$" (scrollbar-control))
  (":msctls_trackbar32$" (trackbar-control))
 
- (".*" (or (window-scrollbar)
-           (neighborhood-scrollbar)
-           (wheel-message)))
+ ("WINWORD\\.EXE:.*:_WwB:" (wheel-message))
+ (":OperaWindowClass$" (window-scrollbar line-scroll))
+ ((title ":AVTreeViewClass:AVTreeNodeSimpleView$")
+  (apply-parent (neighborhood-scrollbar)))
  )
 
 (operator-config
@@ -148,10 +146,6 @@
   )
 
  (wheel-message
-  (ratio 0.0 -5.0)
-  (tick . 120))
-
- (post-wheel-message
   (ratio 0.0 -5.0)
   (tick . 120))
  )
