@@ -1,7 +1,7 @@
 /*
  * conf.h  -- configuration
  *
- * $Id: conf.c,v 1.20 2005/07/28 09:41:16 hos Exp $
+ * $Id: conf.c,v 1.21 2005/07/29 06:33:02 hos Exp $
  *
  */
 
@@ -19,6 +19,8 @@
 #define USERPROFILE_ENV L"USERPROFILE"
 
 static wchar_t *rc_names[] = { L".mprc", L"dot.mprc", L"default.mprc" };
+
+static int include_depth;
 
 
 static
@@ -289,8 +291,10 @@ s_exp_data_t *merge_conf_data_with_include(s_exp_data_t *data1,
                 }
 
                 {
+                    include_depth += 1;
                     s_exp_data_t *d = load_conf(S_EXP_CAR(pp)->string.str,
                                                 data1);
+                    include_depth -= 1;
                     if(d == NULL) {
                         log_printf(LOG_LEVEL_ERROR,
                                    L"include: config file not found: ");
@@ -334,6 +338,11 @@ s_exp_data_t *load_conf(LPCWSTR conf_file, s_exp_data_t *base_data)
 {
     LPWSTR path;
     s_exp_data_t *data;
+
+    if(include_depth >= 20) {
+        log_printf(LOG_LEVEL_WARNING, L"too deep include: %ls\n", conf_file);
+        return data;
+    }
 
     if(conf_file == NULL) {
         int i;
@@ -838,8 +847,7 @@ int apply_comm_mode_conf(struct mouse_conf *conf,
                     c = s_exp_assq(mode, name);
                     if(c == NULL ||
                        c->type != S_EXP_TYPE_CONS ||
-                       S_EXP_CAR(c)->type != S_EXP_TYPE_CONS ||
-                       apply_button_act(act[0], app_conf, S_EXP_CAR(c)) == 0) {
+                       apply_button_act(act[0], app_conf, c) == 0) {
                         if(c != NULL) {
                             log_printf(
                                 LOG_LEVEL_WARNING,
@@ -1312,6 +1320,7 @@ int load_setting(LPWSTR conf_file, int force_apply)
     log_printf(LOG_LEVEL_NOTIFY, L"\n" L"Loading configuration...\n");
 
     /* load setting file */
+    include_depth = 0;
     conf.conf_data = load_conf(conf.conf_file, S_EXP_NIL);
     if(conf.conf_data == NULL) {
         log_printf(LOG_LEVEL_WARNING, L"Config file not found\n");

@@ -1,0 +1,13 @@
+;;;; -*- coding: utf-8; mode: lisp -*-
+;;
+;; dot.mprc -- template of personal settings
+;;
+
+;; 標準設定の読み込み
+(include "default.mprc")
+
+;; 2ボタンデバイスの場合は、次の行をコメントアウトするとよいカモ
+;(include "2button.mprc")
+
+;; 設定をカスタマイズ場合は、このファイルをホームディレクトリに
+;; コピーして、この次の行から設定を記述して下さい。
