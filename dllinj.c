@@ -1,7 +1,7 @@
 /*
  * dllinj.c  -- DLL injection
  *
- * $Id: dllinj.c,v 1.6 2005/02/03 15:55:54 hos Exp $
+ * $Id: dllinj.c,v 1.7 2005/07/29 19:15:01 hos Exp $
  *
  */
 
@@ -9,8 +9,6 @@
 #include <psapi.h>
 
 
-static SYSTEM_INFO sinfo;
-
 int replace_imported_proc(HMODULE mod,
                           void *target_proc, const char *target_proc_mod_name,
                           void *new_proc)
@@ -100,9 +98,6 @@ void *replace_all_imported_proc(const char *target_proc_mod_name,
     void *target_proc;
     void *from, *to;
 
-    memset(&sinfo, 0, sizeof(sinfo));
-    GetSystemInfo(&sinfo);
-
     target_proc_mod = GetModuleHandleA(target_proc_mod_name);
     if(target_proc_mod == NULL) {
         return NULL;
@@ -126,7 +121,6 @@ void *replace_all_imported_proc(const char *target_proc_mod_name,
         DWORD size;
         int n, i;
 
-        memset(mods, 0, sizeof(mods));
         if(EnumProcessModules(GetCurrentProcess(),
                               mods, sizeof(mods), &size) == 0) {
             return NULL;
