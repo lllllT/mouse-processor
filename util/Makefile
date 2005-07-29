@@ -1,7 +1,7 @@
 #
 # util/Makefile
 #
-# $Id: Makefile,v 1.11 2005/01/21 16:24:46 hos Exp $
+# $Id: Makefile,v 1.12 2005/07/29 06:43:55 hos Exp $
 #
 
 DEFINES = 
@@ -25,7 +25,7 @@ PACK_SRC_FILES = $(SRCS) $(HEADERS) $(RSRC) Makefile
 
 TARGET = $(LIB_NAME)
 
-INSTALL = install
+INSTALL = install -p
 
 all: $(TARGET)
 

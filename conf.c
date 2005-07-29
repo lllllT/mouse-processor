@@ -1,7 +1,7 @@
 /*
  * conf.h  -- configuration
  *
- * $Id: conf.c,v 1.21 2005/07/29 06:33:02 hos Exp $
+ * $Id: conf.c,v 1.22 2005/07/29 06:43:54 hos Exp $
  *
  */
 
@@ -341,7 +341,7 @@ s_exp_data_t *load_conf(LPCWSTR conf_file, s_exp_data_t *base_data)
 
     if(include_depth >= 20) {
         log_printf(LOG_LEVEL_WARNING, L"too deep include: %ls\n", conf_file);
-        return data;
+        return base_data;
     }
 
     if(conf_file == NULL) {

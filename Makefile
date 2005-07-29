@@ -1,7 +1,7 @@
 #
 # Makefile
 #
-# $Id: Makefile,v 1.41 2005/07/27 05:54:33 hos Exp $
+# $Id: Makefile,v 1.42 2005/07/29 06:43:53 hos Exp $
 #
 
 DEFINES = -D_WIN32_WINNT=0x0500 -DUNICODE=1 -D_UNICODE=1
@@ -52,11 +52,11 @@ ALL_HEADERS = $(EXE_HEADERS) $(SBI_DLL_HEADERS) $(SBH_DLL_HEADERS)
 ALL_DEPS = $(ALL_SRCS:%.c=%.d) $(ALL_RSRC:%.rc=%.d)
 
 PACK_BIN_FILES = $(EXE_NAME) $(SBI_DLL_NAME) $(SBH_DLL_NAME)
-PACK_BIN_ADD_FILES = README.txt VERSION default.mprc
+PACK_BIN_ADD_FILES = README.txt VERSION
 PACK_SRC_FILES = $(ALL_SRCS) $(ALL_RSRC) $(ALL_HEADERS) \
                  icon.ico Makefile
 
-SUBDIRS = util doc
+SUBDIRS = util doc conf
 TARGET = $(SBI_DLL_NAME) $(SBH_DLL_NAME) $(EXE_NAME)
 VERSION = `cat VERSION`
 
