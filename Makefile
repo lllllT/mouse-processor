@@ -1,7 +1,7 @@
 #
 # Makefile
 #
-# $Id: Makefile,v 1.42 2005/07/29 06:43:53 hos Exp $
+# $Id: Makefile,v 1.43 2005/07/29 07:52:14 hos Exp $
 #
 
 DEFINES = -D_WIN32_WINNT=0x0500 -DUNICODE=1 -D_UNICODE=1
@@ -49,7 +49,8 @@ SBH_DLL_LDFLAGS = $(LDFLAGS) -shared -nostdlib -e _DllMain@12 \
 ALL_SRCS = $(EXE_SRCS) $(SBI_DLL_SRCS) $(SBH_DLL_SRCS)
 ALL_RSRC = $(EXE_RSRC) $(SBI_DLL_RSRC) $(SBH_DLL_RSRC)
 ALL_HEADERS = $(EXE_HEADERS) $(SBI_DLL_HEADERS) $(SBH_DLL_HEADERS)
-ALL_DEPS = $(ALL_SRCS:%.c=%.d) $(ALL_RSRC:%.rc=%.d)
+
+DEPENDS = .depends
 
 PACK_BIN_FILES = $(EXE_NAME) $(SBI_DLL_NAME) $(SBH_DLL_NAME)
 PACK_BIN_ADD_FILES = README.txt VERSION
@@ -71,7 +72,12 @@ INSTALL = install -p
 
 all: all-rec $(TARGET)
 
--include $(ALL_DEPS)
+-include $(DEPENDS)
+
+depend:
+	for f in $(ALL_SRCS) $(ALL_RSRC) ; do \
+	  $(CC) $(CFLAGS) -MM -x c $$f ; \
+	done > $(DEPENDS)
 
 %-rec:
 	for d in $(SUBDIRS); do \
@@ -98,12 +104,6 @@ lib$(SBH_DLL_NAME).a: $(SBH_DLL_NAME)
 
 .res.o:
 	$(WINDRES) -o $@ $<
-
-.c.d:
-	$(CC) $(CFLAGS) -MM -MF $@ $<
-
-.rc.d:
-	$(CC) $(CFLAGS) -MM -MF $@ -x c $<
 
 resource.o: icon.ico
 
@@ -143,4 +143,4 @@ pack-clean:
 	-$(RM) -r $(TARGET_NAME)-$(VERSION) $(TARGET_NAME)_src-$(VERSION)
 
 clean: clean-rec pack-clean
-	-$(RM) $(TARGET) *.a *.o *.d *.res *.tmp *~
+	-$(RM) $(TARGET) $(DEPENDS) *.a *.o *.res *.tmp *~
