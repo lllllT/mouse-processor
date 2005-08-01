@@ -1,7 +1,7 @@
 /*
  * conf.h  -- configuration
  *
- * $Id: conf.c,v 1.23 2005/08/01 06:08:08 hos Exp $
+ * $Id: conf.c,v 1.24 2005/08/01 06:19:28 hos Exp $
  *
  */
 
@@ -337,7 +337,7 @@ s_exp_data_t *load_merged_file_conf(LPCWSTR path, s_exp_data_t *data)
 static
 s_exp_data_t *load_conf(LPCWSTR conf_file, s_exp_data_t *base_data)
 {
-    LPWSTR path;
+    LPWSTR fname, path;
     s_exp_data_t *data;
 
     if(include_depth >= 20) {
@@ -357,16 +357,20 @@ s_exp_data_t *load_conf(LPCWSTR conf_file, s_exp_data_t *base_data)
         return NULL;
     }
 
-    if(conf_file[0] == L'/' ||
-       conf_file[0] == L'\\' ||
-       (((conf_file[0] >= L'a' && conf_file[0] <= L'z') ||
-         (conf_file[0] >= L'A' && conf_file[0] <= L'Z')) &&
-        conf_file[1] == L':')) {
+    fname = expand_env_str(conf_file);
+    if(fname != NULL &&
+       (fname[0] == L'/' ||
+        fname[0] == L'\\' ||
+        (((fname[0] >= L'a' && fname[0] <= L'z') ||
+          (fname[0] >= L'A' && fname[0] <= L'Z')) &&
+         fname[1] == L':'))) {
+        free(fname);
         /* abs path */
         return load_merged_file_conf(conf_file, base_data);
     }
+    free(fname);
 
-    /* try to read from "$HOME/..." */
+    /* try to read from "%HOME%/..." */
     if((path = get_home_path(conf_file)) != NULL) {
         data = load_merged_file_conf(path, base_data);
         free(path);
@@ -376,7 +380,7 @@ s_exp_data_t *load_conf(LPCWSTR conf_file, s_exp_data_t *base_data)
         }
     }
 
-    /* try to read from "$HOMEDRIVE$HOMEPATH/..." */
+    /* try to read from "%HOMEDRIVE%%HOMEPATH%/..." */
     if((path = get_home_drivepath(conf_file)) != NULL) {
         data = load_merged_file_conf(path, base_data);
         free(path);
@@ -386,7 +390,7 @@ s_exp_data_t *load_conf(LPCWSTR conf_file, s_exp_data_t *base_data)
         }
     }
 
-    /* try to read from "$USERPROFILE/..." */
+    /* try to read from "%USERPROFILE%/..." */
     if((path = get_userprofile_path(conf_file)) != NULL) {
         data = load_merged_file_conf(path, base_data);
         free(path);
