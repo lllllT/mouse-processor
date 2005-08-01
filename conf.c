@@ -1,7 +1,7 @@
 /*
  * conf.h  -- configuration
  *
- * $Id: conf.c,v 1.22 2005/07/29 06:43:54 hos Exp $
+ * $Id: conf.c,v 1.23 2005/08/01 06:08:08 hos Exp $
  *
  */
 
@@ -13,10 +13,9 @@
 #include <errno.h>
 
 
-#define HOME_ENV L"HOME"
-#define HOMEDRIVE_ENV L"HOMEDRIVE"
-#define HOMEPATH_ENV L"HOMEPATH"
-#define USERPROFILE_ENV L"USERPROFILE"
+#define HOME_ENV L"%HOME%\\"
+#define HOMEPATH_ENV L"%HOMEDRIVE%%HOMEPATH%\\"
+#define USERPROFILE_ENV L"%USERPROFILE%\\"
 
 static wchar_t *rc_names[] = { L".mprc", L"dot.mprc", L"default.mprc" };
 
@@ -24,70 +23,66 @@ static int include_depth;
 
 
 static
-LPWSTR get_env_path(LPCWSTR rel_path, LPCWSTR env)
+LPWSTR expand_env_str(LPCWSTR str)
 {
     DWORD size;
-    LPWSTR path;
+    LPWSTR s;
 
-    size = GetEnvironmentVariableW(env, NULL, 0);
+    size = ExpandEnvironmentStringsW(str, NULL, 0);
     if(size == 0) {
         return NULL;
     }
-    size += 1 + wcslen(rel_path);
+    size += 1;
 
-    path = (LPWSTR)malloc(sizeof(WCHAR) * size);
-    if(path == NULL) {
+    s = (LPWSTR)malloc(sizeof(WCHAR) * size);
+    if(s == NULL) {
         return NULL;
     }
-    memset(path, 0, sizeof(WCHAR) * size);
+    memset(s, 0, sizeof(WCHAR) * size);
 
-    GetEnvironmentVariable(env, path, size);
+    ExpandEnvironmentStringsW(str, s, size);
 
-    wcscat(path, L"\\");
-    wcscat(path, rel_path);
+    return s;
+}
 
-    return path;
+static
+LPWSTR wcscat_dup(LPCWSTR s1, LPCWSTR s2)
+{
+    DWORD size = 1;
+    LPWSTR s;
+
+    size += wcslen(s1);
+    size += wcslen(s2);
+
+    s = (LPWSTR)malloc(sizeof(WCHAR) * size);
+    if(s == NULL) {
+        return NULL;
+    }
+
+    memset(s, 0, sizeof(WCHAR) * size);
+
+    wcscat(s, s1);
+    wcscat(s, s2);
+
+    return s;
 }
 
 static
 LPWSTR get_home_path(LPCWSTR rel_path)
 {
-    return get_env_path(rel_path, HOME_ENV);
-}
-
-static
-LPWSTR get_userprofile_path(LPCWSTR rel_path)
-{
-    return get_env_path(rel_path, USERPROFILE_ENV);
+    return wcscat_dup(HOME_ENV, rel_path);
 }
 
 static
 LPWSTR get_home_drivepath(LPCWSTR rel_path)
 {
-    DWORD size;
-    LPWSTR path;
+    return wcscat_dup(HOMEPATH_ENV, rel_path);
+}
 
-    size = GetEnvironmentVariableW(HOMEDRIVE_ENV, NULL, 0) +
-           GetEnvironmentVariableW(HOMEPATH_ENV, NULL, 0);
-    if(size == 0) {
-        return NULL;
-    }
-    size += 1 + wcslen(rel_path);
-
-    path = (LPWSTR)malloc(sizeof(WCHAR) * size);
-    if(path == NULL) {
-        return NULL;
-    }
-    memset(path, 0, sizeof(WCHAR) * size);
-
-    GetEnvironmentVariable(HOMEDRIVE_ENV, path, size);
-    GetEnvironmentVariable(HOMEPATH_ENV,
-                           path + wcslen(path), size - wcslen(path));
-
-    wcscat(path, L"\\");
-    wcscat(path, rel_path);
-
-    return path;
+static
+LPWSTR get_userprofile_path(LPCWSTR rel_path)
+{
+    return wcscat_dup(USERPROFILE_ENV, rel_path);
 }
 
 static
@@ -325,7 +320,13 @@ s_exp_data_t *merge_conf_data_with_include(s_exp_data_t *data1,
 static
 s_exp_data_t *load_merged_file_conf(LPCWSTR path, s_exp_data_t *data)
 {
-    s_exp_data_t *d = load_file_conf(path);
+    LPWSTR p = expand_env_str(path);
+    if(p == NULL) {
+        return NULL;
+    }
+
+    s_exp_data_t *d = load_file_conf(p);
+    free(p);
     if(d == NULL) {
         return NULL;
     }
@@ -352,6 +353,8 @@ s_exp_data_t *load_conf(LPCWSTR conf_file, s_exp_data_t *base_data)
                 return data;
             }
         }
+
+        return NULL;
     }
 
     if(conf_file[0] == L'/' ||
