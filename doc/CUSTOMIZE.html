@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
-<meta http-equiv="content-type" content="text/html; charset=euc-jp">
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
 <link rel="stylesheet" type="text/css" href="std.css">
 <link rel="stylesheet" type="text/css" href="manual.css">
 <title>Customize mouse-processor setting file</title>
@@ -25,22 +25,22 @@
 <h2><a name="introduction">Introduction</a></h2>
 
 <p>
-���Υɥ�����ȤǤ� mouse-processor ������ե���������� (�񼰡��ѥ�᡼����) �ˤĤ����������ޤ���<br>
-��°������ե����� <a href="../default.mprc"><span class="fname">default.mprc</span></a> �ǰ��̤�ε�ǽ�����ѤǤ��ޤ�����
-����ե�����򥫥����ޥ������뤳�Ȥǡ���꼫ʬ���ߤ�ư��򤹤�褦������ѹ����뤳�Ȥ��Ǥ��ޤ���
+このドキュメントでは mouse-processor の設定ファイルの内容 (書式、パラメータ等) について説明します。<br>
+付属の設定ファイル <a href="../default.mprc"><span class="fname">default.mprc</span></a> で一通りの機能を利用できますが、
+設定ファイルをカスタマイズすることで、より自分好みの動作をするよう設定を変更することができます。
 </p>
 
 
 <h2><a name="setting-file">Setting file</a></h2>
 
 <p>
-����ե�����ϥ��ޥ�ɥ饤��������ޤ��Ͻ���ξ�꤫�鸡������ޤ���
+設定ファイルはコマンドライン引数、または所定の場所から検索されます。
 </p>
 
 <ul>
-<li>���ޥ�ɥ饤����������Хѥ�������ե��������ꤷ������¾�ξ�꤫��θ����ϹԤʤ��ޤ���</li>
-<li>���ޥ�ɥ饤����������Хѥ�������ե��������ꤷ�����ϥۡ���ǥ��쥯�ȥ꤫�鸡������ޤ���</li>
-<li>���ޥ�ɥ饤���������ꤷ�ʤ��ä����ϥۡ���ǥ��쥯�ȥ꤫��ʲ��Υե�����̾�򸡺������ǽ�˸��դ��ä��ե��������Ѥ��ޤ���
+<li>コマンドライン引数で絶対パスの設定ファイルを指定した場合は他の場所からの検索は行なわれません。</li>
+<li>コマンドライン引数で相対パスの設定ファイルを指定した場合はホームディレクトリから検索されます。</li>
+<li>コマンドライン引数を指定しなかった場合はホームディレクトリから以下のファイル名を検索し、最初に見付かったファイルを使用します。
   <ul>
     <li><span class="fname">.mprc</span></li>
     <li><span class="fname">dot.mprc</span></li>
@@ -50,16 +50,20 @@
 </ul>
 
 <p>
-�ۡ���ǥ��쥯�ȥ�Ȥϰʲ��Τ����줫�Ǥ����夫���˸�������ޤ���
+ホームディレクトリとは以下のいずれかです。上から順に検索されます。
 </p>
 
 <ul>
-  <li>�Ķ��ѿ� <span class="env">HOME</span> �Υǥ��쥯�ȥ�</li>
-  <li>�Ķ��ѿ� <span class="env">HOMEDRIVE</span> �� <span class="env">HOMEPATH</span> ��Ҥ����ǥ��쥯�ȥ�</li>
-  <li>�Ķ��ѿ� <span class="env">USERPROFILE</span> �Υǥ��쥯�ȥ�</li>
-  <li>�ץ����� <span class="fname">mp.exe</span> �Υ����ȥǥ��쥯�ȥ�</li>
-  <li>�¹ԥե����� <span class="fname">mp.exe</span> ��Ʊ���ǥ��쥯�ȥ�</li>
+  <li>環境変数 <span class="env">HOME</span> のディレクトリ</li>
+  <li>環境変数 <span class="env">HOMEDRIVE</span> と <span class="env">HOMEPATH</span> を繋げたディレクトリ</li>
+  <li>環境変数 <span class="env">USERPROFILE</span> のディレクトリ</li>
+  <li>プロセス <span class="fname">mp.exe</span> のカレントディレクトリ</li>
+  <li>実行ファイル <span class="fname">mp.exe</span> と同じディレクトリ</li>
 </ul>
+
+<p>
+指定したファイル名に "<code>%</code>" (パーセント記号) でくくられた部分があると、それはくくられた文字列に対応する環境変数に置換されます。
+</p>
 
 
 <h2><a name="file-format">File format</a></h2>
@@ -67,39 +71,39 @@
 <h3><a name="encoding">Character Encoding</a></h3>
 
 <p>
-����ե������ʸ�����󥳡��ɤ� UTF-8 �Ǥ���
-ASCII ʸ���ʳ����㤨�����ܸ�����ޤ����ˤ�ɬ�� UTF-8 �ǥե��������¸���Ʋ�������
+設定ファイルの文字エンコードは UTF-8 です。
+ASCII 文字以外、例えば日本語等を含める場合には必ず UTF-8 でファイルを保存して下さい。
 </p>
 
 
 <h3><a name="syntax">Syntax</a></h3>
 
 <p>
-�����S����ɽ�����졢���Ϣ�ۥꥹ�Ȥǹ�������ޤ���
-��������ܤϡ�����̾�򤢤�魯����ܥ뤫��Ϥޤ�ꥹ�ȤȤʤ�ޤ���<br>
-S���ξܺ٤ˤĤ��Ƥ� <a href="#appendix:s-exp">Appendix: S-Expression</a> ���������Ƥ��ޤ������̾�Ϥ���ۤɰռ�����ɬ�פ�̵���Ǥ��礦��
+設定はS式で表記され、主に連想リストで構成されます。
+各設定項目は、項目名をあらわすシンボルから始まるリストとなります。<br>
+S式の詳細については <a href="#appendix:s-exp">Appendix: S-Expression</a> で説明していますが、通常はそれほど意識する必要も無いでしょう。
 </p>
 
 <p>
-���Υɥ�����ȤǤϰʲ��Τ褦��ɽ���򤷤ޤ���
-(ɽ���Ķ��ˤ�äƤ϶��̤Ǥ��ʤ���礬����ޤ�)
+このドキュメントでは以下のような表記をします。
+(表示環境によっては区別できない場合があります)
 <dl class="ref">
 <dt><code><span class="var">some-value</span></code></dt>
 <dd>
-�����ǽ�ʹ��ܤ򤢤�路�ޤ���<br>
-�������ƤˤĤ��Ƥϳƹ��ܤ������򻲾Ȥ��Ʋ�������
+設定可能な項目をあらわします。<br>
+設定内容については各項目の説明を参照して下さい。
 </dd>
 
 <dt><code>[<span class="var">some-value</span>]</code></dt>
 <dd>
-��ά��ǽ��������ܤ򤢤�路�ޤ���<br>
-�������Ƥ���Ӿ�ά��������ˤĤ��Ƥϳƹ��ܤ������򻲾Ȥ��Ʋ�������
+省略可能な設定項目をあらわします。<br>
+設定内容および省略時の設定については各項目の説明を参照して下さい。
 </dd>
 
 <dt><code><span class="omit">...</span></code></dt>
 <dd>
-������ܡ��������Ƥ��ά���Ƥ��뤳�Ȥ򤢤�路�ޤ���<br>
-¾�����������ǽ�Ǥ������������˻��Ȥʤ뤿��ʤ��Ƥ��ޤ���
+設定項目、設定内容を省略していることをあらわします。<br>
+他の設定を指定可能ですが、説明上繁雑となるため省いています。
 </dd>
 
 </dl>
@@ -109,24 +113,24 @@ S���ξܺ٤ˤĤ��Ƥ� <a href="#appendix:s-exp">Appendix: S-Expression</a> �������
 <h3><a name="setting">Setting</a></h3>
 
 <p>
-�Ƽ����������ե��������Ƭ�������ɤ߹��ޤ�ޤ���<br>
-Ʊ���������ܤ��Ф���ʣ�������꤬���줿��硢�Ǹ�����꤬ͭ���Ȥʤ�ޤ���
+各種設定は設定ファイルの先頭から順に読み込まれます。<br>
+同一の設定項目に対して複数の設定がされた場合、最後の設定が有効となります。
 </p>
 
 <dl class="ref">
-<dt><a name="include"><code>include</code> ʸ</a></dt>
+<dt><a name="include"><code>include</code> 文</a></dt>
 <dd>
-<code>include</code> ʸ�򵭽Ҥ����¾������ե�������ɤ߹��ळ�Ȥ��Ǥ��ޤ���<br>
+<code>include</code> 文を記述すると他の設定ファイルを読み込むことができます。<br>
 <div class="subref">
   <dl>
   <dt><code>(include <span class="var">file-name</span> <span class="omit">...</span>)</code></dt>
   <dd>
-  <code><span class="var">file-name</span></code> �ˤϥե�����̾��ʸ����ǻ��ꤷ�ޤ���
-  ʣ���Υե�����̾����ꤷ���Ȥ��ϡ����֤��ɤ߹��ޤ�ޤ���<br>
-  �ե�����θ�����ˡ�ϡ����ޥ�ɥ饤�����������ե�����̾����ꤷ���Ȥ���Ʊ�ͤǤ���
-  <a href="#setting-file">Setting file</a> �򻲾Ȥ��Ʋ�������
+  <code><span class="var">file-name</span></code> にはファイル名を文字列で指定します。
+  複数のファイル名を指定したときは、順番に読み込まれます。<br>
+  ファイルの検索方法は、コマンドライン引数で設定ファイル名を指定したときと同様です。
+  <a href="#setting-file">Setting file</a> を参照して下さい。
   <div class="ex">
-  ��: �ե����� 2button.mprc ���ɤ߹���
+  例: ファイル 2button.mprc を読み込む
 <pre>
 (include "2button.mprc")
 </pre>
@@ -136,20 +140,20 @@ S���ξܺ٤ˤĤ��Ƥ� <a href="#appendix:s-exp">Appendix: S-Expression</a> �������
 </div>
 </dd>
 
-<dt><a name="global"><code>global</code> ����</a></dt>
+<dt><a name="global"><code>global</code> 設定</a></dt>
 <dd>
-<code>global</code> ������ܤǤ����Τ�ư��˱ƶ���������򵭽Ҥ��ޤ���
+<code>global</code> 設定項目では全体の動作に影響する設定を記述します。
 <div class="subref">
   <dl>
   <dt><a name="global:combination-time"><code>(combination-time . <span class="var">threshold-time</span>)</code></a></dt>
   <dd>
-  2�ܥ���Ʊ��������ǧ���������λ��ֳִ֤�ߥ���ñ�̤ǻ��ꤷ�ޤ���<br>
-  1�Ĥ�Υܥ���򲡤��Ƥ��顢<code><span class="var">threshold-time</span></code> �ߥ��ð����2�Ĥ�Υܥ���򲡤��ȡ�2�ܥ���Ʊ�������򤷤���Τ�ǧ�����ޤ���<br>
-  ���λ��֤�᤮��Ȥ��줾��Υܥ������̤˲�������ΤȤ���ޤ���
-  �ޤ������λ�����Ǥ��äƤ�2�Ĥ�Υܥ���򲡤����˥ޥ�����ư��������¾�Υܥ����ư�����ȡ�2�ܥ���Ʊ�������Ȥ�ǧ������ޤ���
-  2�ܥ���Ʊ���˲������Ȥ���Υ�����Ȥ���ξ����ư�����ꤷ�ʤ��ä��Ȥ� (<a href="#act:nothing"><code>nothing</code></a> ����ꤷ���Ȥ�) ��Ʊ�ͤ�2�ܥ���Ʊ�������Ȥ�ǧ������ޤ���
+  2ボタン同時押しを認識する最大の時間間隔をミリ秒単位で指定します。<br>
+  1つめのボタンを押してから、<code><span class="var">threshold-time</span></code> ミリ秒以内に2つめのボタンを押すと、2ボタン同時押しをしたものと認識します。<br>
+  この時間を過ぎるとそれぞれのボタンを個別に押したものとされます。
+  また、この時間内であっても2つめのボタンを押す前にマウスを動かしたり他のボタンを動作させると、2ボタン同時押しとは認識されません。
+  2ボタン同時に押したときと離したときの両方の動作を指定しなかったとき (<a href="#act:nothing"><code>nothing</code></a> を指定したとき) も同様に2ボタン同時押しとは認識されません。
   <div class="ex">
-  ��: ���ֳִ֤� 0.5 �ä�����
+  例: 時間間隔を 0.5 秒に設定
 <pre>
 (global
  (combination-time . 500)
@@ -161,19 +165,19 @@ S���ξܺ٤ˤĤ��Ƥ� <a href="#appendix:s-exp">Appendix: S-Expression</a> �������
 
   <dt><a name="global:priority"><code>(priority . <span class="var">process-priority</span>)</code></a></dt>
   <dd>
-  mp.exe �ץ�������ͥ���٤���ꤷ�ޤ���<br>
-  ¾�Υץ���������٤��⤤�Ȥ��˥ޥ������������ư������³Ū�ˤʤ����θ��ݤ�ȯ�������硢�ץ�������ͥ���٤�⤯���뤳�Ȥǲ�������뤳�Ȥ�����ޤ���<br>
-  �̾�ϡ����̵꤬���¤�ͥ���٤��ѹ�����ɬ�פϤ���ޤ���<br>
-  <code><span class="var">process-priority</span></code> �ϼ��Τ����줫������ꤷ�ޤ���
+  mp.exe プロセスの優先度を指定します。<br>
+  他のプロセスの負荷が高いときにマウスカーソルの動きが断続的になる等の現象が発生する場合、プロセスの優先度を高くすることで改善されることがあります。<br>
+  通常は、問題が無い限り優先度を変更する必要はありません。<br>
+  <code><span class="var">process-priority</span></code> は次のいずれかから指定します。
     <dl class="subitem">
-    <dt><code>high</code></dt>         <dd>��</dd>
-    <dt><code>above-normal</code></dt> <dd>�̾�ʾ�</dd>
-    <dt><code>normal</code></dt>       <dd>�̾�</dd>
-    <dt><code>below-normal</code></dt> <dd>�̾�ʲ�</dd>
-    <dt><code>idle</code></dt>         <dd>��</dd>
+    <dt><code>high</code></dt>         <dd>高</dd>
+    <dt><code>above-normal</code></dt> <dd>通常以上</dd>
+    <dt><code>normal</code></dt>       <dd>通常</dd>
+    <dt><code>below-normal</code></dt> <dd>通常以下</dd>
+    <dt><code>idle</code></dt>         <dd>低</dd>
     </dl>
   <div class="ex">
-  ��: ͥ���٤��̾�ʾ������
+  例: 優先度を通常以上に設定
 <pre>
 (global
  (priority . above-normal)
@@ -185,14 +189,14 @@ S���ξܺ٤ˤĤ��Ƥ� <a href="#appendix:s-exp">Appendix: S-Expression</a> �������
 
   <dt><a name="global:tray-icon"><code>(tray-icon <span class="var">icon-file</span> [<span class="var">index</span>])</code></a></dt>
   <dd>
-  �������ȥ쥤��ɽ�����륢���������ꤷ�ޤ���<br>
-  ʸ���� <code><span class="var">icon-file</span></code> �ǻ��ꤵ�줿�ե������ <code><span class="var">index</span></code> ���ܤΥ�����������Ѥ��ޤ���
-  �����ǽ�ʥե�����ϡ�<span class="fname">.ico</span> �ե������ <span class="fname">.exe</span>��<span class="fname">.dll</span> �ե�����ʤɤ�����ޤ���<br>
-  <code><span class="var">index</span></code> ���ά����� <code>0</code> ����ꤷ����ΤȤ���ޤ���<br>
-  <code><span class="var">icon-file</span></code> �� <code>#f</code> ����ꤹ��ȥ������ȥ쥤�˥��������ɽ�����ʤ��ʤ�ޤ���
-  �����������ξ��ϥȥ쥤�������󤫤�Υ�˥塼�������ѤǤ��ʤ��ʤ�ޤ��Τǡ���ʬ���դ��Ʋ�������
+  タスクトレイに表示するアイコンを指定します。<br>
+  文字列 <code><span class="var">icon-file</span></code> で指定されたファイルの <code><span class="var">index</span></code> 番目のアイコンを利用します。
+  指定可能なファイルは、<span class="fname">.ico</span> ファイルや <span class="fname">.exe</span>、<span class="fname">.dll</span> ファイルなどがあります。<br>
+  <code><span class="var">index</span></code> を省略すると <code>0</code> を指定したものとされます。<br>
+  <code><span class="var">icon-file</span></code> に <code>#f</code> を指定するとタスクトレイにアイコンを表示しなくなります。
+  ただし、この場合はトレイアイコンからのメニュー等も利用できなくなりますので、十分注意して下さい。
   <div class="ex">
-  ��: �֥ޥ����ץ���ȥ�����ѥͥ�Υޥ����������������
+  例: 「マウス」コントロールパネルのマウスアイコンを利用
 <pre>
 (global
  (tray-icon "main.cpl" 0)
@@ -206,17 +210,17 @@ S���ξܺ٤ˤĤ��Ƥ� <a href="#appendix:s-exp">Appendix: S-Expression</a> �������
 </div>
 </dd>
 
-<dt><a name="mode"><code>normal-mode</code>��<code>scroll-mode</code> ����</a></dt>
+<dt><a name="mode"><code>normal-mode</code>、<code>scroll-mode</code> 設定</a></dt>
 <dd>
-<code>normal-mode</code> ����� <code>scroll-mode</code> ������ܤǤϡ�
-���줾���̾�⡼�ɤȥ���������⡼�ɤ�ư��򵭽Ҥ��ޤ���<br>
-�̾�⡼�ɤϥޥ�����ư����ǽ�ʥ⡼�ɤǡ��������Ѥ���Ȥ��Υܥ��������Ƥʤɤ����ꤷ�ޤ���
-����������⡼�ɤϥ�����ɥ�������������Υ⡼�ɤǤ���<br>
-�ƥ⡼�ɤ�ʣ����ư��������Ĥ��Ȥ��Ǥ������줾���̾�� (�⡼��̾) ��Ĥ����ޤ���
-��ư������ϡ���Ƭ���⡼��̾�Ǥ���ꥹ�ȤȤ��Ƶ��Ҥ��ޤ���<br>
-�ץ�����൯ư����������ɤ߹��߻��ˤϡ�ư��⡼�ɤϺǽ�˽񤫤�Ƥ����̾�⡼�ɤˤʤ�ޤ���
+<code>normal-mode</code> および <code>scroll-mode</code> 設定項目では、
+それぞれ通常モードとスクロールモードの動作を記述します。<br>
+通常モードはマウス移動が可能なモードで、普段利用するときのボタン割り当てなどを設定します。
+スクロールモードはウィンドウスクロール時のモードです。<br>
+各モードは複数の動作設定をもつことができ、それぞれに名前 (モード名) をつけられます。
+各動作設定は、先頭がモード名であるリストとして記述します。<br>
+プログラム起動時や設定再読み込み時には、動作モードは最初に書かれている通常モードになります。
 <div class="ex">
-��: <code>abc</code>��<code>def</code> �Ȥ���̾����2�Ĥ��̾�⡼�ɤȡ�<code>uvw</code>��<code>xyz</code> �Ȥ���̾����2�ĤΥ���������⡼�ɤ�����
+例: <code>abc</code>、<code>def</code> という名前の2つの通常モードと、<code>uvw</code>、<code>xyz</code> という名前の2つのスクロールモードを設定
 <pre>
 (normal-mode
  (abc
@@ -240,15 +244,15 @@ S���ξܺ٤ˤĤ��Ƥ� <a href="#appendix:s-exp">Appendix: S-Expression</a> �������
 </pre>
 </div>
 
-�ƥ⡼������ˤϰʲ��Υ��٥��ȯ������ư��򵭽ҤǤ��ޤ���
+各モード設定には以下のイベント発生時の動作を記述できます。
 <div class="subref">
   <dl>
   <dt><a name="evt:button-d"><code>(button-d-<span class="var">X</span> . (<span class="var">action</span> [<span class="var">args</span>]))</code></a></dt>
   <dt><a name="evt:button-u"><code>(button-u-<span class="var">X</span> . (<span class="var">action</span> [<span class="var">args</span>]))</code></a></dt>
   <dd>
-  ���줾�졢�ܥ���򲡤����Ȥ���Υ�����Ȥ���ư�����ꤷ�ޤ���<br>
-  <code><span class="var">X</span></code> �ˤ�1����5�ޤǤΥܥ����ֹ����ꤷ�ޤ���<br>
-  <code><span class="var">action</span></code> �ˤϡ��ɤΤ褦��ư��򤹤뤫�򼡤Τ����줫������ꤷ�ޤ���
+  それぞれ、ボタンを押したときと離したときの動作を指定します。<br>
+  <code><span class="var">X</span></code> には1から5までのボタン番号を指定します。<br>
+  <code><span class="var">action</span></code> には、どのような動作をするかを次のいずれかから指定します。
     <ul>
     <li><a href="#act:button-d"><code>button-d</code></a></li>
     <li><a href="#act:button-u"><code>button-u</code></a></li>
@@ -258,16 +262,16 @@ S���ξܺ٤ˤĤ��Ƥ� <a href="#appendix:s-exp">Appendix: S-Expression</a> �������
     <li><a href="#act:mul-scroll-ratio"><code>mul-scroll-ratio</code></a></li>
     <li><a href="#act:nothing"><code>nothing</code></a></li>
     </ul>
-  <code><span class="var">args</span></code> �ˤ� <code><span class="var">action</span></code> �ؤΰ��������Ǥ��ޤ���<br>
-  �� <code><span class="var">action</span></code> ����� <code><span class="var">args</span></code> �ˤĤ��Ƥϡ����줾��������򻲾Ȥ��Ʋ�������
+  <code><span class="var">args</span></code> には <code><span class="var">action</span></code> への引数を指定できます。<br>
+  各 <code><span class="var">action</span></code> および <code><span class="var">args</span></code> については、それぞれの説明を参照して下さい。
   </dd>
 
   <dt><a name="evt:button-d-cmb"><code>(button-d-<span class="var">X+Y</span> . (<span class="var">action</span> [<span class="var">args</span>]))</code></a></dt>
   <dt><a name="evt:button-u-cmb"><code>(button-u-<span class="var">X+Y</span> . (<span class="var">action</span> [<span class="var">args</span>]))</code></a></dt>
   <dd>
-  ���줾�졢2�ܥ���Ʊ���˲������Ȥ���Υ�����Ȥ���ư�����ꤷ�ޤ���<br>
-  <code><span class="var">X</span></code> �� <code><span class="var">Y</span></code> �ˤ�1����5�ޤǤΥܥ����ֹ��2�ܥ���Ʊ���������Ȥ߹�碌����ꤷ�ޤ���<br>
-  <code><span class="var">action</span></code> �ˤϡ��ɤΤ褦��ư��򤹤뤫�򼡤Τ����줫������ꤷ�ޤ���
+  それぞれ、2ボタン同時に押したときと離したときの動作を指定します。<br>
+  <code><span class="var">X</span></code> と <code><span class="var">Y</span></code> には1から5までのボタン番号で2ボタン同時押しの組み合わせを指定します。<br>
+  <code><span class="var">action</span></code> には、どのような動作をするかを次のいずれかから指定します。
     <ul>
     <li><a href="#act:button-d"><code>button-d</code></a></li>
     <li><a href="#act:button-u"><code>button-u</code></a></li>
@@ -277,35 +281,35 @@ S���ξܺ٤ˤĤ��Ƥ� <a href="#appendix:s-exp">Appendix: S-Expression</a> �������
     <li><a href="#act:mul-scroll-ratio"><code>mul-scroll-ratio</code></a></li>
     <li><a href="#act:nothing"><code>nothing</code></a></li>
     </ul>
-  <code><span class="var">args</span></code> �ˤ� <code><span class="var">action</span></code> �ؤΰ��������Ǥ��ޤ���<br>
-  �� <code><span class="var">action</span></code> ����� <code><span class="var">args</span></code> �ˤĤ��Ƥϡ����줾��������򻲾Ȥ��Ʋ�������
+  <code><span class="var">args</span></code> には <code><span class="var">action</span></code> への引数を指定できます。<br>
+  各 <code><span class="var">action</span></code> および <code><span class="var">args</span></code> については、それぞれの説明を参照して下さい。
   </dd>
 
   <dt><a name="evt:wheel"><code>(wheel . (<span class="var">action</span> [<span class="var">args</span>]))</code></a></dt>
   <dd>
-  �ޥ����ۥ������ư�������Ȥ���ư�����ꤷ�ޤ���<br>
-  <code><span class="var">action</span></code> �ˤϡ��ɤΤ褦��ư��򤹤뤫�򼡤Τ����줫������ꤷ�ޤ���
+  マウスホイールを動かしたときの動作を指定します。<br>
+  <code><span class="var">action</span></code> には、どのような動作をするかを次のいずれかから指定します。
     <ul>
     <li><a href="#act:wheel-input"><code>wheel-input</code></a></li>
     <li><a href="#act:post-wheel-message"><code>post-wheel-message</code></a></li>
     <li><a href="#act:nothing"><code>nothing</code></a></li>
     </ul>
-  <code><span class="var">args</span></code> �ˤ� <code><span class="var">action</span></code> �ؤΰ��������Ǥ��ޤ���<br>
-  �� <code><span class="var">action</span></code> ����� <code><span class="var">args</span></code> �ˤĤ��Ƥϡ����줾��������򻲾Ȥ��Ʋ�������
+  <code><span class="var">args</span></code> には <code><span class="var">action</span></code> への引数を指定できます。<br>
+  各 <code><span class="var">action</span></code> および <code><span class="var">args</span></code> については、それぞれの説明を参照して下さい。
   </dd>
   </dl>
 </div>
 
-����������⡼�ɤ�����ˤϰʲ�������򵭽ҤǤ��ޤ���
+スクロールモードの設定には以下の設定を記述できます。
 <div class="subref">
   <dl>
   <dt><a name="mode-spec:scroll-ratio"><code>(scroll-ratio <span class="var">x-ratio</span> <span class="var">y-ratio</span>)</code></a></dt>
   <dd>
-  ����������®�٤���ꤷ�ޤ�������������⡼�ɤǤΤ�ͭ���Ǥ���<br>
-  <code><span class="var">x-ratio</span></code> ����� <code><span class="var">y-ratio</span></code> �ϡ����줾�� X ���� (��)��Y ���� (��) �Υ���������®�٤ǡ����ܤ�®�٤ǥ��������뤹�뤫����ꤷ�ޤ���
-  ��ο�����ꤹ��ȥ���������θ������դˤʤ�ޤ���
+  スクロール速度を指定します。スクロールモードでのみ有効です。<br>
+  <code><span class="var">x-ratio</span></code> および <code><span class="var">y-ratio</span></code> は、それぞれ X 方向 (横)、Y 方向 (縦) のスクロール速度で、何倍の速度でスクロールするかを指定します。
+  負の数を指定するとスクロールの向きが逆になります。
   <div class="ex">
-  ��: ����Ⱦʬ���Ĥ�ո�����2�ܤ�®�٤ǥ���������
+  例: 横を半分、縦を逆向きに2倍の速度でスクロール
 <pre>
 (scroll-mode
  (half-x-reverse-double-y
@@ -319,15 +323,15 @@ S���ξܺ٤ˤĤ��Ƥ� <a href="#appendix:s-exp">Appendix: S-Expression</a> �������
   </dl>
 </div>
 
-��ư������� <code><span class="var">action</span></code> �Ȥ��ƻ���Ǥ�������ˤϰʲ��Τ�Τ�����ޤ���
+各動作設定で <code><span class="var">action</span></code> として指定できる設定には以下のものがあります。
 <div class="subref">
   <dl>
   <dt><a name="act:button-d"><code>(butto-d <span class="var">N</span>)</code></a></dt>
   <dt><a name="act:button-u"><code>(butto-u <span class="var">N</span>)</code></a></dt>
   <dd>
-  ���줾�졢�ܥ���򲡤�ư���Υ��ư��������Ƥޤ���<br>
-  <code><span class="var">N</span></code> �ˤ�1����5�ޤǤΥܥ����ֹ����ꤷ�ޤ���<br>
-  ����ư������Ǥ���Τϰʲ��Υ��٥������Ǥ���
+  それぞれ、ボタンを押す動作と離す動作を割り当てます。<br>
+  <code><span class="var">N</span></code> には1から5までのボタン番号を指定します。<br>
+  この動作を指定できるのは以下のイベント設定です。
     <ul>
     <li><a href="#evt:button-d"><code>button-d-<span class="var">X</span></code></a></li>
     <li><a href="#evt:button-u"><code>button-u-<span class="var">X</span></code></a></li>
@@ -335,7 +339,7 @@ S���ξܺ٤ˤĤ��Ƥ� <a href="#appendix:s-exp">Appendix: S-Expression</a> �������
     <li><a href="#evt:button-u-cmb"><code>button-u-<span class="var">X+Y</span></code></a></li>
     </ul>
   <div class="ex">
-  ��: �ܥ���3�򥯥�å������Ȥ����ܥ���5�Υ���å��Ȥ���ư���褦������Ƥޤ���
+  例: ボタン3をクリックしたとき、ボタン5のクリックとして動作するよう割り当てます。
 <pre>
 (normal-mode
  (some-name
@@ -349,9 +353,9 @@ S���ξܺ٤ˤĤ��Ƥ� <a href="#appendix:s-exp">Appendix: S-Expression</a> �������
 
   <dt><a name="act:normal-mode"><code>(normal-mode <span class="var">mode-name</span>)</code></a></dt>
   <dd>
-  ���ߤ�ư��⡼�ɤ��̾�⡼�ɤ��ڤ��ؤ��ޤ���<br>
-  <code><span class="var">mode-name</span></code> �ˤ��ڤ��ؤ�����̾�⡼�ɤΥ⡼��̾����ꤷ�ޤ���<br>
-  ����ư������Ǥ���Τϰʲ��Υ��٥������Ǥ���
+  現在の動作モードを通常モードに切り替えます。<br>
+  <code><span class="var">mode-name</span></code> には切り替え後の通常モードのモード名を指定します。<br>
+  この動作を指定できるのは以下のイベント設定です。
     <ul>
     <li><a href="#evt:button-d"><code>button-d-<span class="var">X</span></code></a></li>
     <li><a href="#evt:button-u"><code>button-u-<span class="var">X</span></code></a></li>
@@ -359,7 +363,7 @@ S���ξܺ٤ˤĤ��Ƥ� <a href="#appendix:s-exp">Appendix: S-Expression</a> �������
     <li><a href="#evt:button-u-cmb"><code>button-u-<span class="var">X+Y</span></code></a></li>
     </ul>
   <div class="ex">
-  ��: �ܥ���3�Υ���å����ܥ���4�Ȥ���ư���⡼�� <code>mode-A</code> �ȡ��ܥ���3�Υ���å����ܥ���5�Ȥ���ư���⡼�� <code>mode-B</code> ��2�Ĥ��̾�⡼�ɤ�ܥ���1��2��Ʊ���������ڤ��ؤ���
+  例: ボタン3のクリックがボタン4として動作するモード <code>mode-A</code> と、ボタン3のクリックがボタン5として動作するモード <code>mode-B</code> の2つの通常モードをボタン1と2の同時押しで切り替える
 <pre>
 (normal-mode
  (mode-A
@@ -380,9 +384,9 @@ S���ξܺ٤ˤĤ��Ƥ� <a href="#appendix:s-exp">Appendix: S-Expression</a> �������
 
   <dt><a name="act:scroll-mode"><code>(scroll-mode <span class="var">mode-name</span>)</code></a></dt>
   <dd>
-  ���ߤ�ư��⡼�ɤ򥹥�������⡼�ɤ��ڤ��ؤ��ޤ���<br>
-  <code><span class="var">mode-name</span></code> �ˤ��ڤ��ؤ���Υ���������⡼�ɤΥ⡼��̾����ꤷ�ޤ���<br>
-  ����ư������Ǥ���Τϰʲ��Υ��٥������Ǥ���
+  現在の動作モードをスクロールモードに切り替えます。<br>
+  <code><span class="var">mode-name</span></code> には切り替え後のスクロールモードのモード名を指定します。<br>
+  この動作を指定できるのは以下のイベント設定です。
     <ul>
     <li><a href="#evt:button-d"><code>button-d-<span class="var">X</span></code></a></li>
     <li><a href="#evt:button-u"><code>button-u-<span class="var">X</span></code></a></li>
@@ -390,7 +394,7 @@ S���ξܺ٤ˤĤ��Ƥ� <a href="#appendix:s-exp">Appendix: S-Expression</a> �������
     <li><a href="#evt:button-u-cmb"><code>button-u-<span class="var">X+Y</span></code></a></li>
     </ul>
   <div class="ex">
-  ��: �̾�⡼�� <code>mode-N</code> ���˥ܥ���3�򲡤����Ƥ���֤�������������⡼�� <code>mode-S</code> ���ڤ��ؤ����ܥ���3��Υ�����̾�⡼�ɤ����
+  例: 通常モード <code>mode-N</code> 時にボタン3を押ししている間だけスクロールモード <code>mode-S</code> に切り替え、ボタン3を離すと通常モードに戻る
 <pre>
 (normal-mode
  (mode-N
@@ -411,9 +415,9 @@ S���ξܺ٤ˤĤ��Ƥ� <a href="#appendix:s-exp">Appendix: S-Expression</a> �������
 
   <dt><a name="act:set-scroll-ratio"><code>(set-scroll-ratio <span class="var">x-ratio</span> <span class="var">y-ratio</span>)</code></a></dt>
   <dd>
-  ����������®�٤����ꤷ�ʤ����ޤ�������������⡼�ɤǤΤ�ͭ���Ǥ���<br>
-  <code><span class="var">x-ratio</span></code> �� <code><span class="var">y-ratio</span></code> �ΰ�̣�� <a href="#mode-spec:scroll-ratio"><code>scroll-ratio</code></a> ��Ʊ���Ǥ���<br>
-  ����ư������Ǥ���Τϰʲ��Υ��٥������Ǥ���
+  スクロール速度を設定しなおします。スクロールモードでのみ有効です。<br>
+  <code><span class="var">x-ratio</span></code> と <code><span class="var">y-ratio</span></code> の意味は <a href="#mode-spec:scroll-ratio"><code>scroll-ratio</code></a> と同じです。<br>
+  この動作を指定できるのは以下のイベント設定です。
     <ul>
     <li><a href="#evt:button-d"><code>button-d-<span class="var">X</span></code></a></li>
     <li><a href="#evt:button-u"><code>button-u-<span class="var">X</span></code></a></li>
@@ -424,9 +428,9 @@ S���ξܺ٤ˤĤ��Ƥ� <a href="#appendix:s-exp">Appendix: S-Expression</a> �������
 
   <dt><a name="act:mul-scroll-ratio"><code>(mul-scroll-ratio <span class="var">x-ratio</span> <span class="var">y-ratio</span>)</code></a></dt>
   <dd>
-  ����������®�٤��ѹ����ޤ�������������⡼�ɤǤΤ�ͭ���Ǥ���<br>
-  <a href="#mode-spec:scroll-ratio"><code>scroll-ratio</code></a>��<a href="#act:set-scroll-ratio"><code>set-scroll-ratio</code></a> �����ꤷ�� X �����Υ���������®�٤� <code><span class="var">x-ratio</span></code> ��褸��Y �����Υ���������®�٤� <code><span class="var">y-ratio</span></code> ��褸�ޤ���<br>
-  ����ư������Ǥ���Τϰʲ��Υ��٥������Ǥ���
+  スクロール速度を変更します。スクロールモードでのみ有効です。<br>
+  <a href="#mode-spec:scroll-ratio"><code>scroll-ratio</code></a>、<a href="#act:set-scroll-ratio"><code>set-scroll-ratio</code></a> で設定した X 方向のスクロール速度に <code><span class="var">x-ratio</span></code> を乗じ、Y 方向のスクロール速度に <code><span class="var">y-ratio</span></code> を乗じます。<br>
+  この動作を指定できるのは以下のイベント設定です。
     <ul>
     <li><a href="#evt:button-d"><code>button-d-<span class="var">X</span></code></a></li>
     <li><a href="#evt:button-u"><code>button-u-<span class="var">X</span></code></a></li>
@@ -434,7 +438,7 @@ S���ξܺ٤ˤĤ��Ƥ� <a href="#appendix:s-exp">Appendix: S-Expression</a> �������
     <li><a href="#evt:button-u-cmb"><code>button-u-<span class="var">X+Y</span></code></a></li>
     </ul>
   <div class="ex">
-  ��: �ܥ���3�򲡤����Ӥ˥�����������������ž���륹��������⡼��
+  例: ボタン3を押すたびにスクロール方向が逆転するスクロールモード
 <pre>
 (scroll-mode
  (some-name
@@ -448,8 +452,8 @@ S���ξܺ٤ˤĤ��Ƥ� <a href="#appendix:s-exp">Appendix: S-Expression</a> �������
 
   <dt><a name="act:wheel-input"><code>(wheel-input)</code></a></dt>
   <dd>
-  �̾�Υۥ�������ž�������Ȥ���ư���Ʊ���Ǥ���<br>
-  ����ư������Ǥ���Τϰʲ��Υ��٥������Ǥ���
+  通常のホイールを回転させたときの動作と同じです。<br>
+  この動作を指定できるのは以下のイベント設定です。
     <ul>
     <li><a href="#evt:wheel"><code>wheel</code></a></li>
     </ul>
@@ -457,10 +461,10 @@ S���ξܺ٤ˤĤ��Ƥ� <a href="#appendix:s-exp">Appendix: S-Expression</a> �������
 
   <dt><a name="act:post-wheel-message"><code>(post-wheel-message)</code></a></dt>
   <dd>
-  �ۥ�������ž�������Ȥ���ȯ�������å�������ޥ�����������ľ���Υ�����ɥ����������ޤ���<br>
-  �̾�ۥ������å������ϥ����ե������������륦����ɥ�����������ޤ���������ư����ѹ������ޤ���
-  ����ˤ�ꡢ�����ƥ��֤Ǥʤ�������ɥ����������ˤ��륦����ɥ��إ����쥯�Ȥ˥ۥ������å�����������ޤ���<br>
-  ����ư������Ǥ���Τϰʲ��Υ��٥������Ǥ���
+  ホイールを回転させたときに発生するメッセージをマウスカーソル直下のウィンドウに送信します。<br>
+  通常、ホイールメッセージはキーフォーカスがあるウィンドウに送信されますが、その動作を変更させます。
+  これにより、アクティブでないウィンドウや後ろの方にあるウィンドウへダイレクトにホイールメッセージを送れます。<br>
+  この動作を指定できるのは以下のイベント設定です。
     <ul>
     <li><a href="#evt:wheel"><code>wheel</code></a></li>
     </ul>
@@ -468,75 +472,75 @@ S���ξܺ٤ˤĤ��Ƥ� <a href="#appendix:s-exp">Appendix: S-Expression</a> �������
 
   <dt><a name="act:nothing"><code>(nothing)</code></a></dt>
   <dd>
-  ����Ԥʤ��ޤ���<br>
-  ����Υܥ����̵���ˤ������Ȥ��ʤɤ˻��ꤷ�ޤ���<br>
-  ����ư������ƤΥ��٥������ǻ���Ǥ��ޤ���
+  何も行ないません。<br>
+  特定のボタンを無効にしたいときなどに指定します。<br>
+  この動作は全てのイベント設定で指定できます。
   </dd>
   </dl>
 </div>
 
 </dd>
 
-<dt><a name="scroll-window"><code>scroll-window</code> ����</a></dt>
+<dt><a name="scroll-window"><code>scroll-window</code> 設定</a></dt>
 <dd>
-<code>scroll-window</code> ������ܤǤϥ�����ɥ����ȤΥ�����������ˡ�򵭽Ҥ��ޤ���<br>
-������ɥ��μ��ऴ�Ȥ˰�ĤΥꥹ�Ȥ�ɽ�������ꥹ�Ȥΰ�Ĥ�����Ǥ��ɤΥ�����ɥ��˰��פ��뤫�򼨤�����Ĥ�����Ǥ�������������ˡ�򼨤��ޤ���<br>
-�оݥ�����ɥ���ʣ��������˰��פ����硢���פ�������Τ�������ե�����ǺǸ�˵��Ҥ���Ƥ����Τ��¹Ԥ���ޤ���<br>
+<code>scroll-window</code> 設定項目ではウィンドウごとのスクロール方法を記述します。<br>
+ウィンドウの種類ごとに一つのリストで表記し、リストの一つめの要素がどのウィンドウに一致するかを示し、二つめの要素がスクロール方法を示します。<br>
+対象ウィンドウが複数の設定に一致する場合、一致した設定のうち設定ファイルで最後に記述されているものが実行されます。<br>
 <br>
-������ɥ��ϥ�����ɥ����饹�ȥ����ȥ�Ƕ��̤��ޤ���<br>
-���饹�ȥ����ȥ�ϡ�������ɥ��οƻҴط��򤢤�魯����� "<code>:</code>" (������) �ǿƥ�����ɥ��Υ��饹�������ȥ��Ϣ�뤷��ɽ�����ޤ���
-�Ǥⱦ¦���оݤȤʤ�ҥ�����ɥ��ǡ���ĺ�¦���ƥ�����ɥ������κ����Ƥοơ��Ȥ����褦��Ϣ�뤷�ޤ���
-�����������ֺǽ�Υ�����ɥ��κ�¦�Ϥ��Υץ������Υѥ��Ȥʤ�ޤ���<br>
-������ɥ��Υ��饹�ȥ����ȥ�ϡ�����������ɥ��� "�ܺ٤�ɽ��" �˥����å������졢
-�̾�⡼�ɤ��饹��������⡼�ɤ˰ܹԤ���Ȥ���ɽ���������������Τ뤳�Ȥ��Ǥ��ޤ���
-"window class" �α���ɽ�������Τ�������ɥ����饹��"window title" �α���ɽ�������Τ�������ɥ������ȥ�Ǥ���
+ウィンドウはウィンドウクラスとタイトルで区別します。<br>
+クラスとタイトルは、ウィンドウの親子関係をあらわすために "<code>:</code>" (コロン) で親ウィンドウのクラス・タイトルと連結して表現します。
+最も右側が対象となる子ウィンドウで、一つ左側が親ウィンドウ、その左が親の親、というように連結します。
+ただし、一番最初のウィンドウの左側はそのプログラムのパスとなります。<br>
+ウィンドウのクラスとタイトルは、ログウィンドウの "詳細を表示" にチェックを入れ、
+通常モードからスクロールモードに移行するときに表示されるログから知ることができます。
+"window class" の右に表示されるのがウィンドウクラス、"window title" の右に表示されるのがウィンドウタイトルです。
 <div class="ex">
-��: ���Ģ�Υ��ǥ��åȥ���ȥ�����Υ��饹
+例: メモ帳のエディットコントロールのクラス
 <pre>
 C:\WINNT\system32\notepad.exe:Notepad:Edit
 </pre>
 </div>
 </dd>
 
-<code>scroll-window</code> ������ܤǤϡ�������ɥ��Υ��饹�������ȥ�λ��������ɽ����Ȥ��ޤ���
-����ɽ���ξܺ٤ˤĤ��Ƥ� <a href="#appendix:regexp">Appendix: Regular Expression</a> �򻲾Ȥ��Ʋ�������
-����ɽ����ʸ����Ȥ��Ƶ��Ҥ��ޤ���
+<code>scroll-window</code> 設定項目では、ウィンドウのクラス・タイトルの指定に正規表現を使えます。
+正規表現の詳細については <a href="#appendix:regexp">Appendix: Regular Expression</a> を参照して下さい。
+正規表現は文字列として記述します。
 <div class="ex">
-��: ���ƤΥ��ǥ��åȥ���ȥ�����Υ��饹�˰��פ�������ɽ��
+例: 全てのエディットコントロールのクラスに一致する正規表現
 <pre>
 ":Edit$"
 </pre>
 </div>
 
-���ΤȤ���ʸ���������ɽ����ξ���� "<code>\</code>" ������������ʸ���Ȥ������Ѥ���Ƥ��뤳�Ȥ����դ��Ʋ�������
-"<code>\</code>" ���Ȥ�ɽ������ˤ� "<code>\\\\</code>" �ȵ��Ҥ���ɬ�פ�����ޤ���
+このとき、文字列と正規表現の両方で "<code>\</code>" がエスケープ文字として利用されていることに注意して下さい。
+"<code>\</code>" 自身を表現するには "<code>\\\\</code>" と記述する必要があります。
 <div class="ex">
-��: ���Ģ�Υ��ǥ��åȥ���ȥ�����Υ��饹�˴����˰��פ�������ɽ��
+例: メモ帳のエディットコントロールのクラスに完全に一致する正規表現
 <pre>
 "^C:\\\\WINNT\\\\system32\\\\notepad\\.exe:Notepad:Edit$"
 </pre>
 </div>
 
-<code>scroll-window</code> ������ܤΥ�����ɥ�����ꤹ����֤�ʸ����Τߤ򵭽Ҥ���ȡ�����ϥ�����ɥ����饹�򼨤�����ɽ���Ǥ���Ȥߤʤ���ޤ���<br>
-������ɥ������ȥ����ꤹ��ˤϡ�<code>(title <span class="var">"title-regexp"</span>)</code> �ȵ��Ҥ��ޤ���
-Ʊ�ͤˡ�������ɥ����饹����ꤹ��Τ� <code>(class <span class="var">"class-regexp"</span>)</code> �ȵ��Ҥ��뤳�Ȥ�Ǥ��ޤ���<br>
-������ɥ����饹�ȥ����ȥ��ξ������ꤹ��ˤϡ�<code>(and <span class="omit">...</span>)</code> �ޤ��� <code>(or <span class="omit">...</span>)</code> ��Ȥ��ޤ���
-<code>and</code> ��ξ���˰��פ��륦����ɥ���<code>or</code> �Ϥɤ��餫�˰��פ��륦����ɥ��򼨤��ޤ���
+<code>scroll-window</code> 設定項目のウィンドウを指定する位置に文字列のみを記述すると、それはウィンドウクラスを示す正規表現であるとみなされます。<br>
+ウィンドウタイトルを指定するには、<code>(title <span class="var">"title-regexp"</span>)</code> と記述します。
+同様に、ウィンドウクラスを指定するのに <code>(class <span class="var">"class-regexp"</span>)</code> と記述することもできます。<br>
+ウィンドウクラスとタイトルの両方を指定するには、<code>(and <span class="omit">...</span>)</code> または <code>(or <span class="omit">...</span>)</code> を使います。
+<code>and</code> は両方に一致するウィンドウを、<code>or</code> はどちらかに一致するウィンドウを示します。
 <div class="ex">
-��: ���Ģ�� <span class="fname">default.mprc</span> �Ȥ����ե�������Խ����Ƥ���Ȥ��Υ��ǥ��åȥ���ȥ�����ˤΤ߰���
+例: メモ帳で <span class="fname">default.mprc</span> というファイルを編集しているときのエディットコントロールにのみ一致
 <pre>
 (and (class "notepad\\.exe:.*:Edit$")
-     (title ":default.mprc - ���Ģ:"))
+     (title ":default.mprc - メモ帳:"))
 </pre>
 </div>
 
-������ɥ��Υ�����������ˡ�ˤ� <a href="#scroll-op">Scroll operator</a> ����ꤷ�ޤ���
+ウィンドウのスクロール方法には <a href="#scroll-op">Scroll operator</a> を指定します。
 </dd>
 
-<dt><a name="operator-config"><code>operator-config</code> ����</a></dt>
+<dt><a name="operator-config"><code>operator-config</code> 設定</a></dt>
 <dd>
-<code>operator-config</code> ������ܤǤϡ�<a href="#scroll-op">Scroll operator</a> ��ư������򵭽Ҥ��ޤ���<br>
-�ܺ٤ˤĤ��Ƥϡ��� Scroll operator �������򻲾Ȥ��Ʋ�������
+<code>operator-config</code> 設定項目では、<a href="#scroll-op">Scroll operator</a> の動作設定を記述します。<br>
+詳細については、各 Scroll operator の説明を参照して下さい。
 </dd>
 </dl>
 
@@ -544,60 +548,60 @@ C:\WINNT\system32\notepad.exe:Notepad:Edit
 <h2><a name="scroll-op">Scroll operator</a></h2>
 
 <p>
-Scroll operator �ϡ�����������⡼�ɻ��˥ޥ�����ư���˱����ƥ�����ɥ��򥹥������뤵���ޤ���<br>
-�ɤΥ�����ɥ��Ǥɤ� Scroll operator ���Ѥ��뤫���б��դ��� <a href="#scroll-window"><code>scroll-window</code></a> ����ǻ��ꤷ�ޤ���<br>
-����������®�٤������ʤɤγ� Scroll operator ���Ȥ�����ϡ�<a href="#operator-config"><code>operator-config</code></a> ����ǵ��Ҥ��ޤ���
-�ޤ���<a href="#scroll-window"><code>scroll-window</code></a> ����� Scroll operator ����ꤹ��Ȥ��ΰ����Ȥ��Ƹ��̤˵��Ҥ��뤳�Ȥ�Ǥ��ޤ���
+Scroll operator は、スクロールモード時にマウスの動きに応じてウィンドウをスクロールさせます。<br>
+どのウィンドウでどの Scroll operator を用いるかの対応付けは <a href="#scroll-window"><code>scroll-window</code></a> 設定で指定します。<br>
+スクロール速度や方向などの各 Scroll operator ごとの設定は、<a href="#operator-config"><code>operator-config</code></a> 設定で記述します。
+また、<a href="#scroll-window"><code>scroll-window</code></a> 設定で Scroll operator を指定するときの引数として個別に記述することもできます。
 </p>
 
 <p>
-Scroll operator �ˤϰʲ��Τ�Τ����Ǥ��ޤ���
+Scroll operator には以下のものを指定できます。
 </p>
 <div class="refp">
 <dl class="ref">
 <dt><a name="op:window-scrollbar"><code>(window-scrollbar <span class="var">[mode x-ratio y-ratio]</span>)</code></a></dt>
 <dd>
-Windows ɸ��Υ���������С�����ĥ�����ɥ��򥹥������뤵���ޤ���<br>
-<code><span class="var">mode</span></code> �ˤϥޥ�����ư����®�٤ȥ����������®�٤�ɤΤ褦���б��Ť��뤫����ꤷ�ޤ���
-��ά�������ϡ�<code>operator-config</code> ����� <code>default-mode</code> ���������Ѥ��ޤ���<br>
-<code><span class="var">x-ratio</span></code> �� <code><span class="var">y-ratio</span></code> �ˤϥ���������®�٤���Ψ����ꤷ�ޤ���
-��ά�������ϡ�<code>operator-config</code> ����� <code><span class="var">mode</span></code> ���б�������ܤ����ꤷ�Ƥ����ͤ���Ѥ��ޤ���
-�ǽ�Ū�ʥ���������®�٤ϡ�<a href="#mode-spec:scroll-ratio"><code>scroll-ratio</code></a> �������ͤ� <code><span class="var">x-ratio</span></code>��<code><span class="var">y-ratio</span></code> ���줾����б������ͤ�褸����̤����㤷�ޤ���<br>
-<code><span class="var">mode</span></code> �ˤϰʲ��Υ⡼�ɤ����Ǥ��ޤ���
+Windows 標準のスクロールバーを持つウィンドウをスクロールさせます。<br>
+<code><span class="var">mode</span></code> にはマウスを動かす速度とスクロールの速度をどのように対応づけるかを指定します。
+省略した場合は、<code>operator-config</code> 設定の <code>default-mode</code> の設定を使用します。<br>
+<code><span class="var">x-ratio</span></code> と <code><span class="var">y-ratio</span></code> にはスクロール速度の比率を指定します。
+省略した場合は、<code>operator-config</code> 設定の <code><span class="var">mode</span></code> に対応する項目に設定してある値を使用します。
+最終的なスクロール速度は、<a href="#mode-spec:scroll-ratio"><code>scroll-ratio</code></a> の設定値と <code><span class="var">x-ratio</span></code>、<code><span class="var">y-ratio</span></code> それぞれの対応する値を乗じた結果に比例します。<br>
+<code><span class="var">mode</span></code> には以下のモードを指定できます。
   <dl class="subitem">
   <dt><code>drag</code></dt>
   <dd>
-  ����������С��Υ����ɥ�å������Ȥ��Ȥۤ�Ʊ��®�٤ǥ��������뤷�ޤ���<br>
-  <a href="#mode-spec:scroll-ratio"><code>scroll-ratio</code></a>��<code><span class="var">x-ratio</span></code>��<code><span class="var">y-ratio</span></code> �����ꤷ���ͤ����� <code>1</code> ���ä����ˡ��ޥ����������뤬1�ԥ������ư����֤�ޥ�����ư�����ȡ������1�ԥ�����ʬ�ɥ�å�����Τ�Ʊ���������������뤷�ޤ���
+  スクロールバーのサムをドラッグしたときとほぼ同じ速度でスクロールします。<br>
+  <a href="#mode-spec:scroll-ratio"><code>scroll-ratio</code></a>、<code><span class="var">x-ratio</span></code>、<code><span class="var">y-ratio</span></code> で設定した値が全て <code>1</code> だった場合に、マウスカーソルが1ピクセル移動するぶんマウスを動かすと、サムを1ピクセル分ドラッグするのと同じだけスクロールします。
   </dd>
 
   <dt><code>percentage</code></dt>
   <dd>
-  ����������С���Ĺ���˴ؤ�餺����γ��ǥ��������뤷�ޤ���<br>
-  <a href="#mode-spec:scroll-ratio"><code>scroll-ratio</code></a>��<code><span class="var">x-ratio</span></code>��<code><span class="var">y-ratio</span></code> �����ꤷ���ͤ����� <code>1</code> ���ä����ˡ��ޥ����������뤬1�ԥ������ư����֤�ޥ�����ư�����ȡ�����������С���ư�ϰϤ�1%ʬ�����������뤷�ޤ���
+  スクロールバーの長さに関わらず一定の割合でスクロールします。<br>
+  <a href="#mode-spec:scroll-ratio"><code>scroll-ratio</code></a>、<code><span class="var">x-ratio</span></code>、<code><span class="var">y-ratio</span></code> で設定した値が全て <code>1</code> だった場合に、マウスカーソルが1ピクセル移動するぶんマウスを動かすと、スクロールバー可動範囲の1%分がスクロールします。
   </dd>
 
   <dt><code>bar-unit</code></dt>
   <dd>
-  ����������С������ꤵ��Ƥ���Ǿ���ñ�̤����㤷��®�٤ǥ��������뤷�ޤ���<br>
-  <a href="#mode-spec:scroll-ratio"><code>scroll-ratio</code></a>��<code><span class="var">x-ratio</span></code>��<code><span class="var">y-ratio</span></code> �����ꤷ���ͤ����� <code>1</code> ���ä����ˡ��ޥ����������뤬1�ԥ������ư����֤�ޥ�����ư�����ȡ�����������С��ΰ��֤�1ñ�̥��������뤷�ޤ���
+  スクロールバーに設定されている最小の単位に比例した速度でスクロールします。<br>
+  <a href="#mode-spec:scroll-ratio"><code>scroll-ratio</code></a>、<code><span class="var">x-ratio</span></code>、<code><span class="var">y-ratio</span></code> で設定した値が全て <code>1</code> だった場合に、マウスカーソルが1ピクセル移動するぶんマウスを動かすと、スクロールバーの位置を1単位スクロールします。
   </dd>
 
   <dt><code>line-scroll</code></dt>
   <dd>
-  ����������С���ξü�Υܥ���򲡤����Ȥ���Ʊ���������������뤷�ޤ���<br>
-  <a href="#mode-spec:scroll-ratio"><code>scroll-ratio</code></a>��<code><span class="var">x-ratio</span></code>��<code><span class="var">y-ratio</span></code> �����ꤷ���ͤ����� <code>1</code> ���ä����ˡ��ޥ����������뤬1�ԥ������ư����֤�ޥ�����ư�����ȡ�����������С�ξü�Υܥ����1�󲡤����Τ�Ʊ���������������뤷�ޤ���
+  スクロールバーの両端のボタンを押したときと同じだけスクロールします。<br>
+  <a href="#mode-spec:scroll-ratio"><code>scroll-ratio</code></a>、<code><span class="var">x-ratio</span></code>、<code><span class="var">y-ratio</span></code> で設定した値が全て <code>1</code> だった場合に、マウスカーソルが1ピクセル移動するぶんマウスを動かすと、スクロールバー両端のボタンを1回押したのと同じだけスクロールします。
   </dd>
 
   <dt><code>page-scroll</code></dt>
   <dd>
-  ����������С���ξü�Υܥ���ȥ���δ֤򲡤����Ȥ���Ʊ���������������뤷�ޤ���<br>
-  <a href="#mode-spec:scroll-ratio"><code>scroll-ratio</code></a>��<code><span class="var">x-ratio</span></code>��<code><span class="var">y-ratio</span></code> �����ꤷ���ͤ����� <code>1</code> ���ä����ˡ��ޥ����������뤬1�ԥ������ư����֤�ޥ�����ư�����ȡ�����������С�ξü�Υܥ���ȥ���δ֤�1�󲡤����Τ�Ʊ���������������뤷�ޤ���
+  スクロールバーの両端のボタンとサムの間を押したときと同じだけスクロールします。<br>
+  <a href="#mode-spec:scroll-ratio"><code>scroll-ratio</code></a>、<code><span class="var">x-ratio</span></code>、<code><span class="var">y-ratio</span></code> で設定した値が全て <code>1</code> だった場合に、マウスカーソルが1ピクセル移動するぶんマウスを動かすと、スクロールバー両端のボタンとサムの間を1回押したのと同じだけスクロールします。
   </dd>
   </dl>
 
 <div class="ex">
-��: ���Ģ�Υ��ǥ��åȥ���ȥ������ <code>line-scroll</code> �⡼�ɤǥ��������롢����¾�Υ��ǥ��åȥ���ȥ������ <code>drag</code> �⡼�ɡ��̾�� 1/10 ��®�٤ǥ��������롢��ɥѥåɤΥ�å����ǥ��åȥ���ȥ������ <code>page-scroll</code> �⡼�ɤǥ���������
+例: メモ帳のエディットコントロールは <code>line-scroll</code> モードでスクロール、その他のエディットコントロールは <code>drag</code> モード・通常の 1/10 の速度でスクロール、ワードパッドのリッチエディットコントロールは <code>page-scroll</code> モードでスクロール
 <pre>
 (scroll-window
  ("notepad\\.exe:.*:Edit$" (window-scroll))
@@ -618,32 +622,32 @@ Windows ɸ��Υ���������С�����ĥ�����ɥ��򥹥������뤵���ޤ���<br>
  )
 </pre>
 </div>
-<code>drag</code>��<code>percentage</code>��<code>bar-unit</code> �γƥ⡼�ɤ��оݥ�����ɥ��Υ�������� <code>WM_HSCROLL</code> �ޤ��� <code>WM_VSCROLL</code> �Τ������ʤ��Ȥ⤤���줫�����ꤵ��Ƥ���ɬ�פ�����ޤ���
-�����Υ������뤬���ꤵ��Ƥ��ʤ��ä����Ϥ��μ¹Ԥϼ��Ԥ��ޤ���
+<code>drag</code>、<code>percentage</code>、<code>bar-unit</code> の各モードは対象ウィンドウのスタイルに <code>WM_HSCROLL</code> または <code>WM_VSCROLL</code> のうち少なくともいずれかが指定されている必要があります。
+これらのスタイルが指定されていなかった場合はこの実行は失敗します。
 </dd>
 
 <dt><a name="op:neighborhood-scrollbar"><code>(neighborhood-scrollbar <span class="var">[mode x-ratio y-ratio]</span>)</code></a></dt>
 <dd>
-�оݥ�����ɥ��Τ������ն�ˤ��륹��������С�����ȥ�����򥹥������뤵���ޤ���<br>
-<a href="#op:window-scrollbar"><code>window-scrollbar</code></a> �Ȥϰۤʤꡢ�оݥ�����ɥ��ϥ���������С�������������Υ�����ɥ����� (��¦�䲼¦�ʤ�) �˥���������С�����ȥ��������̤˻��äƤ�����˻Ȥ��ޤ���
-MS Office ���ʤ䡢Acrobat Reader �ʤɤ��������ޤ���<br>
-<code><span class="var">mode</span></code>��<code><span class="var">x-ratio</span></code>��<code><span class="var">y-ratio</span></code> �λ����ͤ����������ˡ�� <a href="#op:window-scrollbar"><code>window-scrollbar</code></a> ��Ʊ�ͤǤ���
+対象ウィンドウのすぐ隣付近にあるスクロールバーコントロールをスクロールさせます。<br>
+<a href="#op:window-scrollbar"><code>window-scrollbar</code></a> とは異なり、対象ウィンドウはスクロールバーを持たず、そのウィンドウの隣 (右側や下側など) にスクロールバーコントロールを個別に持っている場合に使います。
+MS Office 製品や、Acrobat Reader などが該当します。<br>
+<code><span class="var">mode</span></code>、<code><span class="var">x-ratio</span></code>、<code><span class="var">y-ratio</span></code> の指定値および設定方法は <a href="#op:window-scrollbar"><code>window-scrollbar</code></a> と同様です。
 </dd>
 
 <dt><a name="op:scrollbar-control"><code>(scrollbar-control <span class="var">[mode x-ratio y-ratio]</span>)</code></a></dt>
 <dd>
-����������С�����ȥ���������ޤ���<br>
-����������С�ñ�Τ��оݤȤ�����˻Ȥ��ޤ���<br>
-<code><span class="var">mode</span></code> �λ����ͤ����������ˡ�� <a href="#op:window-scrollbar"><code>window-scrollbar</code></a> ��Ʊ�ͤǤ���<br>
-<code><span class="var">x-ratio</span></code> �� <code><span class="var">y-ratio</span></code> �ϥ���������®�٤���ꤷ�ޤ���
-����������®�٤ϡ�
+スクロールバーコントロールを操作します。<br>
+スクロールバー単体を対象とする場合に使います。<br>
+<code><span class="var">mode</span></code> の指定値および設定方法は <a href="#op:window-scrollbar"><code>window-scrollbar</code></a> と同様です。<br>
+<code><span class="var">x-ratio</span></code> と <code><span class="var">y-ratio</span></code> はスクロール速度を指定します。
+スクロール速度は、
 <pre>
-X ������ư�� * <code><span class="var">x-ratio</span></code> + Y ������ư�� * <code><span class="var">y-ratio</span></code>
+X 方向の動き * <code><span class="var">x-ratio</span></code> + Y 方向の動き * <code><span class="var">y-ratio</span></code>
 </pre>
-�����㤷�ޤ���<br>
-<code>operator-config</code> ����Ǥϡ���ʿ����������С��� <code>h-bar</code>����ľ����������С��� <code>v-bar</code> �򥭡��Ȥ��Ƹ��̤�����򵭽Ҥ��ޤ���<br>
+に比例します。<br>
+<code>operator-config</code> 設定では、水平スクロールバーは <code>h-bar</code>、垂直スクロールバーは <code>v-bar</code> をキーとして個別に設定を記述します。<br>
 <div class="ex">
-��: ��ʿ����������С��ξ��ϥޥ����β���ư���ǥ��������뤵������ľ����������С��ξ��ϥޥ����νĤ�ư���ǥ��������뤵����
+例: 水平スクロールバーの場合はマウスの横の動きでスクロールさせ、垂直スクロールバーの場合はマウスの縦の動きでスクロールさせる
 <pre>
 (scroll-window
  <span class="omit">...</span>
@@ -671,57 +675,57 @@ X ������ư�� * <code><span class="var">x-ratio</span></code> + Y ������ư�� * <c
 
 <dt><a name="op:trackbar-control"><code>(trackbar-control <span class="var">[mode x-ratio y-ratio]</span>)</code></a></dt>
 <dd>
-�ȥ�å��С�����ȥ���������ޤ���<br>
-�ȥ�å��С�ñ�Τ��оݤȤ�����˻Ȥ��ޤ���<br>
-<code><span class="var">mode</span></code>��<code><span class="var">x-ratio</span></code>��<code><span class="var">y-ratio</span></code> �λ����ͤ����������ˡ�� <a href="#op:scrollbar-control"><code>scrollbar-control</code></a> ��Ʊ�ͤǤ�
+トラックバーコントロールを操作します。<br>
+トラックバー単体を対象とする場合に使います。<br>
+<code><span class="var">mode</span></code>、<code><span class="var">x-ratio</span></code>、<code><span class="var">y-ratio</span></code> の指定値および設定方法は <a href="#op:scrollbar-control"><code>scrollbar-control</code></a> と同様です
 </dd>
 
 <dt><a name="op:ie-scroll"><code>(ie-scroll <span class="var">[mode x-ratio y-ratio]</span>)</code></a></dt>
 <dd>
-Internet Explorer �򥹥������뤵���ޤ���<br>
-IE ����ݡ��ͥ�Ȥ�ȤäƤ��륢�ץꥱ�������HTML �إ�פ䥿�֥֥饦���ʤɤ���ѤǤ��ޤ���<br>
-<code><span class="var">x-ratio</span></code>��<code><span class="var">y-ratio</span></code> �λ����ͤ����������ˡ�� <a href="#op:window-scrollbar"><code>window-scrollbar</code></a> ��Ʊ�ͤǤ���<br>
-<code><span class="var">mode</span></code> �ˤϥޥ�����ư����®�٤ȥ����������®�٤�ɤΤ褦���б��Ť��뤫����ꤷ�ޤ���
-��ά�������ϡ�<code>operator-config</code> ����� <code>default-mode</code> ���������Ѥ��ޤ���<br>
-<code><span class="var">mode</span></code> �ˤϰʲ��Υ⡼�ɤ����Ǥ��ޤ���
+Internet Explorer をスクロールさせます。<br>
+IE コンポーネントを使っているアプリケーション、HTML ヘルプやタブブラウザなども使用できます。<br>
+<code><span class="var">x-ratio</span></code>、<code><span class="var">y-ratio</span></code> の指定値および設定方法は <a href="#op:window-scrollbar"><code>window-scrollbar</code></a> と同様です。<br>
+<code><span class="var">mode</span></code> にはマウスを動かす速度とスクロールの速度をどのように対応づけるかを指定します。
+省略した場合は、<code>operator-config</code> 設定の <code>default-mode</code> の設定を使用します。<br>
+<code><span class="var">mode</span></code> には以下のモードを指定できます。
   <dl class="subitem">
   <dt><code>drag</code></dt>
   <dd>
-  ����������С��Υ����ɥ�å������Ȥ��Ȥۤ�Ʊ��®�٤ǥ��������뤷�ޤ���<br>
-  <a href="#mode-spec:scroll-ratio"><code>scroll-ratio</code></a>��<code><span class="var">x-ratio</span></code>��<code><span class="var">y-ratio</span></code> �����ꤷ���ͤ����� <code>1</code> ���ä����ˡ��ޥ����������뤬1�ԥ������ư����֤�ޥ�����ư�����ȡ������1�ԥ�����ʬ�ɥ�å�����Τ�Ʊ���������������뤷�ޤ���
+  スクロールバーのサムをドラッグしたときとほぼ同じ速度でスクロールします。<br>
+  <a href="#mode-spec:scroll-ratio"><code>scroll-ratio</code></a>、<code><span class="var">x-ratio</span></code>、<code><span class="var">y-ratio</span></code> で設定した値が全て <code>1</code> だった場合に、マウスカーソルが1ピクセル移動するぶんマウスを動かすと、サムを1ピクセル分ドラッグするのと同じだけスクロールします。
   </dd>
 
   <dt><code>percentage</code></dt>
   <dd>
-  ����������С���Ĺ���˴ؤ�餺����γ��ǥ��������뤷�ޤ���<br>
-  <a href="#mode-spec:scroll-ratio"><code>scroll-ratio</code></a>��<code><span class="var">x-ratio</span></code>��<code><span class="var">y-ratio</span></code> �����ꤷ���ͤ����� <code>1</code> ���ä����ˡ��ޥ����������뤬1�ԥ������ư����֤�ޥ�����ư�����ȡ�����������С���ư�ϰϤ�1%ʬ�����������뤷�ޤ���
+  スクロールバーの長さに関わらず一定の割合でスクロールします。<br>
+  <a href="#mode-spec:scroll-ratio"><code>scroll-ratio</code></a>、<code><span class="var">x-ratio</span></code>、<code><span class="var">y-ratio</span></code> で設定した値が全て <code>1</code> だった場合に、マウスカーソルが1ピクセル移動するぶんマウスを動かすと、スクロールバー可動範囲の1%分がスクロールします。
   </dd>
 
   <dt><code>pixel</code></dt>
   <dd>
-  �����������оݤ�ԥ�����ñ�̤ǥ��������뤷�ޤ���<br>
-  <a href="#mode-spec:scroll-ratio"><code>scroll-ratio</code></a>��<code><span class="var">x-ratio</span></code>��<code><span class="var">y-ratio</span></code> �����ꤷ���ͤ����� <code>1</code> ���ä����ˡ��ޥ����������뤬1�ԥ������ư����֤�ޥ�����ư�����ȡ�1�ԥ�����ʬ���������뤷�ޤ���
+  スクロール対象をピクセル単位でスクロールします。<br>
+  <a href="#mode-spec:scroll-ratio"><code>scroll-ratio</code></a>、<code><span class="var">x-ratio</span></code>、<code><span class="var">y-ratio</span></code> で設定した値が全て <code>1</code> だった場合に、マウスカーソルが1ピクセル移動するぶんマウスを動かすと、1ピクセル分スクロールします。
   </dd>
   </dl>
 </dd>
 
 <dt><a name="op:wheel-message"><code>(wheel-message <span class="var">[x-ratio y-ratio tick]</span>)</code></a></dt>
 <dd>
-�ޥ����ۥ�������ž�������Ȥ���Ʊ����å��������оݥ�����ɥ����������ޤ���<br>
-�ޥ�����ư���ǥۥ�����β�ž��Ƹ����������˻Ȥ��ޤ���<br>
-<code><span class="var">x-ratio</span></code> �� <code><span class="var">y-ratio</span></code> �ϥۥ�����β�ž®�٤���ꤷ�ޤ���
-��ž®�٤ϡ�
+マウスホイールを回転させたときと同じメッセージを対象ウィンドウに送信します。<br>
+マウスの動きでホイールの回転を再現したい場合に使います。<br>
+<code><span class="var">x-ratio</span></code> と <code><span class="var">y-ratio</span></code> はホイールの回転速度を指定します。
+回転速度は、
 <pre>
-X ������ư�� * <code><span class="var">x-ratio</span></code> + Y ������ư�� * <code><span class="var">y-ratio</span></code>
+X 方向の動き * <code><span class="var">x-ratio</span></code> + Y 方向の動き * <code><span class="var">y-ratio</span></code>
 </pre>
-�����㤷�ޤ���
-��ά�������ϡ�<code>operator-config</code> ����� <code>ratio</code> �����ꤷ�Ƥ����ͤ���Ѥ��ޤ���<br>
-<code><span class="var">tick</span></code> �ϰ��Υ�å����������������ž�̤Ǥ���
-�̾�� <code>120</code> ����ꤷ�ޤ���
-���ץꥱ��������б����Ƥ���� <code>120</code> ��꾮�����ͤ����Ǥ��ޤ���
-��ά�������ϡ�<code>operator-config</code> ����� <code>tick</code> �����ꤷ�Ƥ����ͤ���Ѥ��ޤ���
+に比例します。
+省略した場合は、<code>operator-config</code> 設定の <code>ratio</code> に設定してある値を使用します。<br>
+<code><span class="var">tick</span></code> は一回のメッセージで送信する回転量です。
+通常は <code>120</code> を指定します。
+アプリケーションが対応していれば <code>120</code> より小さい値を指定できます。
+省略した場合は、<code>operator-config</code> 設定の <code>tick</code> に設定してある値を使用します。
 <div class="ex">
-��: �ꥹ�ȥӥ塼����ȥ�����ξ��ϥޥ����ν�ư��ǥۥ�����ư��
+例: リストビューコントロールの場合はマウスの縦動作でホイール動作
 <pre>
 (scroll-window
  (":SysListView32$" (wheel-message))
@@ -741,16 +745,16 @@ X ������ư�� * <code><span class="var">x-ratio</span></code> + Y ������ư�� * <c
 </div>
 
 <p>
-Scroll operator �ˤ�¾�� Scroll operator ������Ȥ��ƤȤ� Meta scroll operator �����Ǥ��ޤ���
+Scroll operator には他の Scroll operator を引数としてとる Meta scroll operator も指定できます。
 </p>
 <div class="refp">
 <dl class="ref">
 <dt><a name="op:or"><code>(or <span class="var">scroll-operator1 [scroll-operator2 ...]</span>)</code></a></dt>
 <dd>
-���ꤵ�줿 Scroll operator ����������ޤǽ缡�¹Ԥ��ޤ���<br>
-�¹Ԥ������������Ϥ���ʹߤ˻��ꤵ�줿 Scroll operator �ϼ¹Ԥ���ޤ���
+指定された Scroll operator を成功するまで順次実行します。<br>
+実行が成功した場合はそれ以降に指定された Scroll operator は実行されません。
 <div class="ex">
-��: ¾�Τɤ� <code>scroll-window</code> ������ˤ���פ��ʤ��ä����� <code>window-scrollbar</code>��<code>neighborhood-scrollbar</code>��<code>wheel-message</code> ����缡�¹Բ�ǽ�ʤ�Τ�
+例: 他のどの <code>scroll-window</code> の設定にも合致しなかった場合は <code>window-scrollbar</code>、<code>neighborhood-scrollbar</code>、<code>wheel-message</code> から順次実行可能なものを試す
 <pre>
 (scroll-window
  (".*" (or (window-scrollbar)
@@ -764,9 +768,9 @@ Scroll operator �ˤ�¾�� Scroll operator ������Ȥ��ƤȤ� Meta scroll operator �
 
 <dt><a name="op:apply-parent"><code>(apply-parent <span class="var">scroll-operator [nth]</span>)</code></a></dt>
 <dd>
-�ƥ�����ɥ����оݥ�����ɥ��Ȥ��ޤ���<br>
-<code><span class="var">scroll-operator</span></code> �ǻ��ꤷ�� operator �� <code><span class="var">nth</span></code> ����ƤΥ�����ɥ���Ŭ�Ѥ��ޤ���
-<code><span class="var">nth</span></code> ����ά���줿���� <code>1</code> ����Ѥ��ޤ���
+親ウィンドウを対象ウィンドウとします。<br>
+<code><span class="var">scroll-operator</span></code> で指定した operator を <code><span class="var">nth</span></code> 世代親のウィンドウに適用します。
+<code><span class="var">nth</span></code> が省略された場合は <code>1</code> を使用します。
 </dd>
 
 </dl>
@@ -778,76 +782,76 @@ Scroll operator �ˤ�¾�� Scroll operator ������Ȥ��ƤȤ� Meta scroll operator �
 <h3><a name="appendix:s-exp">S-Expression</a></h3>
 
 <p>
-mouse-processor �����Ѥ���S���ϡ�Scheme (R5RS) �Τ�ΤΥ��֥��åȤǤ���<br>
-����S���ϰʲ������Ǥǹ�������ޤ���
+mouse-processor で利用するS式は、Scheme (R5RS) のもののサブセットです。<br>
+このS式は以下の要素で構成されます。
 </p>
 
 <dl>
-<dt>������</dt>
+<dt>コメント</dt>
 <dd>
-"<code>;</code>" (���ߥ�����) ���顢���ιԤ������ޤǤϥ����ȤȤ��ư����ޤ���
+"<code>;</code>" (セミコロン) から、その行の末尾まではコメントとして扱われます。
 </dd>
 
-<dt>����</dt>
+<dt>整数</dt>
 <dd>
-���ͤ�ɽ�路�ޤ���
-��Ƭ�� <code>#o #d #x</code> ���դ��뤳�Ȥǡ����줾��8�ʿ���10�ʿ���16�ʿ���ɽ���Ǥ��ޤ���
+数値を表わします。
+接頭辞 <code>#o #d #x</code> を付けることで、それぞれ8進数、10進数、16進数で表記できます。
 <div class="ex">
-��: �ʲ�������10�ʿ��� 26 ��Ʊ���ͤˤʤ�ޤ���
+例: 以下は全て10進数の 26 と同じ値になります。
 <pre>
 26  #o32  #d26  #x1A
 </pre>
 </div>
 </dd>
 
-<dt>��ư��������</dt>
+<dt>浮動小数点数</dt>
 <dd>
-�����˾����� "<code>.</code>" ��ޤ�뤳�Ȥ�ͭ�����٤μ¿���ɽ���Ǥ��ޤ���
+数字に小数点 "<code>.</code>" を含めることで有限精度の実数を表記できます。
 </dd>
 
-<dt>����ܥ�</dt>
+<dt>シンボル</dt>
 <dd>
-����ե��٥åȤ䵭��ǹ������졢��ǽ̾�ʤɤ��Ѥ����뼱�̻ҤǤ���
+アルファベットや記号で構成され、機能名などに用いられる識別子です。
 </dd>
 
-<dt>ʸ����</dt>
+<dt>文字列</dt>
 <dd>
-���֥륯�����ơ������ (��Ű����䡢"")�Ǥ�����졢Ǥ�դ�ʸ����ޤ�뤳�Ȥ��Ǥ��ޤ���
-���֥륯�����ơ�������ޤ�����ľ���� "<code>\</code>" �����֤��ޤ���"<code>\</code>" ���Ȥ�ޤ᤿������Ʊ�ͤǤ���
+ダブルクオーテーション (二重引用符、"")でくくられ、任意の文字を含めることができます。
+ダブルクオーテーションを含める場合は直前に "<code>\</code>" を前置します。"<code>\</code>" 自身を含めたい場合も同様です。
 </dd>
 
-<dt>������</dt>
+<dt>真偽値</dt>
 <dd>
-������ӵ��򤢤�路�ޤ���<br>
-���� <code>#f</code>������ <code>#f</code> �ʳ��Ȥʤ�ޤ���
-����Ū�˿��򤢤�魯 <code>#t</code> �⤢��ޤ���
+真および偽をあらわします。<br>
+偽は <code>#f</code>、真は <code>#f</code> 以外となります。
+明示的に真をあらわす <code>#t</code> もあります。
 </dd>
 
-<dt>cons ����</dt>
+<dt>cons セル</dt>
 <dd>
-car ���� cdr ������Ĥǹ������졢���줾���Ǥ�դ��ͤ�����뤳�Ȥ��Ǥ��ޤ���
-car �� cdr �δ֤� "<code>.</code>" �Ƕ��ڤꡢ���Τ��� () �Ǥ����ä�ɽ�����ޤ���
+car 部と cdr 部の二つで構成され、それぞれに任意の値を入れることができます。
+car と cdr の間を "<code>.</code>" で区切り、全体を括弧 () でくくって表記します。
 <div class="ex">
-��: car ���� <code>car</code> �Ȥ�������ܥ롢cdr ���� <code>"cdr"</code> �Ȥ���ʸ��������줿 cons ����ϡ��ʲ��Τ褦��ɽ�����ޤ���
+例: car 部に <code>car</code> というシンボル、cdr 部に <code>"cdr"</code> という文字列を入れた cons セルは、以下のように表記します。
 <pre>
 (car . "cdr")
 </pre>
 </div>
 </dd>
 
-<dt>�ꥹ��</dt>
+<dt>リスト</dt>
 <dd>
-�ꥹ�Ȥ� cons �����Ϣ�ʤ�ǹ�������ޤ���<br>
-n�Ĥ����Ǥ���ĥꥹ�Ȥ� n�Ĥ� cons ����ǹ������졢���줾��� car �������Ǥ� cdr ���ϼ��� cons ������ݻ����ޤ����Ǹ�� cdr ���϶��ꥹ�� <code>()</code> ���ݻ����ޤ���
+リストは cons セルの連なりで構成されます。<br>
+n個の要素を持つリストは n個の cons セルで構成され、それぞれの car 部は要素を cdr 部は次の cons セルを保持します。最後の cdr 部は空リスト <code>()</code> を保持します。
 <div class="ex">
-��: 4�Ĥ����Ǥ���������줾������Ǥ������Υꥹ�Ȥϰʲ��Τ褦��ɽ�����ޤ���
+例: 4つの要素を持ち、それぞれの要素が整数のリストは以下のように表記します。
 <pre>
 (1 . (2 . (3 . (4 . ()))))
 </pre>
 </div>
-���ΤޤޤǤ�ɽ�����˻��Ȥʤ뤿�ᡢcdr ���� cons ����ξ��ϡ�car ���� cdr ���δ֤ΥɥåȤ� cdr ���򤯤����̤Ͼ�ά���뤳�Ȥ��Ǥ��ޤ���
+このままでは表記が繁雑となるため、cdr 部が cons セルの場合は、car 部と cdr 部の間のドットと cdr 部をくくる括弧は省略することができます。
 <div class="ex">
-��: �ʲ�������Ʊ���ꥹ�Ȥ�ɽ�路�ޤ���
+例: 以下は全て同じリストを表わします。
 <pre>
 (1 2 3 4)
 (1 . (2 3 4))
@@ -858,7 +862,7 @@ n�Ĥ����Ǥ���ĥꥹ�Ȥ� n�Ĥ� cons ����ǹ������졢���줾��� car �������Ǥ� cdr
 </dl>
 
 <p>
-BNF ��ˡ�äݤ�����ϰʲ��ΤȤ��ꡣ
+BNF 記法っぽい定義は以下のとおり。
 <pre>
 &lt;datum&gt; = &lt;boolean&gt;
         | &lt;number&gt;
@@ -923,8 +927,8 @@ BNF ��ˡ�äݤ�����ϰʲ��ΤȤ��ꡣ
 <h3><a name="appendix:regexp">Regular Expression</a></h3>
 
 <p>
-���Ѳ�ǽ������ɽ���� <a href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/script56/html/vspropattern.asp">VBScript ��Ʊ��</a>�Ǥ���<br>
-����� egrep �� perl ���ΰ���Ū������ɽ���Ȥۤ�Ʊ���Ǥ���
+利用可能な正規表現は <a href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/script56/html/vspropattern.asp">VBScript と同じ</a>です。<br>
+これは egrep や perl 等の一般的な正規表現とほぼ同じです。
 </p>
 
 
@@ -940,17 +944,17 @@ BNF ��ˡ�äݤ�����ϰʲ��ΤȤ��ꡣ
   <li><a href="#syntax">Syntax</a></li>
   <li><a href="#setting">Setting</a>
     <ul>
-    <li><a href="#include"><code>include</code> ʸ</a>
-    <li><a href="#global"><code>global</code> ����</a>
+    <li><a href="#include"><code>include</code> 文</a>
+    <li><a href="#global"><code>global</code> 設定</a>
       <ul>
       <li><a href="#global:combination-time"><code>combination-time</code></a></li>
       <li><a href="#global:priority"><code>priority</code></a></li>
       <li><a href="#global:tray-icon"><code>tray-icon</code></a></li>
       </ul>
     </li>
-    <li><a href="#mode"><code>normal-mode</code>��<code>scroll-mode</code> ����</a>
+    <li><a href="#mode"><code>normal-mode</code>、<code>scroll-mode</code> 設定</a>
       <ul>
-      <li>���٥������
+      <li>イベント設定
         <ul>
         <li><a href="#evt:button-d"><code>button-d-<span class="var">X</span></code></a></li>
         <li><a href="#evt:button-u"><code>button-u-<span class="var">X</span></code></a></li>
@@ -959,12 +963,12 @@ BNF ��ˡ�äݤ�����ϰʲ��ΤȤ��ꡣ
         <li><a href="#evt:wheel"><code>wheel</code></a></li>
 	</ul>
       </li>
-      <li>����������⡼������
+      <li>スクロールモード設定
         <ul>
         <li><a href="#mode-spec:scroll-ratio"><code>scroll-ratio</code></a></li>
 	</ul>
       </li>
-      <li>ư������
+      <li>動作設定
         <ul>
         <li><a href="#act:button-d"><code>butto-d</code></a></li>
         <li><a href="#act:button-u"><code>butto-u</code></a></li>
@@ -979,8 +983,8 @@ BNF ��ˡ�äݤ�����ϰʲ��ΤȤ��ꡣ
       </li>
       </ul>
     </li>
-    <li><a href="#scroll-window"><code>scroll-window</code> ����</a>
-    <li><a href="#operator-config"><code>operator-config</code> ����</a></li>
+    <li><a href="#scroll-window"><code>scroll-window</code> 設定</a>
+    <li><a href="#operator-config"><code>operator-config</code> 設定</a></li>
     </ul>
   </li>
   </ul>
@@ -1012,11 +1016,11 @@ BNF ��ˡ�äݤ�����ϰʲ��ΤȤ��ꡣ
 webmaster@tamanegi.org
 </address>
 
-<!-- $Id: CUSTOMIZE.html,v 1.8 2005/07/29 06:33:04 hos Exp $ -->
+<!-- $Id: CUSTOMIZE.html,v 1.9 2005/08/01 06:34:21 hos Exp $ -->
 
 <!--
 Local Variables:
-coding: euc-jp
+coding: utf-8
 End:
 -->
 
