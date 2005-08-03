@@ -114,7 +114,7 @@ S式の詳細については <a href="#appendix:s-exp">Appendix: S-Expression</a
 
 <p>
 各種設定は設定ファイルの先頭から順に読み込まれます。<br>
-同一の設定項目に対して複数の設定がされた場合、最後の設定が有効となります。
+同一の設定項目に対して複数回設定がされた場合、最後の設定が有効となります。
 </p>
 
 <dl class="ref">
@@ -206,6 +206,12 @@ S式の詳細については <a href="#appendix:s-exp">Appendix: S-Expression</a
   </div>
   </dd>
 
+  <dt><a name="global:initial-mode"><code>(initial-mode . <span class="var">mode-name</span>)</code></a></dt>
+  <dd>
+  設定読み込み後の初期モードを指定します。<br>
+  <code><span class="var">mode-name</span></code> には <a href="#mode"><code>normal-mode</code> 設定</a>から一つ指定します。
+  <dd>
+
   </dl>
 </div>
 </dd>
@@ -218,7 +224,7 @@ S式の詳細については <a href="#appendix:s-exp">Appendix: S-Expression</a
 スクロールモードはウィンドウスクロール時のモードです。<br>
 各モードは複数の動作設定をもつことができ、それぞれに名前 (モード名) をつけられます。
 各動作設定は、先頭がモード名であるリストとして記述します。<br>
-プログラム起動時や設定再読み込み時には、動作モードは最初に書かれている通常モードになります。
+プログラム起動時や設定再読み込み時には、動作モードは <a href="#global:initial-mode"><code>initial-mode</code></a> で指定された通常モードになります。
 <div class="ex">
 例: <code>abc</code>、<code>def</code> という名前の2つの通常モードと、<code>uvw</code>、<code>xyz</code> という名前の2つのスクロールモードを設定
 <pre>
@@ -950,6 +956,7 @@ BNF 記法っぽい定義は以下のとおり。
       <li><a href="#global:combination-time"><code>combination-time</code></a></li>
       <li><a href="#global:priority"><code>priority</code></a></li>
       <li><a href="#global:tray-icon"><code>tray-icon</code></a></li>
+      <li><a href="#global:initial-mode"><code>initial-mode</code></a></li>
       </ul>
     </li>
     <li><a href="#mode"><code>normal-mode</code>、<code>scroll-mode</code> 設定</a>
@@ -1016,7 +1023,7 @@ BNF 記法っぽい定義は以下のとおり。
 webmaster@tamanegi.org
 </address>
 
-<!-- $Id: CUSTOMIZE.html,v 1.9 2005/08/01 06:34:21 hos Exp $ -->
+<!-- $Id: CUSTOMIZE.html,v 1.10 2005/08/03 04:26:33 hos Exp $ -->
 
 <!--
 Local Variables:
