@@ -1,6 +1,6 @@
 ;;;; -*- coding: utf-8; mode: lisp -*-
 ;;
-;; pressed.mprc -- scroll when button-4 is pressed
+;; pressed.mprc -- scroll when button-3 is pressed
 ;;
 ;; include "pressed.mprc" after "default.mprc"
 ;;
@@ -11,11 +11,11 @@
 
 (normal-mode
  ;; normal mode
- ;;   button 1,2,3,5 => each button click
- ;;   button 4 press => change to scroll mode
+ ;;   button 1,2,4,5 => each button click
+ ;;   button 3 press => change to scroll mode
  ;;   wheel          => post wheel message to under pointer window
  (normal-when-released
-  (button-d-4 . (scroll-mode scroll-when-pressed))
+  (button-d-3 . (scroll-mode scroll-when-pressed))
   (wheel      . (post-wheel-message))
   )
  )
@@ -24,13 +24,13 @@
  ;; scroll mode (both horizontal and vertical)
  ;;   button 1         => reduce scroll speed
  ;;   button 2         => increase scroll speed
- ;;   button 4 release => return to normal mode
+ ;;   button 3 release => return to normal mode
  ;;   wheel            => post wheel message to under pointer window
  (scroll-when-pressed
   (scroll-ratio 1.0 1.0)
   (button-u-1   . (mul-scroll-ratio 0.5 0.5))
   (button-u-2   . (mul-scroll-ratio 2.0 2.0))
-  (button-u-4   . (normal-mode))
+  (button-u-3   . (normal-mode))
   (wheel        . (post-wheel-message))
   )
  )

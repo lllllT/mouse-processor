@@ -75,7 +75,7 @@ Setting
 
    - default.mprc   一般的な設定。4ボタン以上のデバイスを想定。
    - 2button.mprc   2ボタンのデバイス用設定。
-   - pressed.mprc   ボタン4を押下時のみスクロールモードとなる設定。
+   - pressed.mprc   ボタン3を押下時のみスクロールモードとなる設定。
    - dot.mprc       ユーザごとの設定ファイルのテンプレート。
 
  - 設定ファイル default.mprc は、以下のような設定となっています。
@@ -185,4 +185,4 @@ Link
  - mouse-processor <http://www.tamanegi.org/prog/mouse-processor/>
 
 
-$Id: README.txt,v 1.13 2005/08/03 05:20:28 hos Exp $
+$Id: README.txt,v 1.14 2005/08/03 05:23:20 hos Exp $
