@@ -1,7 +1,7 @@
 /*
  * conf.h  -- configuration
  *
- * $Id: conf.c,v 1.25 2005/08/03 04:08:49 hos Exp $
+ * $Id: conf.c,v 1.26 2005/08/03 04:45:40 hos Exp $
  *
  */
 
@@ -665,23 +665,27 @@ int apply_action_change_normal(struct mouse_action *act,
 {
     struct mouse_conf *mode;
 
-    if(S_EXP_CDR(conf)->type != S_EXP_TYPE_CONS ||
-       S_EXP_CADR(conf)->type != S_EXP_TYPE_SYMBOL) {
-        log_printf(LOG_LEVEL_WARNING,
-                   L"Invalid action format: normal-mode action: ");
-        log_print_s_exp(LOG_LEVEL_WARNING, conf, 1);
-        return 0;
-    }
+    if(S_EXP_CDR(conf) == S_EXP_NIL) {
+        mode = app_conf->initial_conf;
+    } else {
+        if(S_EXP_CDR(conf)->type != S_EXP_TYPE_CONS ||
+           S_EXP_CADR(conf)->type != S_EXP_TYPE_SYMBOL) {
+            log_printf(LOG_LEVEL_WARNING,
+                       L"Invalid action format: normal-mode action: ");
+            log_print_s_exp(LOG_LEVEL_WARNING, conf, 1);
+            return 0;
+        }
 
-    mode = get_mode_ptr(app_conf->normal_conf,
-                        app_conf->normal_conf_num,
-                        S_EXP_CADR(conf)->symbol.name);
-    if(mode == NULL) {
-        log_printf(LOG_LEVEL_WARNING,
-                   L"Invalid action format: "
-                   L"specified normal-mode not found: ");
-        log_print_s_exp(LOG_LEVEL_WARNING, conf, 1);
-        return 0;
+        mode = get_mode_ptr(app_conf->normal_conf,
+                            app_conf->normal_conf_num,
+                            S_EXP_CADR(conf)->symbol.name);
+        if(mode == NULL) {
+            log_printf(LOG_LEVEL_WARNING,
+                       L"Invalid action format: "
+                       L"specified normal-mode not found: ");
+            log_print_s_exp(LOG_LEVEL_WARNING, conf, 1);
+            return 0;
+        }
     }
 
     act->code = MOUSE_ACT_MODECH;
@@ -931,6 +935,31 @@ int apply_mode_conf(struct app_setting *app_conf)
             goto fail_end;
         }
 
+        {
+            s_exp_data_t *t;
+
+            t = get_conf(app_conf, S_EXP_TYPE_SYMBOL,
+                         L"global", L"initial-mode", NULL);
+
+            app_conf->initial_conf = &app_conf->normal_conf[0];
+            if(t != NULL) {
+                struct mouse_conf *m;
+
+                m = get_mode_ptr(app_conf->normal_conf,
+                                 app_conf->normal_conf_num,
+                                 t->symbol.name);
+
+                if(m == NULL) {
+                    log_printf(LOG_LEVEL_WARNING,
+                               L"Invalid initial-mode name: "
+                               L"specified normal-mode not found: ");
+                    log_print_s_exp(LOG_LEVEL_WARNING, t, 1);
+                } else {
+                    app_conf->initial_conf = m;
+                }
+            }
+        }
+
         i = 0;
         S_EXP_FOR_EACH(normal_mode, p) {
             apply_comm_mode_conf(&app_conf->normal_conf[i],
@@ -983,30 +1012,8 @@ int apply_mode_conf(struct app_setting *app_conf)
         }
         conf->wheel_act.code = MOUSE_ACT_WHEEL;
         conf->move_act.code = MOUSE_ACT_MOVE;
-    }
 
-    {
-        s_exp_data_t *t;
-
-        t = get_conf(app_conf, S_EXP_TYPE_SYMBOL,
-                     L"global", L"initial-mode", NULL);
-
-        app_conf->initial_conf = &app_conf->normal_conf[0];
-        if(t != NULL) {
-            struct mouse_conf *m;
-
-            m = get_mode_ptr(app_conf->normal_conf, app_conf->normal_conf_num,
-                             t->symbol.name);
-
-            if(m == NULL) {
-                log_printf(LOG_LEVEL_WARNING,
-                           L"Invalid initial-mode name: "
-                           L"specified normal-mode not found: ");
-                log_print_s_exp(LOG_LEVEL_WARNING, t, 1);
-            } else {
-                app_conf->initial_conf = m;
-            }
-        }
+        app_conf->initial_conf = conf;
     }
 
     return 1;

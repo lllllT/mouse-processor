@@ -28,7 +28,7 @@
  ;;   wheel        => post wheel message to under pointer window
  (scroll-2btn
   (scroll-ratio 1.0 1.0)
-  (button-u-1   . (normal-mode normal-2btn))
+  (button-u-1   . (normal-mode))
   (button-u-1+2 . (mul-scroll-ratio 2.0 2.0))
   (button-u-2   . (mul-scroll-ratio 0.5 0.5))
   (wheel        . (post-wheel-message))

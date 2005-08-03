@@ -357,10 +357,11 @@ S式の詳細については <a href="#appendix:s-exp">Appendix: S-Expression</a
   </div>
   </dd>
 
-  <dt><a name="act:normal-mode"><code>(normal-mode <span class="var">mode-name</span>)</code></a></dt>
+  <dt><a name="act:normal-mode"><code>(normal-mode [<span class="var">mode-name</span>])</code></a></dt>
   <dd>
   現在の動作モードを通常モードに切り替えます。<br>
-  <code><span class="var">mode-name</span></code> には切り替え後の通常モードのモード名を指定します。<br>
+  <code><span class="var">mode-name</span></code> には切り替え後の通常モードのモード名を指定します。
+  省略した場合は <a href="#global:initial-mode"><code>initial-mode</code></a> のモードが指定されたものとされます。<br>
   この動作を指定できるのは以下のイベント設定です。
     <ul>
     <li><a href="#evt:button-d"><code>button-d-<span class="var">X</span></code></a></li>
@@ -1023,7 +1024,7 @@ BNF 記法っぽい定義は以下のとおり。
 webmaster@tamanegi.org
 </address>
 
-<!-- $Id: CUSTOMIZE.html,v 1.10 2005/08/03 04:26:33 hos Exp $ -->
+<!-- $Id: CUSTOMIZE.html,v 1.11 2005/08/03 04:45:42 hos Exp $ -->
 
 <!--
 Local Variables:
