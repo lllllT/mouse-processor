@@ -1,7 +1,7 @@
 /*
  * conf.h  -- configuration
  *
- * $Id: conf.c,v 1.24 2005/08/01 06:19:28 hos Exp $
+ * $Id: conf.c,v 1.25 2005/08/03 04:08:49 hos Exp $
  *
  */
 
@@ -985,6 +985,30 @@ int apply_mode_conf(struct app_setting *app_conf)
         conf->move_act.code = MOUSE_ACT_MOVE;
     }
 
+    {
+        s_exp_data_t *t;
+
+        t = get_conf(app_conf, S_EXP_TYPE_SYMBOL,
+                     L"global", L"initial-mode", NULL);
+
+        app_conf->initial_conf = &app_conf->normal_conf[0];
+        if(t != NULL) {
+            struct mouse_conf *m;
+
+            m = get_mode_ptr(app_conf->normal_conf, app_conf->normal_conf_num,
+                             t->symbol.name);
+
+            if(m == NULL) {
+                log_printf(LOG_LEVEL_WARNING,
+                           L"Invalid initial-mode name: "
+                           L"specified normal-mode not found: ");
+                log_print_s_exp(LOG_LEVEL_WARNING, t, 1);
+            } else {
+                app_conf->initial_conf = m;
+            }
+        }
+    }
+
     return 1;
 
   fail_end:
@@ -1376,7 +1400,7 @@ int load_setting(LPWSTR conf_file, int force_apply)
         memset(&data, 0, sizeof(data));
         data.mode = MODE_CH_NORMAL;
         GetCursorPos(&pt);
-        ctx.mode_data.cur_conf = &ctx.app_conf.normal_conf[0];
+        ctx.mode_data.cur_conf = ctx.app_conf.initial_conf;
         SendMessage(ctx.main_window, WM_MOUSEHOOK_MODECH,
                     MAKEWPARAM(pt.x, pt.y), (LPARAM)&data);
 

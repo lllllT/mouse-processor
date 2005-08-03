@@ -5,10 +5,18 @@
 ;; include "2button.mprc" after "default.mprc"
 ;;
 
+(global
+ (initial-mode . normal-2btn)
+ )
+
 (normal-mode
- ;; normal mode:
- (normal
+ ;; normal mode (for 2-button device)
+ ;;   button 1...5 => each button click
+ ;;   button 1+2   => change to scroll mode (for 2-button device)
+ ;;   wheel        => post wheel message to under pointer window
+ (normal-2btn
   (button-u-1+2 . (scroll-mode scroll-2btn))
+  (wheel        . (post-wheel-message))
   )
  )
 
@@ -20,7 +28,7 @@
  ;;   wheel        => post wheel message to under pointer window
  (scroll-2btn
   (scroll-ratio 1.0 1.0)
-  (button-u-1   . (normal-mode normal))
+  (button-u-1   . (normal-mode normal-2btn))
   (button-u-1+2 . (mul-scroll-ratio 2.0 2.0))
   (button-u-2   . (mul-scroll-ratio 0.5 0.5))
   (wheel        . (post-wheel-message))

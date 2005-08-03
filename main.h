@@ -1,7 +1,7 @@
 /*
  * main.h  --
  *
- * $Id: main.h,v 1.41 2005/06/29 04:46:31 hos Exp $
+ * $Id: main.h,v 1.42 2005/08/03 04:08:49 hos Exp $
  *
  */
 
@@ -132,6 +132,8 @@ struct app_setting {
     int tray_icon_idx;
 
     DWORD priority_class;
+
+    struct mouse_conf *initial_conf;
 
     int normal_conf_num;
     struct mouse_conf *normal_conf;

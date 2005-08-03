@@ -12,6 +12,9 @@
 
  ;; tasktray icon
  ;(tray-icon "main.cpl" 0)              ; mouse icon
+
+ ;; initial mode
+ (initial-mode . normal)
  )
 
 (normal-mode
