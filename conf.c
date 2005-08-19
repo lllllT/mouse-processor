@@ -1,7 +1,7 @@
 /*
  * conf.h  -- configuration
  *
- * $Id: conf.c,v 1.26 2005/08/03 04:45:40 hos Exp $
+ * $Id: conf.c,v 1.27 2005/08/19 14:05:59 hos Exp $
  *
  */
 
@@ -888,8 +888,8 @@ int apply_comm_mode_conf(struct mouse_conf *conf,
     }
 
     c = s_exp_massq(mode, S_EXP_TYPE_CONS, L"wheel", NULL);
-    if(c != NULL && S_EXP_CAR(c)->type == S_EXP_TYPE_CONS) {
-        apply_wheel_act(&conf->wheel_act, app_conf, S_EXP_CAR(c));
+    if(c != NULL && c->type == S_EXP_TYPE_CONS) {
+        apply_wheel_act(&conf->wheel_act, app_conf, c);
     }
 
     return 1;
