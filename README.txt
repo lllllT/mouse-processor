@@ -168,10 +168,13 @@ Known Problem
    ル、UPX 等の packer を使っているもの等)
    その場合は、line-scroll または page-scroll モードを使用するか、
    wheel-message operator を使用して下さい。
+   UPX 等で圧縮されている実行ファイルの場合は、展開すると改善される場
+   合があります。(OpenJane 等は UPX で圧縮されて配布されているようです。)
 
 
 TODO
- - 設定に関するドキュメント
+ -
+   設定に関するドキュメント
     -> 0.1.2 で一応追加。
 
  - キーボードとの連携
@@ -185,4 +188,4 @@ Link
  - mouse-processor <http://www.tamanegi.org/prog/mouse-processor/>
 
 
-$Id: README.txt,v 1.14 2005/08/03 05:23:20 hos Exp $
+$Id: README.txt,v 1.15 2007/03/05 08:30:41 hos Exp $

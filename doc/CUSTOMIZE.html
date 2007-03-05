@@ -720,10 +720,15 @@ IE コンポーネントを使っているアプリケーション、HTML ヘル
 <dd>
 マウスホイールを回転させたときと同じメッセージを対象ウィンドウに送信します。<br>
 マウスの動きでホイールの回転を再現したい場合に使います。<br>
+アプリケーションが水平ホイールメッセージに対応していれば水平方向のスクロールが可能かもしれません。<br>
 <code><span class="var">x-ratio</span></code> と <code><span class="var">y-ratio</span></code> はホイールの回転速度を指定します。
-回転速度は、
+縦方向の回転速度は、
 <pre>
-X 方向の動き * <code><span class="var">x-ratio</span></code> + Y 方向の動き * <code><span class="var">y-ratio</span></code>
+Y 方向の動き * <code><span class="var">y-ratio</span></code>
+</pre>
+に比例し、横方向の回転速度は、
+<pre>
+X 方向の動き * <code><span class="var">x-ratio</span></code>
 </pre>
 に比例します。
 省略した場合は、<code>operator-config</code> 設定の <code>ratio</code> に設定してある値を使用します。<br>
@@ -1024,7 +1029,7 @@ BNF 記法っぽい定義は以下のとおり。
 webmaster@tamanegi.org
 </address>
 
-<!-- $Id: CUSTOMIZE.html,v 1.11 2005/08/03 04:45:42 hos Exp $ -->
+<!-- $Id: CUSTOMIZE.html,v 1.12 2007/03/05 08:30:41 hos Exp $ -->
 
 <!--
 Local Variables:
