@@ -88,7 +88,6 @@
  (":msctls_trackbar32$" (trackbar-control))
 
  ("WINWORD\\.EXE:.*:_WwB:" (wheel-message))
- (":OperaWindowClass$" (wheel-message))
  ((title ":AVTreeViewClass:AVTreeNodeSimpleView$")
   (apply-parent (neighborhood-scrollbar)))
  )
