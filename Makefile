@@ -1,7 +1,7 @@
 #
 # Makefile
 #
-# $Id: Makefile,v 1.44 2007/10/12 12:12:08 hos Exp $
+# $Id: Makefile,v 1.45 2007/10/12 12:13:16 hos Exp $
 #
 
 DEFINES = -D_WIN32_WINNT=0x0500 -DUNICODE=1 -D_UNICODE=1
@@ -61,7 +61,6 @@ SUBDIRS = util doc conf
 TARGET = $(SBI_DLL_NAME) $(SBH_DLL_NAME) $(EXE_NAME)
 VERSION = `cat VERSION`
 
-CC = gcc
 RC = rc
 WINDRES = windres
 ZIP = zip
