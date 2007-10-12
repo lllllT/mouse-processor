@@ -1,7 +1,7 @@
 /*
  * scroll_op_ie.c  -- scroll operator for IE component
  *
- * $Id: scroll_op_ie.c,v 1.4 2005/01/28 02:58:45 hos Exp $
+ * $Id: scroll_op_ie.c,v 1.5 2007/10/12 12:07:06 hos Exp $
  *
  */
 
@@ -206,8 +206,11 @@ HRESULT get_scrollable_parent(IDispatch *elem, IDispatch **ret_elem)
 
     while(1) {
         BSTR overflow = NULL, curoverflow = NULL, tagname = NULL;
+        BSTR compatmode = NULL;
         static LPOLESTR props[] = {L"style", L"overflow", NULL};
         static LPOLESTR curprops[] = {L"currentStyle", L"overflow", NULL};
+        static LPOLESTR compatmode_props[] = {
+            L"ownerDocument", L"compatMode", NULL };
 
         if(SUCCEEDED(get_property_strv(elem, props, &overflow)) &&
            SUCCEEDED(get_property_strv(elem, curprops, &curoverflow)) &&
@@ -228,11 +231,20 @@ HRESULT get_scrollable_parent(IDispatch *elem, IDispatch **ret_elem)
                  wcscmp(overflow, L"scroll") == 0))) {
                 long cw, ch, sw, sh;
 
-
-                if(SUCCEEDED(get_property_long(elem, L"clientWidth", &cw)) &&
-                   SUCCEEDED(get_property_long(elem, L"clientHeight", &ch)) &&
-                   SUCCEEDED(get_property_long(elem, L"scrollWidth", &sw)) &&
-                   SUCCEEDED(get_property_long(elem, L"scrollHeight", &sh))) {
+                if(tagname != NULL &&
+                   wcscmp(tagname, L"BODY") == 0 &&
+                   SUCCEEDED(get_property_strv(elem, compatmode_props,
+                                               &compatmode)) &&
+                   compatmode != NULL &&
+                   wcscmp(compatmode, L"CSS1Compat") == 0) {
+                    /* workaround for IE7:
+                       ignore BODY element if DOCTYPE is exists */
+                }
+                else if(
+                    SUCCEEDED(get_property_long(elem, L"clientWidth", &cw)) &&
+                    SUCCEEDED(get_property_long(elem, L"clientHeight", &ch)) &&
+                    SUCCEEDED(get_property_long(elem, L"scrollWidth", &sw)) &&
+                    SUCCEEDED(get_property_long(elem, L"scrollHeight", &sh))) {
                     if(cw != 0 && ch != 0 && (cw < sw || ch < sh)) {
                         spr->log_printf(
                             LOG_LEVEL_DEBUG,
@@ -243,6 +255,7 @@ HRESULT get_scrollable_parent(IDispatch *elem, IDispatch **ret_elem)
                         SysFreeString(overflow);
                         SysFreeString(curoverflow);
                         SysFreeString(tagname);
+                        SysFreeString(compatmode);
                         break;
                     }
                 }
@@ -251,6 +264,7 @@ HRESULT get_scrollable_parent(IDispatch *elem, IDispatch **ret_elem)
         SysFreeString(overflow);
         SysFreeString(curoverflow);
         SysFreeString(tagname);
+        SysFreeString(compatmode);
 
         {
             IDispatch *parent;
