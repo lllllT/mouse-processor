@@ -166,6 +166,21 @@ LRESULT menu_reload(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
     load_setting(ctx.app_conf.conf_file, FALSE);
 
+    /* unhook and hook again if not paused */
+    if(! pause) {
+        int ret;
+
+        ret = clear_hook();
+        if(ret == 0) {
+            error_message_le("clear_hook() failed");
+        }
+
+        ret = set_hook();
+        if(ret == 0) {
+            error_message_le("set_hook() failed");
+        }
+    }
+
     return 0;
 }
 
