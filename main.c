@@ -500,7 +500,7 @@ HWND create_main_window(void)
 
         wnd = CreateWindow(window_class_name, window_title_name,
                            0, 0, 0, 0, 0,
-                           HWND_MESSAGE, NULL, ctx.instance, NULL);
+                           NULL, NULL, ctx.instance, NULL);
 
         return wnd;
     }
