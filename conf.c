@@ -1293,7 +1293,7 @@ int apply_setting(struct app_setting *app_conf)
         if(t != NULL) {
             int i;
             static struct uint_ptr_pair class_map[] = {
-                /*{REALTIME_PRIORITY_CLASS, L"realtime"},*/
+                {REALTIME_PRIORITY_CLASS, L"realtime"},
                 {HIGH_PRIORITY_CLASS, L"high"},
                 {ABOVE_NORMAL_PRIORITY_CLASS, L"above-normal"},
                 {NORMAL_PRIORITY_CLASS, L"normal"},
