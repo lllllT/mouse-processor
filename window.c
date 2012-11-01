@@ -57,6 +57,17 @@ BOOL CALLBACK enum_nontr_window(HWND hwnd, LPARAM lparam)
         return TRUE;
     }
 
+    /* ignore tooltip, drop shadow */
+    {
+        WCHAR buf[256];
+        buf[0] = 0;
+        GetClassNameW(hwnd, buf, 256);
+        if(wcscmp(buf, L"tooltips_class32") == 0 ||
+           wcscmp(buf, L"SysShadow") == 0) {
+            return TRUE;
+        }
+    }
+
     data->target = hwnd;
     return FALSE;
 }
