@@ -1,8 +1,6 @@
 /*
  * scroll_op_trackbar.c  -- scroll operator for trackbar control
  *
- * $Id: scroll_op_trackbar.c,v 1.5 2005/01/28 02:58:46 hos Exp $
- *
  */
 
 #include "operator.h"

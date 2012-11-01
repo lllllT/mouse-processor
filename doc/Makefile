@@ -1,8 +1,6 @@
 #
 # Makefile
 #
-# $Id: Makefile,v 1.2 2005/07/29 06:43:55 hos Exp $
-#
 
 PACK_BIN_DOC_FILES = CUSTOMIZE.html std.css manual.css
 PACK_SRC_FILES = $(PACK_BIN_DOC_FILES) Makefile

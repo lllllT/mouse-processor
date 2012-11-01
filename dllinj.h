@@ -1,8 +1,6 @@
 /*
  * dllinj.h  -- DLL injection
  *
- * $Id: dllinj.h,v 1.1 2005/02/01 11:28:23 hos Exp $
- *
  */
 
 int replace_imported_proc(HMODULE mod,

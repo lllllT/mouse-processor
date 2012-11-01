@@ -1,8 +1,6 @@
 /*
  * s_exp_nth_cdr.c  -- nth cdr of list
  *
- * $Id: s_exp_nth_cdr.c,v 1.1 2005/01/13 09:40:04 hos Exp $
- *
  */
 
 #include "s_exp.h"

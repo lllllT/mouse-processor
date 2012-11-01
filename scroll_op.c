@@ -1,8 +1,6 @@
 /*
  * scroll_op.c  -- scroll operators
  *
- * $Id: scroll_op.c,v 1.15 2005/07/28 09:41:17 hos Exp $
- *
  */
 
 #include "main.h"

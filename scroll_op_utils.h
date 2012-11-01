@@ -1,8 +1,6 @@
 /*
  * scroll_op_utils.h  -- utility for scroll operators
  *
- * $Id: scroll_op_utils.h,v 1.1 2005/01/13 09:40:00 hos Exp $
- *
  */
 
 struct scroll_op_mode_pair {

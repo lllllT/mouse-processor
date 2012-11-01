@@ -1,8 +1,6 @@
 /*
  * scroll_op_scrollbar.h  -- 
  *
- * $Id: scroll_op_scrollbar.h,v 1.4 2005/02/03 09:51:14 hos Exp $
- *
  */
 
 #define FAKE_GSINFO_SHMEM_NAME \

@@ -1,8 +1,6 @@
 /*
  * main.h  --
  *
- * $Id: main.h,v 1.43 2005/08/08 20:58:11 hos Exp $
- *
  */
 
 #include <windows.h>

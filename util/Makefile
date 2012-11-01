@@ -1,8 +1,6 @@
 #
 # util/Makefile
 #
-# $Id: Makefile,v 1.12 2005/07/29 06:43:55 hos Exp $
-#
 
 DEFINES = 
 INCLUDES =

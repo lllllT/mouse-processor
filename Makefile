@@ -1,8 +1,6 @@
 #
 # Makefile
 #
-# $Id: Makefile,v 1.45 2007/10/12 12:13:16 hos Exp $
-#
 
 DEFINES = -D_WIN32_WINNT=0x0500 -DUNICODE=1 -D_UNICODE=1
 INCLUDES = -I./util

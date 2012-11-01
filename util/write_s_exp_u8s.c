@@ -1,8 +1,6 @@
 /*
  * write_s_exp_u8s.c  -- write s-expression
  *
- * $Id: write_s_exp_u8s.c,v 1.1 2005/01/19 08:36:51 hos Exp $
- *
  */
 
 

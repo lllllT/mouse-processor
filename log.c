@@ -1,8 +1,6 @@
 /*
  * log.c  -- logging procs
  *
- * $Id: log.c,v 1.16 2005/01/25 04:17:49 hos Exp $
- *
  */
 
 #include "main.h"

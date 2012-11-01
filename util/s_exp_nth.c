@@ -1,8 +1,6 @@
 /*
  * s_exp_nth.c  -- nth element of list
  *
- * $Id: s_exp_nth.c,v 1.1 2005/01/12 09:39:50 hos Exp $
- *
  */
 
 #include "s_exp.h"

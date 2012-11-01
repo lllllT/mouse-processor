@@ -1,8 +1,6 @@
 /*
  * operator.h  -- operator definition
  *
- * $Id: operator.h,v 1.6 2005/02/03 09:51:13 hos Exp $
- *
  */
 
 #ifndef __OPERATOR_H__

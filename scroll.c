@@ -1,8 +1,6 @@
 /*
  * scroll.c  -- scroll window
  *
- * $Id: scroll.c,v 1.27 2005/03/13 11:23:25 hos Exp $
- *
  */
 
 #include "main.h"

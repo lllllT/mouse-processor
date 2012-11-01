@@ -1,8 +1,6 @@
 /*
  * main.c  -- main part of mouse-processor
  *
- * $Id: main.c,v 1.34 2005/03/13 11:23:25 hos Exp $
- *
  */
 
 #include "main.h"

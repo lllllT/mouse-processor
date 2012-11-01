@@ -1,8 +1,6 @@
 /*
  * automation.h  -- COM automation helper
  *
- * $Id: automation.h,v 1.2 2005/01/13 09:40:02 hos Exp $
- *
  */
 
 #include <objbase.h>

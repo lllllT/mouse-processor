@@ -1,8 +1,6 @@
 /*
  * rassq_pair.c  -- utility function rassq_pair
  *
- * $Id: rassq_pair.c,v 1.1 2005/01/05 07:59:35 hos Exp $
- *
  */
 
 

@@ -1,8 +1,6 @@
 /*
  * shmem.c  -- shared memory
  *
- * $Id: shmem.c,v 1.3 2005/07/27 09:59:19 hos Exp $
- *
  */
 
 #include <windows.h>

@@ -186,6 +186,3 @@ Link
  - X Wheel <http://www5b.biglobe.ne.jp/~hokko2nd/Windows/#XWheel>
    X Wheel NT <http://www5b.biglobe.ne.jp/~hokko2nd/Windows/#XWheelNT>
  - mouse-processor <http://www.tamanegi.org/prog/mouse-processor/>
-
-
-$Id: README.txt,v 1.15 2007/03/05 08:30:41 hos Exp $

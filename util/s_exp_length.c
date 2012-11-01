@@ -1,8 +1,6 @@
 /*
  * s_exp_length.c  -- length of list
  *
- * $Id: s_exp_length.c,v 1.2 2005/01/06 08:49:05 hos Exp $
- *
  */
 
 #include "s_exp.h"

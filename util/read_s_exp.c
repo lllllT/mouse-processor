@@ -1,8 +1,6 @@
 /*
  * read_s_exp.c  -- read s-expression
  *
- * $Id: read_s_exp.c,v 1.8 2005/07/28 09:41:18 hos Exp $
- *
  */
 
 

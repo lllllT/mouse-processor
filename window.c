@@ -1,8 +1,6 @@
 /*
  * window.c  -- window utils
  *
- * $Id: window.c,v 1.3 2005/01/21 04:38:16 hos Exp $
- *
  */
 
 #include "main.h"

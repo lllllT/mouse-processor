@@ -1,8 +1,6 @@
 /*
  * scroll_op_meta.c  -- meta scroll operator
  *
- * $Id: scroll_op_meta.c,v 1.1 2005/02/04 17:08:39 hos Exp $
- *
  */
 
 #include "main.h"

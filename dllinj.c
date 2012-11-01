@@ -1,8 +1,6 @@
 /*
  * dllinj.c  -- DLL injection
  *
- * $Id: dllinj.c,v 1.7 2005/07/29 19:15:01 hos Exp $
- *
  */
 
 #include <windows.h>

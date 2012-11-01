@@ -1,8 +1,6 @@
 /*
  * scroll_op_ie.c  -- scroll operator for IE component
  *
- * $Id: scroll_op_ie.c,v 1.5 2007/10/12 12:07:06 hos Exp $
- *
  */
 
 #define COBJMACROS 1

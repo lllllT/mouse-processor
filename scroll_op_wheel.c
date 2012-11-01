@@ -1,8 +1,6 @@
 /*
  * scroll_op_wheel.c  -- scroll operator for wheel message
  *
- * $Id: scroll_op_wheel.c,v 1.9 2007/03/05 08:30:41 hos Exp $
- *
  */
 
 #include "operator.h"

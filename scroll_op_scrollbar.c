@@ -1,8 +1,6 @@
 /*
  * scroll_op_scrollbar.c  -- scroll operators for scrollbar
  *
- * $Id: scroll_op_scrollbar.c,v 1.25 2005/07/27 09:59:18 hos Exp $
- *
  */
 
 #include "operator.h"

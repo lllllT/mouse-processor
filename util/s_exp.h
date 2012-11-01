@@ -1,8 +1,6 @@
 /*
  * s_exp.h  -- s-expression
  *
- * $Id: s_exp.h,v 1.7 2005/07/28 09:41:18 hos Exp $
- *
  */
 
 #ifndef __S_EXP_H__

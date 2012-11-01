@@ -1,8 +1,6 @@
 /*
  * automation.c  -- COM automation helper
  *
- * $Id: automation_idispatch.c,v 1.3 2005/03/01 02:52:27 hos Exp $
- *
  */
 
 

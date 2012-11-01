@@ -1,8 +1,6 @@
 /*
  * sbi_dllmain.c  -- entry point of DLL for scrollbar injection
  *
- * $Id: sbi_dllmain.c,v 1.7 2005/07/27 05:54:33 hos Exp $
- *
  */
 
 #include <windows.h>

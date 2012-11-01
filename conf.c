@@ -1,8 +1,6 @@
 /*
  * conf.h  -- configuration
  *
- * $Id: conf.c,v 1.27 2005/08/19 14:05:59 hos Exp $
- *
  */
 
 #include "main.h"

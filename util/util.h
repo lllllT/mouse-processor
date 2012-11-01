@@ -1,8 +1,6 @@
 /*
  * util.h  -- definition of util.c
  *
- * $Id: util.h,v 1.2 2005/01/05 07:59:38 hos Exp $
- *
  */
 
 #ifndef __UTIL_H__

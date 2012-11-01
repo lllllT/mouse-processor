@@ -1,8 +1,6 @@
 /*
  * s_exp_massq.c  -- s-expression multi-assq
  *
- * $Id: s_exp_massq.c,v 1.2 2005/01/06 08:49:06 hos Exp $
- *
  */
 
 #include "s_exp.h"

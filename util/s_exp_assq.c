@@ -1,8 +1,6 @@
 /*
  * s_exp_assq.c  -- s-expression assq
  *
- * $Id: s_exp_assq.c,v 1.3 2005/07/28 09:41:18 hos Exp $
- *
  */
 
 #include "s_exp.h"

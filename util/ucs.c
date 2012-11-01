@@ -1,8 +1,6 @@
 /*
  * ucs.c  -- Universal Character Set
  *
- * $Id: ucs.c,v 1.1 2005/01/05 07:59:38 hos Exp $
- *
  */
 
 

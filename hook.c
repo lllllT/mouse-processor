@@ -1,8 +1,6 @@
 /*
  * hook.c  -- hook funcs
  *
- * $Id: hook.c,v 1.26 2005/02/09 09:22:19 hos Exp $
- *
  */
 
 #include "main.h"

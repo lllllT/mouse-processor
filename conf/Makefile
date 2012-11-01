@@ -1,8 +1,6 @@
 #
 # Makefile
 #
-# $Id: Makefile,v 1.2 2006/07/04 06:17:11 hos Exp $
-#
 
 PACK_BIN_DOC_FILES = 2button.mprc default.mprc dot.mprc pressed.mprc
 PACK_SRC_FILES = $(PACK_BIN_DOC_FILES) Makefile

@@ -1,8 +1,6 @@
 /*
  * sbh_dllmain.c  -- entry point of DLL for scrollbar hook
  *
- * $Id: sbh_dllmain.c,v 1.5 2005/02/10 09:24:41 hos Exp $
- *
  */
 
 #include <windows.h>

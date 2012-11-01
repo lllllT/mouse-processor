@@ -1,8 +1,6 @@
 /*
  * regexp.c  -- regular expression
  *
- * $Id: regexp.c,v 1.3 2005/01/25 09:02:48 hos Exp $
- *
  */
 
 #include "main.h"

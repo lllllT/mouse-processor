@@ -1,8 +1,6 @@
 /*
  * automation_get_active_object.c  -- get_active_object
  *
- * $Id: automation_get_active_object.c,v 1.2 2005/01/12 02:25:13 hos Exp $
- *
  */
 
 

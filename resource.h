@@ -1,8 +1,6 @@
 /*
  * header for resource
  *
- * $Id: resource.h,v 1.5 2005/01/20 08:15:14 hos Exp $
- *
  */
 
 #define ID_MENU_TRAY 100

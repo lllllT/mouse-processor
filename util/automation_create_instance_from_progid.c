@@ -1,8 +1,6 @@
 /*
  * automation_create_instance_from_progid.c  -- create_instance_from_progid
  *
- * $Id: automation_create_instance_from_progid.c,v 1.1 2005/01/13 09:40:02 hos Exp $
- *
  */
 
 
