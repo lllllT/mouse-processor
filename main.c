@@ -287,6 +287,13 @@ LRESULT main_create(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
         }
     }
 
+    /* message id of taskbar created notify */
+    taskbar_created_message = RegisterWindowMessage(_T("TaskbarCreated"));
+    if(taskbar_created_message == 0) {
+        error_message_le("RegisterWindowMessage() failed");
+        return 1;
+    }
+
     ret = set_tasktray_icon(hwnd, NIM_ADD);
     if(ret == 0) {
         error_message_le("set_tasktray_icon() failed");
@@ -569,13 +576,6 @@ int main(int ac, char **av)
         }
 
         ctx.instance = (HINSTANCE)module;
-    }
-
-    /* message id of taskbar created notify */
-    taskbar_created_message = RegisterWindowMessage(_T("TaskbarCreated"));
-    if(taskbar_created_message == 0) {
-        error_message_le("RegisterWindowMessage() failed");
-        return 1;
     }
 
     /* initialize COM */
