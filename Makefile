@@ -7,8 +7,8 @@
 DEFINES = -D_WIN32_WINNT=0x0500 -DUNICODE=1 -D_UNICODE=1
 INCLUDES = -I./util
 OPT_CFLAGS = -O3 -fomit-frame-pointer
-CFLAGS = -Wall -g -mwindows -mno-cygwin $(DEFINES) $(INCLUDES) $(OPT_CFLAGS)
-LDFLAGS = -Wall -g -mwindows -mno-cygwin
+CFLAGS = -Wall -g -mwindows $(DEFINES) $(INCLUDES) $(OPT_CFLAGS)
+LDFLAGS = -Wall -g -mwindows
 
 UTIL_LIBS = util/util.a
 
@@ -61,6 +61,7 @@ SUBDIRS = util doc conf
 TARGET = $(SBI_DLL_NAME) $(SBH_DLL_NAME) $(EXE_NAME)
 VERSION = `cat VERSION`
 
+CC = gcc -b i686-w64-mingw32
 RC = rc
 WINDRES = windres
 ZIP = zip
@@ -99,8 +100,8 @@ lib$(SBI_DLL_NAME).a: $(SBI_DLL_NAME)
 
 lib$(SBH_DLL_NAME).a: $(SBH_DLL_NAME)
 
-.rc.res:
-	$(RC) /fo$@ $<
+.rc.o:
+	$(WINDRES) -o $@ $<
 
 .res.o:
 	$(WINDRES) -o $@ $<

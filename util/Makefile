@@ -7,8 +7,8 @@
 DEFINES = 
 INCLUDES =
 OPT_CFLAGS = 
-CFLAGS = -Wall -g -mwindows -mno-cygwin $(DEFINES) $(INCLUDES) $(OPT_CFLAGS)
-LDFLAGS = -Wall -g -mwindows -mno-cygwin
+CFLAGS = -Wall -g -mwindows $(DEFINES) $(INCLUDES) $(OPT_CFLAGS)
+LDFLAGS = -Wall -g -mwindows
 
 SRCS = assq_pair.c rassq_pair.c \
        automation_idispatch.c \
@@ -25,6 +25,7 @@ PACK_SRC_FILES = $(SRCS) $(HEADERS) $(RSRC) Makefile
 
 TARGET = $(LIB_NAME)
 
+CC = gcc -b i686-w64-mingw32
 INSTALL = install -p
 
 all: $(TARGET)
